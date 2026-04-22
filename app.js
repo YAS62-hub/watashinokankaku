@@ -936,9 +936,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // === データバックアップと復元 ===
     const exportDataBtn = document.getElementById('exportDataBtn');
     const importDataBtn = document.getElementById('importDataBtn');
-    const backupDataText = document.getElementById('backupDataText');
+    const importFileInput = document.getElementById('importFileInput');
 
-    if (exportDataBtn && backupDataText) {
+    if (exportDataBtn) {
         exportDataBtn.addEventListener('click', () => {
             try {
                 const data = {
@@ -946,27 +946,23 @@ document.addEventListener('DOMContentLoaded', () => {
                     seAppHistory: localStorage.getItem('seAppHistory') || '[]',
                     seAppResources: localStorage.getItem('seAppResources') || '[]'
                 };
-                // 容量が大きいため改行なしの1文字列とする
                 const jsonStr = JSON.stringify(data);
-                backupDataText.value = jsonStr;
+                const blob = new Blob([jsonStr], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
                 
-                // クリップボードへコピーを試みる
-                if (navigator.clipboard && window.isSecureContext) {
-                    navigator.clipboard.writeText(jsonStr).then(() => {
-                        alert('データを書き出し、クリップボードにコピーしました！これをコピーしたまま、新しいURLで復元ボタンを使ってください。');
-                    }).catch(() => {
-                        backupDataText.select();
-                        alert('データを出力しました！枠の中の文字を全てコピーして、新しいURLで貼り付けてください。');
-                    });
-                } else {
-                    backupDataText.select();
-                    try {
-                        document.execCommand('copy');
-                        alert('データを出力し、コピーしました！これをコピーしたまま、新しいURLで復元ボタンを使ってください。');
-                    } catch (e) {
-                        alert('データを出力しました！枠の中の文字を手動で全てコピーして、新しいURLで貼り付けてください。');
-                    }
-                }
+                const now = new Date();
+                const yyyy = now.getFullYear();
+                const mm = String(now.getMonth() + 1).padStart(2, '0');
+                const dd = String(now.getDate()).padStart(2, '0');
+                const filename = `kankaku_backup_${yyyy}${mm}${dd}.json`;
+                
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
             } catch (e) {
                 console.error(e);
                 alert('書き出しに失敗しました。');
@@ -974,29 +970,39 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    if (importDataBtn && backupDataText) {
+    if (importDataBtn && importFileInput) {
         importDataBtn.addEventListener('click', () => {
-            const jsonStr = backupDataText.value.trim();
-            if (!jsonStr) {
-                alert('復元用のデータ文字を枠内に貼り付けてから押してください。');
+            const file = importFileInput.files[0];
+            if (!file) {
+                alert('復元するバックアップファイルを選択してください。');
                 return;
             }
             if (confirm('現在のデータ（あれば）の上書きとなります。復元してよろしいですか？')) {
-                try {
-                    const parsedData = JSON.parse(jsonStr);
-                    if (parsedData.seAppHistory || parsedData.seAppResources) {
-                        localStorage.setItem('seAppSettings', parsedData.seAppSettings || '{}');
-                        localStorage.setItem('seAppHistory', parsedData.seAppHistory || '[]');
-                        localStorage.setItem('seAppResources', parsedData.seAppResources || '[]');
-                        alert('データを復元しました！アプリを再読み込みします。');
-                        window.location.reload();
-                    } else {
-                        alert('データ形式が正しくありません。正しい文字を貼り付けてください。');
-                    }
-                } catch (e) {
-                    console.error(e);
-                    alert('データの復元に失敗しました。文字の一部が欠けている可能性があります。');
-                }
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    alert('ただいま記憶を復元しています…\nOKを押してしばらくお待ちください。');
+                    setTimeout(() => {
+                        try {
+                            const parsedData = JSON.parse(e.target.result);
+                            if (parsedData.seAppHistory || parsedData.seAppResources) {
+                                localStorage.setItem('seAppSettings', parsedData.seAppSettings || '{}');
+                                localStorage.setItem('seAppHistory', parsedData.seAppHistory || '[]');
+                                localStorage.setItem('seAppResources', parsedData.seAppResources || '[]');
+                                alert('復元が完了しました。画面を再読み込みします。');
+                                window.location.reload();
+                            } else {
+                                alert('データ形式が正しくありません。正しいJSONファイルを選択してください。');
+                            }
+                        } catch (err) {
+                            console.error(err);
+                            alert('データの復元に失敗しました。ファイルが破損している可能性があります。');
+                        }
+                    }, 100); // UIスレッドのブロックを少し緩和
+                };
+                reader.onerror = () => {
+                    alert('ファイルの読み込みに失敗しました。');
+                };
+                reader.readAsText(file);
             }
         });
     }

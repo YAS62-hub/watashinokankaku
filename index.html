@@ -159,8 +159,8 @@
                 
                 <div class="setting-item">
                     <h4 class="setting-subtitle">データのバックアップと復元</h4>
-                    <p class="setting-desc" style="font-size: 0.85rem; margin-bottom: 8px;">下の枠にデータを出力してコピー保存するか、保存した文字を貼り付けて復元できます。</p>
-                    <textarea id="backupDataText" class="custom-input" style="height: 100px; font-size: 0.7rem; margin-bottom: 12px; line-height: 1.2; word-break: break-all;" placeholder="ここにデータが書き出されるか、復元用のデータを貼り付けます" onclick="this.select()"></textarea>
+                    <p class="setting-desc" style="font-size: 0.85rem; margin-bottom: 8px;">「書き出す」でファイルとして保存し、「ファイルを選択」から読み込んで復元できます。</p>
+                    <input type="file" id="importFileInput" accept=".json" class="custom-input" style="margin-bottom: 12px;">
                     
                     <div class="settings-actions">
                         <button id="exportDataBtn" class="secondary-btn">書き出す</button>
