@@ -1,0 +1,17 @@
+{
+    "name": "わたしのかんかく",
+    "short_name": "かんかく",
+    "description": "神経系の波を観察し自己調整をサポートするアプリ",
+    "start_url": "./index.html",
+    "display": "standalone",
+    "background_color": "#FDFBF8",
+    "theme_color": "#A9BCA3",
+    "icons": [
+        {
+            "src": "icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ]
+}

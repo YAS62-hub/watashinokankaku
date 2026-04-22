@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>わたしのかんかく v9.9.3</title>
+    <link rel="stylesheet" href="styles.css?v=20240419_02">
+    <link href="https://fonts.googleapis.com/css2?family=Kosugi+Maru&family=M+PLUS+Rounded+1c:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="manifest" href="manifest.json">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- ヘッダー / 設定ボタン -->
+    <header>
+        <span class="app-title">わたしのかんかく v9.9.3</span>
+        <button id="settingsBtn" class="icon-button" aria-label="設定">⚙️</button>
+    </header>
+
+    <!-- メインコンテンツ -->
+    <main>
+        <!-- ホーム画面（記録） -->
+        <section id="homeTab" class="tab-content active">
+            <h1 class="gentle-question">今、どんな感じですか？</h1>
+            
+            <div class="button-group">
+                <button class="state-button state-high" data-type="high">
+                    <span class="emoji">🔥</span>
+                    <span class="text">アラーム鳴ってる・焦り</span>
+                </button>
+                <button class="state-button state-mid" data-type="mid">
+                    <span class="emoji">☕️</span>
+                    <span class="text">マシな感じ・悪くない</span>
+                </button>
+                <button class="state-button state-low" data-type="low">
+                    <span class="emoji">❄️</span>
+                    <span class="text">冬眠の時間・エネルギー切れ</span>
+                </button>
+            </div>
+            
+            <div class="daily-memo-area">
+                <div class="input-group">
+                    <label for="recordTime" class="memo-label">記録日時</label>
+                    <input type="datetime-local" id="recordTime" class="time-input">
+                </div>
+                <div class="input-group" style="margin-top: 16px;">
+                    <label for="dailyMemo" class="memo-label">今の一言（あれば）</label>
+                    <input type="text" id="dailyMemo" class="memo-input" placeholder="今の気持ちや出来事など...">
+                </div>
+                <button id="submitRecordBtn" class="primary-btn submit-record-btn" disabled>記録する</button>
+            </div>
+        </section>
+
+        <!-- リソース箱 -->
+        <section id="resourceTab" class="tab-content">
+            <h2 class="gentle-question">リソース箱 🎁</h2>
+            
+            <!-- 特等席：今日のリソース -->
+            <div id="todayWordArea" class="today-word-area" style="cursor: pointer;" title="タップして引き直す">
+                <div class="today-header">🎁 今日のリソース（タップで引き直し）</div>
+                <div id="todayResourceContent" class="today-content">
+                    <p id="todayWordText">右下の＋ボタンから、あなたのホッとする言葉や写真を追加してみましょう</p>
+                </div>
+            </div>
+            
+            <!-- 内部タブ -->
+            <div class="inner-tabs">
+                <button class="inner-tab-btn active" data-in-target="photoGalleryTab">📷 写真</button>
+                <button class="inner-tab-btn" data-in-target="wordGalleryTab">📝 言葉</button>
+            </div>
+            
+            <!-- 写真ギャラリー -->
+            <div id="photoGalleryTab" class="inner-tab-content active resource-gallery">
+                <!-- JSで写真のカードが追加されます -->
+            </div>
+            
+            <!-- 言葉ギャラリー -->
+            <div id="wordGalleryTab" class="inner-tab-content resource-gallery" style="display: none;">
+                <!-- JSで言葉のカードが追加されます -->
+            </div>
+            
+            <button id="addResourceFab" class="fab">+</button>
+        </section>
+
+        <!-- 振り返り画面 -->
+        <section id="reflectionTab" class="tab-content">
+            <div class="reflection-container">
+                <p class="safe-message">波があるのは、神経系が環境に合わせてしなやかに生き残ろうとしている証拠です🍵</p>
+                <div class="chart-container">
+                    <canvas id="waveChart"></canvas>
+                </div>
+                
+                <hr class="setting-divider">
+                
+                <h3 class="gentle-question" style="font-size: 1.2rem; margin-bottom: 16px;">カレンダー</h3>
+                <div class="calendar-wrapper">
+                    <div class="calendar-header">
+                        <button id="prevMonth" class="icon-button">◀</button>
+                        <span id="currentMonthLabel"></span>
+                        <button id="nextMonth" class="icon-button">▶</button>
+                    </div>
+                    <div class="calendar-days-header">
+                        <span>日</span><span>月</span><span>火</span><span>水</span><span>木</span><span>金</span><span>土</span>
+                    </div>
+                    <div class="calendar-grid" id="calendarGrid">
+                        <!-- JS generated calendar -->
+                    </div>
+                </div>
+
+                <div id="memoDisplay" class="memo-display hidden">
+                    <p class="memo-date" id="memoDateLabel"></p>
+                    <div id="memoListContainer" class="memo-list-container"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 設定モーダル -->
+        <div id="settingsModal" class="modal">
+            <div class="modal-content">
+                <button class="close-button" id="closeSettings">×</button>
+                <h3>設定</h3>
+                
+                <div class="setting-item">
+                    <label class="toggle-label">
+                        <span class="toggle-text">記録後のメッセージを表示する</span>
+                        <input type="checkbox" id="popupToggle" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                <p class="setting-note">※メッセージはシステムが自動で出しているものです。あなたの感覚を何より大切にしてください。見るのが億劫な時は、遠慮なくオフにしてくださいね。</p>
+                
+                <hr class="setting-divider">
+                
+                <div class="setting-item">
+                    <h4 class="setting-subtitle">ボタンの言葉をカスタマイズ</h4>
+                    <p class="setting-desc">あなたの感覚によりしっくりくる言葉に変更できます。</p>
+                    
+                    <div class="custom-input-group">
+                        <label for="customHigh">🔥 (ハイ)</label>
+                        <input type="text" id="customHigh" class="custom-input" placeholder="例：アラーム・焦り">
+                    </div>
+                    
+                    <div class="custom-input-group">
+                        <label for="customMid">☕️ (ミドル)</label>
+                        <input type="text" id="customMid" class="custom-input" placeholder="例：マシ・悪くない">
+                    </div>
+                    
+                    <div class="custom-input-group">
+                        <label for="customLow">❄️ (ロー)</label>
+                        <input type="text" id="customLow" class="custom-input" placeholder="例：冬眠・エネルギー切れ">
+                    </div>
+                    
+                    <div class="settings-actions">
+                        <button id="saveSettingsBtn" class="primary-btn">保存する</button>
+                        <button id="resetSettingsBtn" class="secondary-btn">初期設定に戻す</button>
+                    </div>
+                </div>
+
+                <hr class="setting-divider">
+                
+                <div class="setting-item">
+                    <h4 class="setting-subtitle">データのバックアップと復元</h4>
+                    <p class="setting-desc" style="font-size: 0.85rem; margin-bottom: 8px;">下の枠にデータを出力してコピー保存するか、保存した文字を貼り付けて復元できます。</p>
+                    <textarea id="backupDataText" class="custom-input" style="height: 100px; font-size: 0.7rem; margin-bottom: 12px; line-height: 1.2; word-break: break-all;" placeholder="ここにデータが書き出されるか、復元用のデータを貼り付けます" onclick="this.select()"></textarea>
+                    
+                    <div class="settings-actions">
+                        <button id="exportDataBtn" class="secondary-btn">書き出す</button>
+                        <button id="importDataBtn" class="primary-btn">復元する</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- 編集モーダル -->
+        <div id="editRecordModal" class="modal">
+            <div class="modal-content">
+                <button class="close-button" id="closeEditModal">×</button>
+                <h3>記録の編集</h3>
+                
+                <input type="hidden" id="editRecordId">
+                <div class="setting-item">
+                    <div class="input-group">
+                        <label for="editRecordTime" class="memo-label">記録日時</label>
+                        <input type="datetime-local" id="editRecordTime" class="time-input" style="width: 100%; box-sizing: border-box;">
+                    </div>
+                    
+                    <div class="input-group" style="margin-top: 16px;">
+                        <label class="memo-label">ゾーン</label>
+                        <div class="button-group edit-zone-group" style="gap: 8px;">
+                            <button class="state-button state-high" data-type="high" style="font-size: 0.8rem; padding: 12px;"><span class="emoji">🔥</span></button>
+                            <button class="state-button state-mid" data-type="mid" style="font-size: 0.8rem; padding: 12px;"><span class="emoji">☕️</span></button>
+                            <button class="state-button state-low" data-type="low" style="font-size: 0.8rem; padding: 12px;"><span class="emoji">❄️</span></button>
+                        </div>
+                    </div>
+                    
+                    <div class="input-group" style="margin-top: 16px;">
+                        <label for="editRecordMemo" class="memo-label">今の一言</label>
+                        <input type="text" id="editRecordMemo" class="memo-input" style="width: 100%; box-sizing: border-box;">
+                    </div>
+                    
+                    <div class="settings-actions" style="margin-top: 24px;">
+                        <button id="saveEditBtn" class="primary-btn">変更を保存</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- 読み込み中オーバーレイ -->
+        <div id="loadingOverlay" class="loading-overlay hidden">
+            <div class="loading-spinner"></div>
+            <p>保存中...</p>
+        </div>
+
+        <!-- 写真拡大モーダル -->
+        <div id="photoViewModal" class="modal">
+            <div class="modal-content photo-view-content">
+                <button class="close-button" id="closePhotoViewModal">×</button>
+                <div class="photo-view-area">
+                    <img id="photoViewImg" src="">
+                    <p id="photoViewText"></p>
+                </div>
+                <div class="settings-actions" style="margin-top: 16px;">
+                    <button class="action-link delete-link" id="deletePhotoBtn" style="font-size:1rem; color:#A89F91;">削除する</button>
+                    <input type="hidden" id="photoViewResourceId">
+                </div>
+            </div>
+        </div>
+
+        <!-- 新しく追加する -->
+        <div id="addResourceModal" class="modal">
+            <div class="modal-content">
+                <button class="close-button" id="closeAddResourceModal">×</button>
+                <h3>新しく追加する</h3>
+                
+                <div class="setting-item">
+                    <p class="setting-desc">どちらか一つでも、両方入力してもOKです。あなたの心が少し「ホッ」とする要素を残してみましょう。</p>
+                    
+                    <div class="resource-section" style="margin-bottom: 24px;">
+                        <label class="memo-label">📷 安心する写真（任意）</label>
+                        <div class="photo-upload-area" id="photoArea" style="margin-top: 8px;">
+                            <img id="photoPreview" src="" alt="お気に入りの写真" style="display: none;">
+                            <div id="photoPlaceholder" class="photo-placeholder">
+                                <span>写真をえらぶ</span>
+                            </div>
+                            <input type="file" id="photoInput" accept="image/*" multiple style="display: none;">
+                        </div>
+                    </div>
+
+                    <div class="resource-section">
+                        <label class="memo-label">📝 安心できる言葉やメモ（任意）</label>
+                        <textarea id="resourceNote" placeholder="大丈夫、焦らなくていいよ..." style="margin-top: 8px;"></textarea>
+                    </div>
+                    
+                    <div class="settings-actions" style="margin-top: 24px;">
+                        <button id="saveResourceBtn" class="primary-btn">大切に保存する</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- ポップアップメッセージ -->
+    <div id="toastMessage" class="toast hidden">
+        <p id="toastText"></p>
+        <div class="toast-actions">
+            <button id="saveMessageBtn" class="toast-btn primary-btn">🔖 この言葉をリソース箱に入れる</button>
+            <button id="toastClose" class="toast-btn secondary-btn">とじる</button>
+        </div>
+    </div>
+
+    <!-- 下部メニュー -->
+    <nav class="bottom-nav">
+        <button class="nav-item active" data-target="homeTab">
+            <span class="nav-icon">🌱</span>
+            <span class="nav-label">ホーム</span>
+        </button>
+        <button class="nav-item" data-target="reflectionTab">
+            <span class="nav-icon">📊</span>
+            <span class="nav-label">振り返り</span>
+        </button>
+        <button class="nav-item" data-target="resourceTab">
+            <span class="nav-icon">🎁</span>
+            <span class="nav-label">リソース箱</span>
+        </button>
+    </nav>
+
+    <script src="app.js?v=20240419_03"></script>
+    <script>
+        /*
+        // iPhoneの強力なキャッシュを完全に無効化するため、一時的にService Workerへの干渉を全て停止します。
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                for (let registration of registrations) {
+                    registration.unregister();
+                }
+            });
+            caches.keys().then(function(names) {
+                for (let name of names) {
+                    caches.delete(name);
+                }
+            });
+        }
+        */
+    </script>
+</body>
+</html>
