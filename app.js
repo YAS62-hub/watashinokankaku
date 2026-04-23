@@ -63,9 +63,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // === 初期設定の読み込み ===
     // 0. カスタムラベルの読み込みと適用
     const defaultLabels = {
-        high: 'アラーム鳴ってる・焦り',
-        mid: 'マシな感じ・悪くない',
-        low: '冬眠の時間・エネルギー切れ'
+        high: 'ハイ（活発・たかぶり・ざわざわ）',
+        mid: '大丈夫（おだやか・マシ・いい感じ）',
+        low: 'ロー（静か・おもい・おやすみ中）'
     };
     
     function loadLabels() {
@@ -448,9 +448,9 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // default labels, fallback if nothing saved
         const defaultLabels = {
-            high: 'アラーム鳴ってる・焦り',
-            mid: 'マシな感じ・悪くない',
-            low: '冬眠の時間・エネルギー切れ'
+            high: 'ハイ（活発・たかぶり・ざわざわ）',
+            mid: '大丈夫（おだやか・マシ・いい感じ）',
+            low: 'ロー（静か・おもい・おやすみ中）'
         };
         
         for (let i = 0; i < firstDayOfMonth; i++) {
