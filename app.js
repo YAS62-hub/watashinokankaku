@@ -1083,13 +1083,52 @@ document.addEventListener('DOMContentLoaded', () => {
     const closePaletteModal = document.getElementById('closePaletteModal');
     const paletteColors = document.getElementById('paletteColors');
     const paletteWords = document.getElementById('paletteWords');
+    const settingsPaletteBtns = document.querySelectorAll('.settings-palette-btn');
 
+    let currentPaletteTargetInput = null;
     const PALETTE_COLORS = ['🔴', '🟠', '🟡', '🟢', '🟤', '⚪️', '🔵', '🔘', '⚫️'];
     const PALETTE_WORDS = {
         high: ['戦闘モード', '視野が狭い', 'しゅぽしゅぽ', 'カッとなる', 'そわそわ', '頭が真っ白', 'キュッと縮こまる', '張り詰める'],
         mid: ['地に足がついている', 'ぽかぽか', '血が巡る感じ', 'ふうっと一息', '余白', 'ホッとする', '呼吸が自然', 'ちょっといい感じ'],
         low: ['岩のよう', '冬眠中', '電源オフ', '感覚が遠い', '泥のように休みたい', '頭にモヤ', '麻痺', '感覚が消える']
     };
+
+    function openPalette(zone, targetInputId, showColors) {
+        currentPaletteTargetInput = targetInputId;
+
+        // Render colors
+        paletteColors.innerHTML = '';
+        if (showColors) {
+            if (paletteColors.previousElementSibling) paletteColors.previousElementSibling.style.display = 'block';
+            paletteColors.style.display = 'flex';
+            PALETTE_COLORS.forEach(color => {
+                const btn = document.createElement('button');
+                btn.textContent = color;
+                btn.style.cssText = 'font-size: 1.5rem; padding: 6px; border: none; background: transparent; cursor: pointer; transition: transform 0.2s;';
+                btn.onclick = () => addToInput(color);
+                paletteColors.appendChild(btn);
+            });
+        } else {
+            if (paletteColors.previousElementSibling) paletteColors.previousElementSibling.style.display = 'none';
+            paletteColors.style.display = 'none';
+        }
+
+        // Render words
+        paletteWords.innerHTML = '';
+        const words = PALETTE_WORDS[zone] || [];
+        words.forEach(word => {
+            const btn = document.createElement('button');
+            btn.textContent = word;
+            btn.style.cssText = 'font-size: 0.85rem; padding: 6px 12px; border: 1px solid #D6D2CA; background: #FFF; border-radius: 20px; color: #5C5446; cursor: pointer; margin-bottom:4px;';
+            btn.onclick = () => addToInput(word);
+            paletteWords.appendChild(btn);
+        });
+
+        if (paletteModal) {
+            paletteModal.classList.add('active');
+            document.body.classList.add('modal-open');
+        }
+    }
 
     if (openPaletteBtn) {
         openPaletteBtn.addEventListener('click', (e) => {
@@ -1098,46 +1137,46 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert('先に「🔥」「☕️」「❄️」のいずれかのボタンを選んでください。');
                 return;
             }
-            
-            paletteColors.innerHTML = '';
-            PALETTE_COLORS.forEach(color => {
-                const btn = document.createElement('button');
-                btn.textContent = color;
-                btn.style.cssText = 'font-size: 1.5rem; padding: 6px; border: none; background: transparent; cursor: pointer; transition: transform 0.2s;';
-                btn.onclick = () => addToMemo(color);
-                paletteColors.appendChild(btn);
-            });
+            openPalette(selectedRecordType, 'dailyMemo', true);
+        });
+    }
 
-            paletteWords.innerHTML = '';
-            const words = PALETTE_WORDS[selectedRecordType] || [];
-            words.forEach(word => {
-                const btn = document.createElement('button');
-                btn.textContent = word;
-                btn.style.cssText = 'font-size: 0.85rem; padding: 6px 12px; border: 1px solid #D6D2CA; background: #FFF; border-radius: 20px; color: #5C5446; cursor: pointer; margin-bottom:4px;';
-                btn.onclick = () => addToMemo(word);
-                paletteWords.appendChild(btn);
-            });
+    settingsPaletteBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const zone = btn.getAttribute('data-zone');
+            const targetInputId = btn.getAttribute('data-target-input');
+            openPalette(zone, targetInputId, false);
+        });
+    });
 
-            if (paletteModal) {
-                paletteModal.classList.add('active');
-                document.body.classList.add('modal-open');
+    if (closePaletteModal) {
+        closePaletteModal.addEventListener('click', () => {
+            if (paletteModal) paletteModal.classList.remove('active');
+            const settingsModal = document.getElementById('settingsModal');
+            if (!settingsModal || !settingsModal.classList.contains('active')) {
+                document.body.classList.remove('modal-open');
             }
         });
     }
 
-    if (closePaletteModal) {
-        closePaletteModal.addEventListener('click', () => {
-            paletteModal.classList.remove('active');
-            document.body.classList.remove('modal-open');
-        });
-    }
-
-    function addToMemo(text) {
-        const current = dailyMemo.value.trim();
-        dailyMemo.value = current ? `${current} ${text}` : text;
+    function addToInput(text) {
+        const inputField = document.getElementById(currentPaletteTargetInput);
+        if (inputField) {
+            if (currentPaletteTargetInput === 'dailyMemo') {
+                const current = inputField.value.trim();
+                inputField.value = current ? `${current} ${text}` : text;
+            } else {
+                inputField.value = text;
+            }
+        }
+        
         if (paletteModal) {
             paletteModal.classList.remove('active');
-            document.body.classList.remove('modal-open');
+            const settingsModal = document.getElementById('settingsModal');
+            if (!settingsModal || !settingsModal.classList.contains('active')) {
+                document.body.classList.remove('modal-open');
+            }
         }
     }
 
@@ -1145,7 +1184,10 @@ document.addEventListener('DOMContentLoaded', () => {
         paletteModal.addEventListener('click', (e) => {
             if (e.target === paletteModal) {
                 paletteModal.classList.remove('active');
-                document.body.classList.remove('modal-open');
+                const settingsModal = document.getElementById('settingsModal');
+                if (!settingsModal || !settingsModal.classList.contains('active')) {
+                    document.body.classList.remove('modal-open');
+                }
             }
         });
     }

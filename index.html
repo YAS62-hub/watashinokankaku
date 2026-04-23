@@ -138,17 +138,26 @@
                     <p class="setting-desc">あなたの感覚によりしっくりくる言葉に変更できます。自由に変えてもいいですし、選択肢から選ぶこともできます。</p>
                     
                     <div class="custom-input-group">
-                        <label for="customHigh">🔥 (ハイ)</label>
+                        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 4px;">
+                            <label for="customHigh" style="margin-bottom: 0;">🔥 (ハイ)</label>
+                            <button class="settings-palette-btn" data-target-input="customHigh" data-zone="high" style="color: var(--accent); font-size: 0.8rem; background: none; border: none; padding: 0; cursor: pointer; font-weight: bold;">🏷️ 選択肢から選ぶ</button>
+                        </div>
                         <input type="text" id="customHigh" class="custom-input" placeholder="例：ハイ（活発・たかぶり・ざわざわ）">
                     </div>
                     
                     <div class="custom-input-group">
-                        <label for="customMid">☕️ (大丈夫)</label>
+                        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 4px;">
+                            <label for="customMid" style="margin-bottom: 0;">☕️ (大丈夫)</label>
+                            <button class="settings-palette-btn" data-target-input="customMid" data-zone="mid" style="color: var(--accent); font-size: 0.8rem; background: none; border: none; padding: 0; cursor: pointer; font-weight: bold;">🏷️ 選択肢から選ぶ</button>
+                        </div>
                         <input type="text" id="customMid" class="custom-input" placeholder="例：大丈夫（おだやか・マシ・いい感じ）">
                     </div>
                     
                     <div class="custom-input-group">
-                        <label for="customLow">❄️ (ロー)</label>
+                        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 4px;">
+                            <label for="customLow" style="margin-bottom: 0;">❄️ (ロー)</label>
+                            <button class="settings-palette-btn" data-target-input="customLow" data-zone="low" style="color: var(--accent); font-size: 0.8rem; background: none; border: none; padding: 0; cursor: pointer; font-weight: bold;">🏷️ 選択肢から選ぶ</button>
+                        </div>
                         <input type="text" id="customLow" class="custom-input" placeholder="例：ロー（静か・おもい・おやすみ中）">
                     </div>
                     
