@@ -194,6 +194,18 @@ document.addEventListener('DOMContentLoaded', () => {
             history.push(record);
             localStorage.setItem('seAppHistory', JSON.stringify(history));
             
+            if (history.length === 5) {
+                setTimeout(() => {
+                    if (confirm('いつも大切に使ってくださりありがとうございます。\n大切な記録を守るために、時々設定画面から『バックアップファイル』をダウンロードしておくのがおすすめです。\n\n「設定画面」を開きますか？\n（OKで設定画面へ、キャンセルで閉じます）')) {
+                        const settingsModal = document.getElementById('settingsModal');
+                        if (settingsModal) {
+                            settingsModal.classList.add('active');
+                            document.body.classList.add('modal-open');
+                        }
+                    }
+                }, 500);
+            }
+            
             // UIリセット
             dailyMemo.value = '';
             stateButtons.forEach(btn => btn.classList.remove('selected-zone'));
@@ -675,6 +687,15 @@ document.addEventListener('DOMContentLoaded', () => {
     if (photoInput) {
         photoInput.addEventListener('change', (e) => {
             const files = e.target.files;
+            if (files.length > 5) {
+                alert('一度に選べるのは5枚までです。');
+                e.target.value = '';
+                photoPreview.style.display = 'none';
+                photoPlaceholder.innerHTML = '<span>写真をえらぶ</span>';
+                photoPlaceholder.style.display = 'flex';
+                photoArea.style.border = '2px dashed #D6D2CA';
+                return;
+            }
             if (files.length === 0) {
                 photoPreview.style.display = 'none';
                 photoPlaceholder.innerHTML = '<span>写真をえらぶ</span>';
@@ -750,6 +771,7 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 if (filesToProcess.length > 0) {
                     for (let i = 0; i < filesToProcess.length; i++) {
+                        if (loadingOverlay) loadingOverlay.querySelector('p').textContent = `大切に保存しています（${i+1}/${filesToProcess.length}枚）...`;
                         const base64 = await compressImage(filesToProcess[i]);
                         newResources.push({
                             id: Date.now().toString(36) + Math.random().toString(36).substr(2, 5) + i,
@@ -844,6 +866,39 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    let globalPhotoResources = [];
+    let currentPhotoIndex = -1;
+
+    function updatePhotoView() {
+        if (currentPhotoIndex < 0 || currentPhotoIndex >= globalPhotoResources.length) return;
+        const res = globalPhotoResources[currentPhotoIndex];
+        const photoViewImg = document.getElementById('photoViewImg');
+        const photoViewText = document.getElementById('photoViewText');
+        const photoViewResourceId = document.getElementById('photoViewResourceId');
+        const prevPhotoBtn = document.getElementById('prevPhotoBtn');
+        const nextPhotoBtn = document.getElementById('nextPhotoBtn');
+        
+        if (photoViewImg) photoViewImg.src = res.photoStr;
+        if (photoViewText) photoViewText.textContent = res.text || '';
+        if (photoViewResourceId) photoViewResourceId.value = res.id;
+        
+        if (prevPhotoBtn) prevPhotoBtn.style.display = currentPhotoIndex > 0 ? 'flex' : 'none';
+        if (nextPhotoBtn) nextPhotoBtn.style.display = currentPhotoIndex < globalPhotoResources.length - 1 ? 'flex' : 'none';
+    }
+
+    const prevPhotoBtn = document.getElementById('prevPhotoBtn');
+    if (prevPhotoBtn) {
+        prevPhotoBtn.addEventListener('click', () => {
+            if (currentPhotoIndex > 0) { currentPhotoIndex--; updatePhotoView(); }
+        });
+    }
+    const nextPhotoBtn = document.getElementById('nextPhotoBtn');
+    if (nextPhotoBtn) {
+        nextPhotoBtn.addEventListener('click', () => {
+            if (currentPhotoIndex < globalPhotoResources.length - 1) { currentPhotoIndex++; updatePhotoView(); }
+        });
+    }
+
     // ギャラリー描画
     function renderResources() {
         const photoGalleryTab = document.getElementById('photoGalleryTab');
@@ -859,6 +914,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (photoGalleryTab) photoGalleryTab.innerHTML = '';
         if (wordGalleryTab) wordGalleryTab.innerHTML = '';
         
+        globalPhotoResources = seAppResources.filter(r => r.photoStr);
+        
         seAppResources.forEach(res => {
             // 写真ギャラリー（グリッド表示）
             if (res.photoStr && photoGalleryTab) {
@@ -867,9 +924,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 item.innerHTML = `<img src="${res.photoStr}" alt="写真">`;
                 
                 item.addEventListener('click', () => {
-                    if (photoViewImg) photoViewImg.src = res.photoStr;
-                    if (photoViewText) photoViewText.textContent = res.text || '';
-                    if (photoViewResourceId) photoViewResourceId.value = res.id;
+                    currentPhotoIndex = globalPhotoResources.findIndex(r => r.id === res.id);
+                    updatePhotoView();
                     if (photoViewModal) {
                         photoViewModal.classList.add('active');
                         document.body.classList.add('modal-open');
@@ -1020,6 +1076,79 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
+
+    // === 感覚パレットロジック ===
+    const openPaletteBtn = document.getElementById('openPaletteBtn');
+    const paletteModal = document.getElementById('paletteModal');
+    const closePaletteModal = document.getElementById('closePaletteModal');
+    const paletteColors = document.getElementById('paletteColors');
+    const paletteWords = document.getElementById('paletteWords');
+
+    const PALETTE_COLORS = ['🔴', '🟠', '🟡', '🟢', '🟤', '⚪️', '🔵', '🔘', '⚫️'];
+    const PALETTE_WORDS = {
+        high: ['戦闘モード', '視野が狭い', 'しゅぽしゅぽ', 'カッとなる', 'そわそわ', '頭が真っ白', 'キュッと縮こまる', '張り詰める'],
+        mid: ['地に足がついている', 'ぽかぽか', '血が巡る感じ', 'ふうっと一息', '余白', 'ホッとする', '呼吸が自然', 'ちょっといい感じ'],
+        low: ['岩のよう', '冬眠中', '電源オフ', '感覚が遠い', '泥のように休みたい', '頭にモヤ', '麻痺', '感覚が消える']
+    };
+
+    if (openPaletteBtn) {
+        openPaletteBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (!selectedRecordType) {
+                alert('先に「🔥」「☕️」「❄️」のいずれかのボタンを選んでください。');
+                return;
+            }
+            
+            paletteColors.innerHTML = '';
+            PALETTE_COLORS.forEach(color => {
+                const btn = document.createElement('button');
+                btn.textContent = color;
+                btn.style.cssText = 'font-size: 1.5rem; padding: 6px; border: none; background: transparent; cursor: pointer; transition: transform 0.2s;';
+                btn.onclick = () => addToMemo(color);
+                paletteColors.appendChild(btn);
+            });
+
+            paletteWords.innerHTML = '';
+            const words = PALETTE_WORDS[selectedRecordType] || [];
+            words.forEach(word => {
+                const btn = document.createElement('button');
+                btn.textContent = word;
+                btn.style.cssText = 'font-size: 0.85rem; padding: 6px 12px; border: 1px solid #D6D2CA; background: #FFF; border-radius: 20px; color: #5C5446; cursor: pointer; margin-bottom:4px;';
+                btn.onclick = () => addToMemo(word);
+                paletteWords.appendChild(btn);
+            });
+
+            if (paletteModal) {
+                paletteModal.classList.add('active');
+                document.body.classList.add('modal-open');
+            }
+        });
+    }
+
+    if (closePaletteModal) {
+        closePaletteModal.addEventListener('click', () => {
+            paletteModal.classList.remove('active');
+            document.body.classList.remove('modal-open');
+        });
+    }
+
+    function addToMemo(text) {
+        const current = dailyMemo.value.trim();
+        dailyMemo.value = current ? `${current} ${text}` : text;
+        if (paletteModal) {
+            paletteModal.classList.remove('active');
+            document.body.classList.remove('modal-open');
+        }
+    }
+
+    if (paletteModal) {
+        paletteModal.addEventListener('click', (e) => {
+            if (e.target === paletteModal) {
+                paletteModal.classList.remove('active');
+                document.body.classList.remove('modal-open');
+            }
+        });
+    }
 
     // 最初の一回描画
     renderResources();

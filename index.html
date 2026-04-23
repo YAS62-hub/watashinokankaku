@@ -43,7 +43,10 @@
                     <input type="datetime-local" id="recordTime" class="time-input">
                 </div>
                 <div class="input-group" style="margin-top: 16px;">
-                    <label for="dailyMemo" class="memo-label">今の一言（あれば）</label>
+                    <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 4px;">
+                        <label for="dailyMemo" class="memo-label" style="margin-bottom: 0;">今の一言（あれば）</label>
+                        <button id="openPaletteBtn" class="action-link" style="color: var(--accent); font-size: 0.8rem; background: none; border: none; padding: 0; cursor: pointer; font-weight: bold;">🏷️ 選択肢から選ぶ</button>
+                    </div>
                     <input type="text" id="dailyMemo" class="memo-input" placeholder="今の気持ちや出来事など...">
                 </div>
                 <button id="submitRecordBtn" class="primary-btn submit-record-btn" disabled>記録する</button>
@@ -132,7 +135,7 @@
                 
                 <div class="setting-item">
                     <h4 class="setting-subtitle">ボタンの言葉をカスタマイズ</h4>
-                    <p class="setting-desc">あなたの感覚によりしっくりくる言葉に変更できます。</p>
+                    <p class="setting-desc">あなたの感覚によりしっくりくる言葉に変更できます。自由に変えてもいいですし、選択肢から選ぶこともできます。</p>
                     
                     <div class="custom-input-group">
                         <label for="customHigh">🔥 (ハイ)</label>
@@ -223,16 +226,28 @@
 
         <!-- 写真拡大モーダル -->
         <div id="photoViewModal" class="modal">
-            <div class="modal-content photo-view-content">
+            <div class="modal-content photo-view-content" style="position: relative;">
                 <button class="close-button" id="closePhotoViewModal">×</button>
-                <div class="photo-view-area">
-                    <img id="photoViewImg" src="">
+                <button id="deletePhotoBtn" style="position: absolute; top: 15px; left: 15px; background: rgba(0,0,0,0.5); border: none; color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; cursor: pointer; z-index: 10;">🗑</button>
+                <div class="photo-view-area" style="position: relative;">
+                    <button id="prevPhotoBtn" style="position: absolute; left: -10px; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.8); border: none; width: 36px; height: 36px; border-radius: 50%; font-size: 1.2rem; display: none; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">&lt;</button>
+                    <button id="nextPhotoBtn" style="position: absolute; right: -10px; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.8); border: none; width: 36px; height: 36px; border-radius: 50%; font-size: 1.2rem; display: none; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">&gt;</button>
+                    <img id="photoViewImg" src="" style="width: 100%; border-radius: 12px; object-fit: contain; max-height: 70vh;">
                     <p id="photoViewText"></p>
                 </div>
-                <div class="settings-actions" style="margin-top: 16px;">
-                    <button class="action-link delete-link" id="deletePhotoBtn" style="font-size:1rem; color:#A89F91;">削除する</button>
-                    <input type="hidden" id="photoViewResourceId">
-                </div>
+                <input type="hidden" id="photoViewResourceId">
+            </div>
+        </div>
+
+        <!-- 感覚パレットモーダル -->
+        <div id="paletteModal" class="modal">
+            <div class="modal-content" style="padding: 20px;">
+                <button class="close-button" id="closePaletteModal">×</button>
+                <h3 style="margin-bottom: 16px; font-size: 1.1rem; color: #5C5446;">今の感覚を選ぶ</h3>
+                <p style="font-size: 0.8rem; color: #8A8172; margin-bottom: 8px;">🎨 色で表すと？</p>
+                <div id="paletteColors" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px;"></div>
+                <p style="font-size: 0.8rem; color: #8A8172; margin-bottom: 8px;">📝 言葉で表すと？</p>
+                <div id="paletteWords" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px;"></div>
             </div>
         </div>
 
