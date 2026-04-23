@@ -688,7 +688,7 @@ document.addEventListener('DOMContentLoaded', () => {
         photoInput.addEventListener('change', (e) => {
             const files = e.target.files;
             if (files.length > 5) {
-                alert('一度に選べるのは5枚までです。');
+                alert('申し訳ありません。システムの都合上、一度に保存できるのは5枚までとなっています。\n\n大切な記録を確実に残すため、数回に分けて保存していただけると幸いです。');
                 e.target.value = '';
                 photoPreview.style.display = 'none';
                 photoPlaceholder.innerHTML = '<span>写真をえらぶ</span>';
@@ -1146,7 +1146,7 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
             const zone = btn.getAttribute('data-zone');
             const targetInputId = btn.getAttribute('data-target-input');
-            openPalette(zone, targetInputId, false);
+            openPalette(zone, targetInputId, true);
         });
     });
 
