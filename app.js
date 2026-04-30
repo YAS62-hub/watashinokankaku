@@ -758,10 +758,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             let filesToProcess = files;
-            if (files.length > 5) {
-                alert('一度に保存できる写真は5枚までです。最初の5枚を処理します。');
-                filesToProcess = files.slice(0, 5);
-            }
 
             if (loadingOverlay) loadingOverlay.classList.add('active');
 
