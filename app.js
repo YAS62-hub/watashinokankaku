@@ -996,13 +996,17 @@ document.addEventListener('DOMContentLoaded', () => {
     if (exportDataBtn) {
         exportDataBtn.addEventListener('click', () => {
             try {
-                const data = {
-                    seAppSettings: localStorage.getItem('seAppSettings') || '{}',
-                    seAppHistory: localStorage.getItem('seAppHistory') || '[]',
-                    seAppResources: localStorage.getItem('seAppResources') || '[]'
-                };
-                const jsonStr = JSON.stringify(data);
-                const blob = new Blob([jsonStr], { type: 'application/json' });
+                // メモリ負荷を最小限に抑えるため、単一の巨大な文字列ではなく配列としてBlobに渡す
+                const settingsStr = localStorage.getItem('seAppSettings') || '{}';
+                const historyStr = localStorage.getItem('seAppHistory') || '[]';
+                const resourcesStr = localStorage.getItem('seAppResources') || '[]';
+                
+                const blob = new Blob([
+                    '{"seAppSettings":', JSON.stringify(settingsStr),
+                    ',"seAppHistory":', JSON.stringify(historyStr),
+                    ',"seAppResources":', JSON.stringify(resourcesStr), '}'
+                ], { type: 'application/json' });
+                
                 const url = URL.createObjectURL(blob);
                 
                 const now = new Date();
@@ -1032,29 +1036,43 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert('復元するバックアップファイルを選択してください。');
                 return;
             }
-            if (confirm('現在のデータ（あれば）の上書きとなります。復元してよろしいですか？')) {
+            if (confirm('現在のデータ（あれば）は上書きされ、一度すべて消去してから復元します。よろしいですか？')) {
+                if (loadingOverlay) {
+                    loadingOverlay.classList.add('active');
+                    const p = loadingOverlay.querySelector('p');
+                    if (p) p.innerHTML = 'ただいま記憶を復元しています...<br>完了までこのままお待ちください。';
+                }
+                
                 const reader = new FileReader();
                 reader.onload = (e) => {
-                    alert('ただいま記憶を復元しています…\nOKを押してしばらくお待ちください。');
                     setTimeout(() => {
                         try {
                             const parsedData = JSON.parse(e.target.result);
                             if (parsedData.seAppHistory || parsedData.seAppResources) {
+                                // 空き容量の枯渇（残骸との衝突）を防ぐために一度確実にクリアする
+                                localStorage.removeItem('seAppSettings');
+                                localStorage.removeItem('seAppHistory');
+                                localStorage.removeItem('seAppResources');
+                                
                                 localStorage.setItem('seAppSettings', parsedData.seAppSettings || '{}');
                                 localStorage.setItem('seAppHistory', parsedData.seAppHistory || '[]');
                                 localStorage.setItem('seAppResources', parsedData.seAppResources || '[]');
-                                alert('復元が完了しました。画面を再読み込みします。');
+                                
+                                alert('復元が完了しました。アプリを再読み込みします。');
                                 window.location.reload();
                             } else {
+                                if (loadingOverlay) loadingOverlay.classList.remove('active');
                                 alert('データ形式が正しくありません。正しいJSONファイルを選択してください。');
                             }
                         } catch (err) {
                             console.error(err);
-                            alert('データの復元に失敗しました。ファイルが破損している可能性があります。');
+                            if (loadingOverlay) loadingOverlay.classList.remove('active');
+                            alert('データの復元に失敗しました。ファイルが破損しているか、容量が大きすぎる可能性があります。');
                         }
-                    }, 100); // UIスレッドのブロックを少し緩和
+                    }, 500); // UIスレッドのブロックを緩和
                 };
                 reader.onerror = () => {
+                    if (loadingOverlay) loadingOverlay.classList.remove('active');
                     alert('ファイルの読み込みに失敗しました。');
                 };
                 reader.readAsText(file);
