@@ -215,15 +215,45 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    let lastSystemInsertedColor = null;
+    let lastSystemInsertedWord = null;
+
+    function addPaletteItem(text, isColor) {
+        let current = dailyMemo.value.trim();
+        
+        let targetToReplace = isColor ? lastSystemInsertedColor : lastSystemInsertedWord;
+        
+        if (targetToReplace && current.includes(targetToReplace)) {
+            // 前に挿入したシステムタグを置き換え
+            current = current.replace(targetToReplace, text);
+        } else {
+            // 無ければ追記
+            current = current ? `${current} ${text}` : text;
+        }
+        
+        dailyMemo.value = current;
+        
+        if (isColor) {
+            lastSystemInsertedColor = text;
+        } else {
+            lastSystemInsertedWord = text;
+        }
+    }
+
     function renderInlinePalette(snapValue) {
         if (!inlinePaletteColors || !inlinePaletteWords) return;
+        
+        // アニメーションのリセット用（フワッと光らせる）
+        inlinePaletteArea.classList.remove('palette-updated');
+        void inlinePaletteArea.offsetWidth; // reflow
+        inlinePaletteArea.classList.add('palette-updated');
         
         inlinePaletteColors.innerHTML = '';
         COMMON_PALETTE_COLORS.forEach(color => {
             const btn = document.createElement('button');
             btn.textContent = color;
             btn.style.cssText = 'font-size: 1.5rem; padding: 4px; border: none; background: transparent; cursor: pointer; transition: transform 0.2s;';
-            btn.onclick = (e) => { e.preventDefault(); addToInlineMemo(color); };
+            btn.onclick = (e) => { e.preventDefault(); addPaletteItem(color, true); };
             inlinePaletteColors.appendChild(btn);
         });
 
@@ -233,14 +263,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const btn = document.createElement('button');
             btn.textContent = word;
             btn.style.cssText = 'font-size: 0.85rem; padding: 6px 12px; border: 1px solid #D6D2CA; background: #FFF; border-radius: 20px; color: #5C5446; cursor: pointer; margin-bottom:4px;';
-            btn.onclick = (e) => { e.preventDefault(); addToInlineMemo(word); };
+            btn.onclick = (e) => { e.preventDefault(); addPaletteItem(word, false); };
             inlinePaletteWords.appendChild(btn);
         });
-    }
-
-    function addToInlineMemo(text) {
-        const current = dailyMemo.value.trim();
-        dailyMemo.value = current ? `${current} ${text}` : text;
     }
 
     const homeStateButtons = document.querySelectorAll('#homeTab .state-button');
@@ -368,6 +393,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             // パレットをニュートラルに戻す
             renderInlinePalette(50);
+            
+            // 挿入記憶もリセット
+            lastSystemInsertedColor = null;
+            lastSystemInsertedWord = null;
             
             homeStateButtons.forEach(btn => btn.classList.remove('selected-zone'));
             submitRecordBtn.disabled = true;
