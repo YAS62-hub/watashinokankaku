@@ -58,6 +58,19 @@ document.addEventListener('DOMContentLoaded', () => {
         const offsetNow = new Date(now.getTime() - now.getTimezoneOffset() * 60000);
         inputEle.value = offsetNow.toISOString().slice(0, 16);
     }
+    
+    // 汎用的なゾーン変換関数（数値や古い文字列をhigh/mid/lowに正規化）
+    function getZone(type) {
+        let val = type;
+        if (!isNaN(parseInt(val))) {
+            const v = parseInt(val);
+            if (v > 65) return 'high';
+            if (v < 35) return 'low';
+            return 'mid';
+        }
+        return String(val); // 'high', 'mid', 'low' 等
+    }
+    
     setNowToInput(recordTimeInput);
 
     // === 初期設定の読み込み ===
@@ -226,8 +239,11 @@ document.addEventListener('DOMContentLoaded', () => {
         dailyMemo.value = current ? `${current} ${text}` : text;
     }
 
+    const homeStateButtons = document.querySelectorAll('#homeTab .state-button');
+    const sliderRevealArea = document.getElementById('sliderRevealArea');
+
     if (senseSlider) {
-        selectedRecordType = '50'; // デフォルト
+        selectedRecordType = null; // 初期は未選択
 
         senseSlider.addEventListener('input', (e) => {
             const val = parseInt(e.target.value);
@@ -255,13 +271,36 @@ document.addEventListener('DOMContentLoaded', () => {
         senseSlider.addEventListener('touchend', snapSlider);
         senseSlider.addEventListener('mouseup', snapSlider);
 
-        // 初期描画
-        renderInlinePalette(50);
-        if (sliderGlowBg) {
-            sliderGlowBg.style.backgroundColor = getSliderColor(50);
-            sliderGlowBg.style.opacity = '0.7'; // 初期から優しく光る
-        }
-        if(submitRecordBtn) submitRecordBtn.disabled = false; // 最初から中央(50)が選ばれている扱い
+        // ホームタブの3択ボタンを押したときの挙動
+        homeStateButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                // ボタンスタイル更新
+                homeStateButtons.forEach(btn => btn.classList.remove('selected-zone'));
+                button.classList.add('selected-zone');
+                
+                const type = button.getAttribute('data-type');
+                let valToSet = 50;
+                if (type === 'high') valToSet = 100;
+                if (type === 'low') valToSet = 0;
+                
+                // スライダーに値をセット
+                senseSlider.value = valToSet;
+                selectedRecordType = valToSet.toString();
+                
+                if (sliderGlowBg) {
+                    sliderGlowBg.style.backgroundColor = getSliderColor(valToSet);
+                    sliderGlowBg.style.opacity = '0.7';
+                }
+                renderInlinePalette(valToSet);
+                
+                if(submitRecordBtn) submitRecordBtn.disabled = false;
+                
+                // スライダー領域を展開！
+                if (sliderRevealArea) {
+                    sliderRevealArea.classList.add('revealed');
+                }
+            });
+        });
     }
 
     if (submitRecordBtn) {
@@ -298,26 +337,20 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // UIリセット
             dailyMemo.value = '';
+            selectedRecordType = null;
             if (senseSlider) {
                 senseSlider.value = 50;
-                selectedRecordType = '50';
-                if (sliderGlowBg) {
-                    sliderGlowBg.style.backgroundColor = getSliderColor(50);
-                }
-                renderInlinePalette(50);
             }
-            submitRecordBtn.disabled = false;
+            if (sliderRevealArea) {
+                sliderRevealArea.classList.remove('revealed');
+            }
+            homeStateButtons.forEach(btn => btn.classList.remove('selected-zone'));
+            submitRecordBtn.disabled = true;
             setNowToInput(recordTimeInput);
             
             if(typeof renderReflection === 'function') renderReflection();
             if (popupToggle.checked) {
-                let msgKey = record.type;
-                if (!isNaN(parseInt(msgKey))) {
-                    const v = parseInt(msgKey);
-                    if (v > 65) msgKey = 'high';
-                    else if (v < 35) msgKey = 'low';
-                    else msgKey = 'mid';
-                }
+                const msgKey = getZone(record.type);
                 const msgArray = messages[msgKey];
                 if (msgArray && msgArray.length > 0) {
                     const randomMsg = msgArray[Math.floor(Math.random() * msgArray.length)];
@@ -455,19 +488,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             dailyData[dateStr].push(r);
         });
-        
-        // 汎用的なゾーン変換関数
-        function getZone(type) {
-            let val = type;
-            if (!isNaN(parseInt(val))) {
-                const v = parseInt(val);
-                if (v > 65) return 'high';
-                if (v < 35) return 'low';
-                return 'mid';
-            }
-            return String(val); // 'high', 'mid', 'low' 等
-        }
-        
         // --- グラフ：時間軸に沿った日内変動を描画 ---
         const recentHistory = history.slice(-50); // 最新50件を表示
         

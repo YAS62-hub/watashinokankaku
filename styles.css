@@ -1040,3 +1040,18 @@ input:checked + .toggle-slider::before {
 .vertical-range:active::-moz-range-thumb {
     transform: scale(1.15);
 }
+
+/* スライダー展開エリアのアニメーション */
+#sliderRevealArea {
+    transition: max-height 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s ease, margin-top 0.4s ease;
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    margin-top: 0;
+}
+
+#sliderRevealArea.revealed {
+    max-height: 600px; /* 十分な高さを確保 */
+    opacity: 1;
+    margin-top: 16px;
+}
