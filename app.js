@@ -85,10 +85,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const savedLabels = JSON.parse(localStorage.getItem('seAppLabels') || 'null');
         const labels = savedLabels || defaultLabels;
         
-        // ボタンに適用 (存在する場合のみ)
-        if (textHigh) textHigh.textContent = labels.high;
-        if (textMid) textMid.textContent = labels.mid;
-        if (textLow) textLow.textContent = labels.low;
+        // ホーム画面・編集画面の両方のボタンテキストを更新
+        const textHighEls = document.querySelectorAll('.state-high .text');
+        const textMidEls = document.querySelectorAll('.state-mid .text');
+        const textLowEls = document.querySelectorAll('.state-low .text');
+        
+        if (textHighEls) textHighEls.forEach(el => el.textContent = labels.high);
+        if (textMidEls) textMidEls.forEach(el => el.textContent = labels.mid);
+        if (textLowEls) textLowEls.forEach(el => el.textContent = labels.low);
         
         // 設定フォームに適用
         if (customHigh) customHigh.value = labels.high;
@@ -270,6 +274,9 @@ document.addEventListener('DOMContentLoaded', () => {
         senseSlider.addEventListener('change', snapSlider);
         senseSlider.addEventListener('touchend', snapSlider);
         senseSlider.addEventListener('mouseup', snapSlider);
+
+        // 初期描画（感覚パレットのみ。スライダー値はニュートラルの50）
+        renderInlinePalette(50);
 
         // ホームタブの3択ボタンを押したときの挙動
         homeStateButtons.forEach(button => {
@@ -457,6 +464,7 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('seAppLabels', JSON.stringify(newLabels));
         loadLabels();
         settingsModal.classList.remove('active');
+        document.body.classList.remove('modal-open');
         showToast('ボタンの言葉を保存しました🍵');
     });
 
@@ -464,6 +472,8 @@ document.addEventListener('DOMContentLoaded', () => {
     resetSettingsBtn.addEventListener('click', () => {
         localStorage.removeItem('seAppLabels');
         loadLabels();
+        settingsModal.classList.remove('active');
+        document.body.classList.remove('modal-open');
         showToast('ボタンの言葉を初期設定に戻しました🍵');
     });
 
