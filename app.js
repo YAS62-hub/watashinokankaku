@@ -165,14 +165,104 @@ document.addEventListener('DOMContentLoaded', () => {
         ]
     };
 
-    stateButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            stateButtons.forEach(btn => btn.classList.remove('selected-zone'));
-            button.classList.add('selected-zone');
-            selectedRecordType = button.getAttribute('data-type');
-            if(submitRecordBtn) submitRecordBtn.disabled = false;
+    const senseSlider = document.getElementById('senseSlider');
+    const sliderGlowBg = document.getElementById('sliderGlowBg');
+    const inlinePaletteColors = document.getElementById('inlinePaletteColors');
+    const inlinePaletteWords = document.getElementById('inlinePaletteWords');
+    const COMMON_PALETTE_COLORS = ['🔴', '🟠', '🟡', '🟢', '🟤', '⚪️', '🔵', '🔘', '⚫️'];
+    const snapPoints = [0, 15, 35, 50, 65, 85, 100];
+    
+    const SLIDER_WORDS = {
+        100: ['頭が真っ白になる', 'カッとなる', 'パニック', '爆発寸前', 'オーバーヒート'],
+        85: ['張り詰めている', 'ギリギリで回している', 'アラームが鳴り響いている', 'プッツンきそう'],
+        65: ['ワクワクする', '心地よい熱量がある', 'エンジンが心地よく回っている', '没頭している'],
+        50: ['穏やか', 'フラット', '呼吸が自然に出入りしている', '地に足がついている感じ', '血が巡る感じ'],
+        35: ['ホッとする', '心地よい重だるさ', '温かい毛布にくるまるような安心感', '満ち足りた休息'],
+        15: ['遠くから眺めている感じ', '感覚が薄れていく', '岩のよう', '電源が落ちそう'],
+        0: ['何も感じない', '麻痺している', '泥のよう', 'システムを保護するためのシャットダウン']
+    };
+
+    function getSliderColor(val) {
+        if (val >= 50) {
+            const ratio = (val - 50) / 50;
+            const r = Math.round(169 + ratio * (179 - 169));
+            const g = Math.round(188 + ratio * (94 - 188));
+            const b = Math.round(163 + ratio * (28 - 163));
+            return `rgb(${r}, ${g}, ${b})`;
+        } else {
+            const ratio = val / 50;
+            const r = Math.round(65 + ratio * (169 - 65));
+            const g = Math.round(117 + ratio * (188 - 117));
+            const b = Math.round(92 + ratio * (163 - 92));
+            return `rgb(${r}, ${g}, ${b})`;
+        }
+    }
+
+    function renderInlinePalette(snapValue) {
+        if (!inlinePaletteColors || !inlinePaletteWords) return;
+        
+        inlinePaletteColors.innerHTML = '';
+        COMMON_PALETTE_COLORS.forEach(color => {
+            const btn = document.createElement('button');
+            btn.textContent = color;
+            btn.style.cssText = 'font-size: 1.5rem; padding: 4px; border: none; background: transparent; cursor: pointer; transition: transform 0.2s;';
+            btn.onclick = (e) => { e.preventDefault(); addToInlineMemo(color); };
+            inlinePaletteColors.appendChild(btn);
         });
-    });
+
+        inlinePaletteWords.innerHTML = '';
+        const words = SLIDER_WORDS[snapValue] || SLIDER_WORDS[50];
+        words.forEach(word => {
+            const btn = document.createElement('button');
+            btn.textContent = word;
+            btn.style.cssText = 'font-size: 0.85rem; padding: 6px 12px; border: 1px solid #D6D2CA; background: #FFF; border-radius: 20px; color: #5C5446; cursor: pointer; margin-bottom:4px;';
+            btn.onclick = (e) => { e.preventDefault(); addToInlineMemo(word); };
+            inlinePaletteWords.appendChild(btn);
+        });
+    }
+
+    function addToInlineMemo(text) {
+        const current = dailyMemo.value.trim();
+        dailyMemo.value = current ? `${current} ${text}` : text;
+    }
+
+    if (senseSlider) {
+        selectedRecordType = '50'; // デフォルト
+
+        senseSlider.addEventListener('input', (e) => {
+            const val = parseInt(e.target.value);
+            selectedRecordType = val.toString();
+            if(submitRecordBtn) submitRecordBtn.disabled = false;
+            if (sliderGlowBg) {
+                sliderGlowBg.style.backgroundColor = getSliderColor(val);
+                sliderGlowBg.style.opacity = '1';
+            }
+        });
+
+        const snapSlider = () => {
+            const val = parseInt(senseSlider.value);
+            const closest = snapPoints.reduce((prev, curr) => Math.abs(curr - val) < Math.abs(prev - val) ? curr : prev);
+            senseSlider.value = closest;
+            selectedRecordType = closest.toString();
+            if (sliderGlowBg) {
+                sliderGlowBg.style.backgroundColor = getSliderColor(closest);
+                // 吸着後もふんわり発光を残す
+            }
+            renderInlinePalette(closest);
+        };
+
+        senseSlider.addEventListener('change', snapSlider);
+        senseSlider.addEventListener('touchend', snapSlider);
+        senseSlider.addEventListener('mouseup', snapSlider);
+
+        // 初期描画
+        renderInlinePalette(50);
+        if (sliderGlowBg) {
+            sliderGlowBg.style.backgroundColor = getSliderColor(50);
+            sliderGlowBg.style.opacity = '0.7'; // 初期から優しく光る
+        }
+        if(submitRecordBtn) submitRecordBtn.disabled = false; // 最初から中央(50)が選ばれている扱い
+    }
 
     if (submitRecordBtn) {
         submitRecordBtn.addEventListener('click', () => {
@@ -208,14 +298,27 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // UIリセット
             dailyMemo.value = '';
-            stateButtons.forEach(btn => btn.classList.remove('selected-zone'));
-            selectedRecordType = null;
-            submitRecordBtn.disabled = true;
+            if (senseSlider) {
+                senseSlider.value = 50;
+                selectedRecordType = '50';
+                if (sliderGlowBg) {
+                    sliderGlowBg.style.backgroundColor = getSliderColor(50);
+                }
+                renderInlinePalette(50);
+            }
+            submitRecordBtn.disabled = false;
             setNowToInput(recordTimeInput);
             
             if(typeof renderReflection === 'function') renderReflection();
             if (popupToggle.checked) {
-                const msgArray = messages[record.type];
+                let msgKey = record.type;
+                if (!isNaN(parseInt(msgKey))) {
+                    const v = parseInt(msgKey);
+                    if (v > 65) msgKey = 'high';
+                    else if (v < 35) msgKey = 'low';
+                    else msgKey = 'mid';
+                }
+                const msgArray = messages[msgKey];
                 if (msgArray && msgArray.length > 0) {
                     const randomMsg = msgArray[Math.floor(Math.random() * msgArray.length)];
                     showToast(randomMsg, true); // 労いメッセージ時のみお守り保存をON

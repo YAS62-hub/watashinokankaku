@@ -954,3 +954,89 @@ input:checked + .toggle-slider::before {
     opacity: 0.5;
     cursor: not-allowed;
 }
+
+/* 縦型スライダー用スタイル */
+.slider-container-vertical {
+    position: relative;
+    width: 60px;
+    height: 300px;
+    margin: 30px auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.glow-bg-vertical {
+    position: absolute;
+    width: 80px;
+    height: 320px;
+    border-radius: 40px;
+    filter: blur(25px);
+    transition: background-color 0.4s ease, opacity 0.4s ease;
+    pointer-events: none;
+    opacity: 0;
+}
+
+.vertical-range {
+    transform: rotate(270deg);
+    width: 280px; /* 実質的な高さ */
+    height: 20px;
+    margin: 0;
+    -webkit-appearance: none;
+    appearance: none;
+    background: transparent;
+    cursor: grab;
+    z-index: 2;
+}
+
+.vertical-range:active {
+    cursor: grabbing;
+}
+
+.vertical-range::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 12px;
+    border-radius: 6px;
+    background: linear-gradient(to right, #41755C, #A9BCA3, #B35E1C);
+    /* 270度回転により: 左(0)=下(青/緑系), 中央(50)=中(淡緑), 右(100)=上(赤/オレンジ系)
+       ※色合いはこれまでのアプリ指定色（ロー、ミッド、ハイ）を踏襲 */
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.vertical-range::-moz-range-track {
+    width: 100%;
+    height: 12px;
+    border-radius: 6px;
+    background: linear-gradient(to right, #41755C, #A9BCA3, #B35E1C);
+}
+
+.vertical-range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 36px;
+    width: 36px;
+    border-radius: 50%;
+    background: #FFF;
+    border: 3px solid #FFF;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2), 0 0 0 1px rgba(0,0,0,0.05);
+    margin-top: -12px;
+    transition: transform 0.1s;
+}
+
+.vertical-range:active::-webkit-slider-thumb {
+    transform: scale(1.15);
+}
+
+.vertical-range::-moz-range-thumb {
+    height: 36px;
+    width: 36px;
+    border-radius: 50%;
+    background: #FFF;
+    border: 3px solid #FFF;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2), 0 0 0 1px rgba(0,0,0,0.05);
+    transition: transform 0.1s;
+}
+
+.vertical-range:active::-moz-range-thumb {
+    transform: scale(1.15);
+}

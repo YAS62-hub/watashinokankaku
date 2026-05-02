@@ -22,19 +22,18 @@
         <section id="homeTab" class="tab-content active">
             <h1 class="gentle-question">今、どんな感じですか？</h1>
             
-            <div class="button-group">
-                <button class="state-button state-high" data-type="high">
-                    <span class="emoji">🔥</span>
-                    <span class="text">アラーム鳴ってる・焦り</span>
-                </button>
-                <button class="state-button state-mid" data-type="mid">
-                    <span class="emoji">☕️</span>
-                    <span class="text">マシな感じ・悪くない</span>
-                </button>
-                <button class="state-button state-low" data-type="low">
-                    <span class="emoji">❄️</span>
-                    <span class="text">冬眠の時間・エネルギー切れ</span>
-                </button>
+            <div class="slider-container-vertical">
+                <div id="sliderGlowBg" class="glow-bg-vertical"></div>
+                <!-- 0=Low, 50=Mid, 100=High -->
+                <input type="range" id="senseSlider" class="vertical-range" min="0" max="100" value="50" step="1">
+            </div>
+
+            <div id="inlinePaletteArea" style="margin-bottom: 24px; min-height: 120px;">
+                <p style="font-size: 0.85rem; color: #8A8172; margin-bottom: 12px; text-align: center;">🎨 いまの感覚に近い色や言葉はありますか？</p>
+                <!-- 色ボタン（既存の9色を常に表示、パレット連動時にハイライトも可能） -->
+                <div id="inlinePaletteColors" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-bottom: 16px;"></div>
+                <!-- 言葉チップ（スライダー位置に応じて自動フィルタリング） -->
+                <div id="inlinePaletteWords" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 6px;"></div>
             </div>
             
             <div class="daily-memo-area">
@@ -45,7 +44,6 @@
                 <div class="input-group" style="margin-top: 16px;">
                     <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 4px;">
                         <label for="dailyMemo" class="memo-label" style="margin-bottom: 0;">今の一言（あれば）</label>
-                        <button id="openPaletteBtn" class="action-link" style="color: var(--accent); font-size: 0.8rem; background: none; border: none; padding: 0; cursor: pointer; font-weight: bold;">🏷️ 選択肢から選ぶ</button>
                     </div>
                     <input type="text" id="dailyMemo" class="memo-input" placeholder="今の気持ちや出来事など...">
                 </div>
