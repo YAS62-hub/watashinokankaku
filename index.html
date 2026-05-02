@@ -49,7 +49,25 @@
                 <div class="slider-container-vertical">
                     <div id="sliderGlowBg" class="glow-bg-vertical"></div>
                     <!-- 0=Low, 50=Mid, 100=High -->
-                    <input type="range" id="senseSlider" class="vertical-range" min="0" max="100" value="50" step="1">
+                    <input type="range" id="senseSlider" class="vertical-range" min="0" max="100" value="50" step="1" list="snap-list">
+                    <datalist id="snap-list">
+                        <option value="0"></option>
+                        <option value="15"></option>
+                        <option value="35"></option>
+                        <option value="50"></option>
+                        <option value="65"></option>
+                        <option value="85"></option>
+                        <option value="100"></option>
+                    </datalist>
+                    <div class="slider-ticks">
+                        <span class="tick"></span><!-- 100 -->
+                        <span class="tick"></span><!-- 85 -->
+                        <span class="tick"></span><!-- 65 -->
+                        <span class="tick"></span><!-- 50 -->
+                        <span class="tick"></span><!-- 35 -->
+                        <span class="tick"></span><!-- 15 -->
+                        <span class="tick"></span><!-- 0 -->
+                    </div>
                 </div>
             </div>
             

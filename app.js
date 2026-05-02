@@ -256,6 +256,16 @@ document.addEventListener('DOMContentLoaded', () => {
             btn.onclick = (e) => { e.preventDefault(); addPaletteItem(color, true); };
             inlinePaletteColors.appendChild(btn);
         });
+        
+        // 色を消す（✖️）ボタン
+        const clearColorBtn = document.createElement('button');
+        clearColorBtn.innerHTML = '✖️';
+        clearColorBtn.style.cssText = 'font-size: 1.2rem; padding: 4px; border: none; background: transparent; cursor: pointer; opacity: 0.6;';
+        clearColorBtn.onclick = (e) => {
+            e.preventDefault();
+            addPaletteItem('', true); // 選択中の色を空文字で上書き（実質消去）
+        };
+        inlinePaletteColors.appendChild(clearColorBtn);
 
         inlinePaletteWords.innerHTML = '';
         const words = SLIDER_WORDS[snapValue] || SLIDER_WORDS[50];
@@ -348,68 +358,79 @@ document.addEventListener('DOMContentLoaded', () => {
         submitRecordBtn.addEventListener('click', () => {
             if (!selectedRecordType) return;
             
-            let dateToSave = new Date().toISOString();
-            if (recordTimeInput && recordTimeInput.value) {
-                dateToSave = new Date(recordTimeInput.value).toISOString();
-            }
-            
-            const record = {
-                id: Date.now().toString(36) + Math.random().toString(36).substr(2, 5),
-                type: selectedRecordType,
-                memo: dailyMemo.value,
-                time: dateToSave
-            };
-            
-            let history = JSON.parse(localStorage.getItem('seAppHistory') || '[]');
-            history.push(record);
-            localStorage.setItem('seAppHistory', JSON.stringify(history));
-            
-            if (history.length === 5) {
-                setTimeout(() => {
-                    if (confirm('いつも大切に使ってくださりありがとうございます。\n大切な記録を守るために、時々設定画面から『バックアップファイル』をダウンロードしておくのがおすすめです。\n\n「設定画面」を開きますか？\n（OKで設定画面へ、キャンセルで閉じます）')) {
-                        const settingsModal = document.getElementById('settingsModal');
-                        if (settingsModal) {
-                            settingsModal.classList.add('active');
-                            document.body.classList.add('modal-open');
-                        }
+            try {
+                let dateToSave = new Date().toISOString();
+                if (recordTimeInput && recordTimeInput.value) {
+                    const parsedDate = new Date(recordTimeInput.value);
+                    if (!isNaN(parsedDate.getTime())) {
+                        dateToSave = parsedDate.toISOString();
                     }
-                }, 500);
-            }
-            
-            // UIリセット
-            dailyMemo.value = '';
-            selectedRecordType = null;
-            if (senseSlider) {
-                senseSlider.value = 50;
-            }
-            if (sliderRevealArea) {
-                sliderRevealArea.classList.remove('revealed');
-            }
-            if (inlinePaletteArea) {
-                inlinePaletteArea.classList.add('disabled-palette');
-            }
-            if (homeButtonGroup) {
-                homeButtonGroup.classList.remove('shrunk');
-            }
-            // パレットをニュートラルに戻す
-            renderInlinePalette(50);
-            
-            // 挿入記憶もリセット
-            lastSystemInsertedColor = null;
-            lastSystemInsertedWord = null;
-            
-            homeStateButtons.forEach(btn => btn.classList.remove('selected-zone'));
-            submitRecordBtn.disabled = true;
-            setNowToInput(recordTimeInput);
-            
-            if(typeof renderReflection === 'function') renderReflection();
-            if (popupToggle.checked) {
-                const msgKey = getZone(record.type);
-                const msgArray = messages[msgKey];
-                if (msgArray && msgArray.length > 0) {
-                    const randomMsg = msgArray[Math.floor(Math.random() * msgArray.length)];
-                    showToast(randomMsg, true); // 労いメッセージ時のみお守り保存をON
                 }
+                
+                const record = {
+                    id: Date.now().toString(36) + Math.random().toString(36).substr(2, 5),
+                    type: selectedRecordType,
+                    memo: dailyMemo.value,
+                    time: dateToSave
+                };
+                
+                let history = JSON.parse(localStorage.getItem('seAppHistory') || '[]');
+                history.push(record);
+                localStorage.setItem('seAppHistory', JSON.stringify(history));
+                
+                if (history.length === 5) {
+                    setTimeout(() => {
+                        if (confirm('いつも大切に使ってくださりありがとうございます。\n大切な記録を守るために、時々設定画面から『バックアップファイル』をダウンロードしておくのがおすすめです。\n\n「設定画面」を開きますか？\n（OKで設定画面へ、キャンセルで閉じます）')) {
+                            const settingsModal = document.getElementById('settingsModal');
+                            if (settingsModal) {
+                                settingsModal.classList.add('active');
+                                document.body.classList.add('modal-open');
+                            }
+                        }
+                    }, 500);
+                }
+                
+                // UIリセット
+                dailyMemo.value = '';
+                selectedRecordType = null;
+                if (senseSlider) {
+                    senseSlider.value = 50;
+                }
+                if (sliderRevealArea) {
+                    sliderRevealArea.classList.remove('revealed');
+                }
+                if (inlinePaletteArea) {
+                    inlinePaletteArea.classList.add('disabled-palette');
+                }
+                if (homeButtonGroup) {
+                    homeButtonGroup.classList.remove('shrunk');
+                }
+                // パレットをニュートラルに戻す
+                renderInlinePalette(50);
+                
+                // 挿入記憶もリセット
+                lastSystemInsertedColor = null;
+                lastSystemInsertedWord = null;
+                
+                homeStateButtons.forEach(btn => btn.classList.remove('selected-zone'));
+                submitRecordBtn.disabled = true;
+                
+                // 現在時刻への再セットを確実に実行
+                setNowToInput(recordTimeInput);
+                
+                if(typeof renderReflection === 'function') renderReflection();
+                if (popupToggle.checked) {
+                    const msgKey = getZone(record.type);
+                    const msgArray = messages[msgKey];
+                    if (msgArray && msgArray.length > 0) {
+                        const randomMsg = msgArray[Math.floor(Math.random() * msgArray.length)];
+                        showToast(randomMsg, true); // 労いメッセージ時のみお守り保存をON
+                    }
+                }
+            } catch (err) {
+                console.error(err);
+                alert('保存中にエラーが発生しました。日付の形式等を再確認してください。');
+                setNowToInput(recordTimeInput); // エラー時も安全な時間にリセットしておく
             }
         });
     }

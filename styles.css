@@ -989,6 +989,48 @@ input:checked + .toggle-slider::before {
     z-index: 2;
 }
 
+/* スライダー横のドット（足場） */
+.slider-ticks {
+    position: absolute;
+    height: 160px;
+    width: 60px; /* スライダー全体と同じ幅 */
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding-right: 2px; /* ドットを右に寄せる */
+    pointer-events: none; /* タップの邪魔をしない */
+    z-index: 1;
+}
+
+/* 個々のドット */
+.slider-ticks .tick {
+    width: 4px;
+    height: 4px;
+    background-color: rgba(138, 129, 114, 0.4); /* 淡い色 */
+    border-radius: 50%;
+}
+
+/* 各吸着ポイントの正確な位置を手動調整する場合（Flexboxのspace-betweenである程度等間隔になるが、0, 15, 35...は非等間隔） */
+/* 必要に応じてposition absolute等で微調整します。今回snapPoints=[0, 15, 35, 50, 65, 85, 100]なので... */
+.slider-ticks {
+    /* flexを解除して、position absoluteによる正確な配置にするのが確実です。 */
+    display: block;
+}
+.slider-ticks .tick {
+    position: absolute;
+    right: 2px;
+}
+.slider-ticks .tick:nth-child(1) { top: 0%; }        /* 100 */
+.slider-ticks .tick:nth-child(2) { top: 15%; }       /* 85 */
+.slider-ticks .tick:nth-child(3) { top: 35%; }       /* 65 */
+.slider-ticks .tick:nth-child(4) { top: 50%; width: 6px; height: 6px; right: 1px; background-color: rgba(138, 129, 114, 0.7); } /* 50 (真ん中だけ強調) */
+.slider-ticks .tick:nth-child(5) { top: 65%; }       /* 35 */
+.slider-ticks .tick:nth-child(6) { top: 85%; }       /* 15 */
+.slider-ticks .tick:nth-child(7) { top: 100%; transform: translateY(-100%); } /* 0 */
+
 .vertical-range:active {
     cursor: grabbing;
 }
