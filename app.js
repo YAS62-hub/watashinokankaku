@@ -72,15 +72,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const savedLabels = JSON.parse(localStorage.getItem('seAppLabels') || 'null');
         const labels = savedLabels || defaultLabels;
         
-        // ボタンに適用
-        textHigh.textContent = labels.high;
-        textMid.textContent = labels.mid;
-        textLow.textContent = labels.low;
+        // ボタンに適用 (存在する場合のみ)
+        if (textHigh) textHigh.textContent = labels.high;
+        if (textMid) textMid.textContent = labels.mid;
+        if (textLow) textLow.textContent = labels.low;
         
         // 設定フォームに適用
-        customHigh.value = labels.high;
-        customMid.value = labels.mid;
-        customLow.value = labels.low;
+        if (customHigh) customHigh.value = labels.high;
+        if (customMid) customMid.value = labels.mid;
+        if (customLow) customLow.value = labels.low;
     }
     loadLabels();
 
@@ -456,9 +456,20 @@ document.addEventListener('DOMContentLoaded', () => {
             dailyData[dateStr].push(r);
         });
         
+        // 汎用的なゾーン変換関数
+        function getZone(type) {
+            let val = type;
+            if (!isNaN(parseInt(val))) {
+                const v = parseInt(val);
+                if (v > 65) return 'high';
+                if (v < 35) return 'low';
+                return 'mid';
+            }
+            return String(val); // 'high', 'mid', 'low' 等
+        }
+        
         // --- グラフ：時間軸に沿った日内変動を描画 ---
         const recentHistory = history.slice(-50); // 最新50件を表示
-        const yMap = { 'high': 3, 'mid': 2, 'low': 1 };
         
         // X軸をスッキリさせる：日付が切り替わった最初のみ文字を出し、それ以外は隠す
         let lastDateString = "";
@@ -471,7 +482,14 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             return ''; // 省略
         });
-        const chartDataPoints = recentHistory.map(r => yMap[r.type]);
+        
+        // データポイント：直接数値を保持するようにする（過去データは100,50,0へ）
+        const chartDataPoints = recentHistory.map(r => {
+            if (!isNaN(parseInt(r.type))) return parseInt(r.type);
+            if (r.type === 'high') return 100;
+            if (r.type === 'mid') return 50;
+            return 0; // low
+        });
         
         const canvas = document.getElementById('waveChart');
         if(!canvas) return; 
@@ -499,14 +517,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 maintainAspectRatio: false,
                 scales: {
                     y: {
-                        min: 0.5,
-                        max: 3.5,
+                        min: -10,
+                        max: 110,
                         ticks: {
-                            stepSize: 1,
+                            stepSize: 50,
                             callback: function(value) {
-                                if (value === 3) return '🔥';
-                                if (value === 2) return '☕️';
-                                if (value === 1) return '❄️';
+                                if (value === 100) return '🔥';
+                                if (value === 50) return '☕️';
+                                if (value === 0) return '❄️';
                                 return '';
                             },
                             font: { size: 14 }
@@ -598,7 +616,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 const MAX_DOTS = 5;
                 records.slice(0, MAX_DOTS).forEach(record => {
                     const dot = document.createElement('span');
-                    dot.className = `cal-dot dot-${record.type}`;
+                    const zone = getZone(record.type);
+                    dot.className = `cal-dot dot-${zone}`;
                     dotContainer.appendChild(dot);
                 });
                 
@@ -630,11 +649,15 @@ document.addEventListener('DOMContentLoaded', () => {
                             const item = document.createElement('div');
                             item.className = 'timeline-item';
                             
-                            const zoneLabel = `${emojiMap[record.type]} ${savedLabels[record.type]}`;
+                            const zone = getZone(record.type);
+                            const zoneLabel = `${emojiMap[zone]} ${savedLabels[zone]}`;
+                            // 細かい数値情報を表示したい場合はここに追加可能
+                            const detailValue = !isNaN(parseInt(record.type)) ? ` <span style="font-size: 0.75rem; color:#8E8578; margin-left:8px;">[${record.type}]</span>` : '';
+                            
                             item.innerHTML = `
                                 <div class="timeline-time">${timeStr}</div>
                                 <div class="timeline-content">
-                                    <div class="timeline-zone">${zoneLabel}</div>
+                                    <div class="timeline-zone">${zoneLabel}${detailValue}</div>
                                     ${record.memo ? `<div class="timeline-memo">${record.memo}</div>` : ''}
                                     <div class="timeline-actions">
                                         <button class="action-link edit-link">編集</button>
