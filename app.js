@@ -244,7 +244,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const homeStateButtons = document.querySelectorAll('#homeTab .state-button');
+    const homeButtonGroup = document.querySelector('#homeTab .button-group');
     const sliderRevealArea = document.getElementById('sliderRevealArea');
+    const inlinePaletteArea = document.getElementById('inlinePaletteArea');
 
     if (senseSlider) {
         selectedRecordType = null; // 初期は未選択
@@ -302,6 +304,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 if(submitRecordBtn) submitRecordBtn.disabled = false;
                 
+                // UI状態の更新
+                if (inlinePaletteArea) {
+                    inlinePaletteArea.classList.remove('disabled-palette');
+                }
+                if (homeButtonGroup) {
+                    homeButtonGroup.classList.add('shrunk');
+                }
                 // スライダー領域を展開！
                 if (sliderRevealArea) {
                     sliderRevealArea.classList.add('revealed');
@@ -351,6 +360,15 @@ document.addEventListener('DOMContentLoaded', () => {
             if (sliderRevealArea) {
                 sliderRevealArea.classList.remove('revealed');
             }
+            if (inlinePaletteArea) {
+                inlinePaletteArea.classList.add('disabled-palette');
+            }
+            if (homeButtonGroup) {
+                homeButtonGroup.classList.remove('shrunk');
+            }
+            // パレットをニュートラルに戻す
+            renderInlinePalette(50);
+            
             homeStateButtons.forEach(btn => btn.classList.remove('selected-zone'));
             submitRecordBtn.disabled = true;
             setNowToInput(recordTimeInput);

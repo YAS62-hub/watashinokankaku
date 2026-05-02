@@ -1053,5 +1053,31 @@ input:checked + .toggle-slider::before {
 #sliderRevealArea.revealed {
     max-height: 600px; /* 十分な高さを確保 */
     opacity: 1;
-    margin-top: 16px;
+    margin-top: 8px;
+}
+
+/* 感覚パレットの表示状態制御 */
+.disabled-palette {
+    opacity: 0.4;
+    pointer-events: none;
+    filter: grayscale(30%);
+}
+
+/* スライダー時のボタングループのスタイリング（余白を詰める） */
+.button-group {
+    transition: all 0.4s ease;
+}
+
+.button-group.shrunk {
+    margin-bottom: 8px !important;
+    gap: 8px;
+}
+
+.button-group.shrunk .state-button {
+    padding: 10px;
+    font-size: 0.8rem;
+}
+.button-group.shrunk .emoji {
+    font-size: 1.6rem;
+    margin-bottom: 4px;
 }
