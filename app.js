@@ -76,14 +76,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // === 初期設定の読み込み ===
     // 0. カスタムラベルの読み込みと適用
     const defaultLabels = {
-        high: 'ハイ（活発・たかぶり・ざわざわ）',
-        mid: '大丈夫（おだやか・マシ・いい感じ）',
-        low: 'ロー（静か・おもい・おやすみ中）'
+        high: 'ハイ（たかぶり・ざわざわ）',
+        mid: '大丈夫（ほどほど・リラックス）',
+        low: 'ロー（おもい・とおい）'
     };
     
     function loadLabels() {
-        const savedLabels = JSON.parse(localStorage.getItem('seAppLabels') || 'null');
-        const labels = savedLabels || defaultLabels;
+        // 【緊急対応】古い文言のキャッシュを完全に削除し、決定稿を強制適用する
+        localStorage.removeItem('seAppLabels');
+        const labels = defaultLabels;
         
         // ホーム画面・編集画面の両方のボタンテキストを更新
         const textHighEls = document.querySelectorAll('.state-high .text');
@@ -689,9 +690,9 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // default labels, fallback if nothing saved
         const defaultLabels = {
-            high: 'ハイ（活発・たかぶり・ざわざわ）',
-            mid: '大丈夫（おだやか・マシ・いい感じ）',
-            low: 'ロー（静か・おもい・おやすみ中）'
+            high: 'ハイ（たかぶり・ざわざわ）',
+            mid: '大丈夫（ほどほど・リラックス）',
+            low: 'ロー（おもい・とおい）'
         };
         
         for (let i = 0; i < firstDayOfMonth; i++) {
