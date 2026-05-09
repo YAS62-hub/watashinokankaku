@@ -111,6 +111,17 @@ main {
     transform: scale(0.98);
 }
 
+.state-button .text {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 1.05rem; /* サイズ調整 */
+}
+
+.state-button .text, .state-button .emoji {
+    pointer-events: none;
+}
+
 .state-button.selected-zone {
     box-shadow: 0 0 0 3px var(--accent);
     background-color: white;

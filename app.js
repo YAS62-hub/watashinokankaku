@@ -325,6 +325,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
             
+            // ガードレール：未選択の場合はモーダルを開かずにトーストを出す
+            if (!activeZone) {
+                showToast('まずは、上のボタンから今の気分に近いものを選んでみてくださいね');
+                return;
+            }
+            
             // モーダルを描画
             renderModalPalette(activeZone);
             
