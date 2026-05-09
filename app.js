@@ -231,31 +231,49 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function renderInlinePalette() {
-        if (!inlinePaletteColors || !inlinePaletteWords) return;
+    const modalPaletteColors = document.getElementById('modalPaletteColors');
+    const modalPaletteWords = document.getElementById('modalPaletteWords');
+    const wordPaletteModal = document.getElementById('wordPaletteModal');
+    const closeWordPaletteModal = document.getElementById('closeWordPaletteModal');
+    const paletteToggleBtn = document.getElementById('paletteToggleBtn');
+    const homeStateButtons = document.querySelectorAll('#homeTab .state-button');
+
+    // モーダルを描画する関数
+    function renderModalPalette(zone) {
+        if (!modalPaletteColors || !modalPaletteWords) return;
         
-        // 色ボタンの描画
-        inlinePaletteColors.innerHTML = '';
+        // 色ボタンの描画（色だけは常に全色表示）
+        modalPaletteColors.innerHTML = '';
         COMMON_PALETTE_COLORS.forEach(color => {
             const btn = document.createElement('button');
             btn.textContent = color;
-            btn.style.cssText = 'font-size: 1.5rem; padding: 4px; border: none; background: transparent; cursor: pointer; transition: transform 0.2s;';
+            btn.style.cssText = 'font-size: 1.8rem; width: 44px; height: 44px; display: flex; justify-content: center; align-items: center; border: none; background: transparent; cursor: pointer; transition: transform 0.2s;';
             btn.onclick = (e) => { e.preventDefault(); addPaletteItem(color, true); };
-            inlinePaletteColors.appendChild(btn);
+            modalPaletteColors.appendChild(btn);
         });
         
+        // 色を消す（✖️）ボタン
         const clearColorBtn = document.createElement('button');
         clearColorBtn.innerHTML = '✖️';
-        clearColorBtn.style.cssText = 'font-size: 1.2rem; padding: 4px; border: none; background: transparent; cursor: pointer; opacity: 0.6;';
+        clearColorBtn.style.cssText = 'font-size: 1.2rem; width: 44px; height: 44px; display: flex; justify-content: center; align-items: center; border: none; background: transparent; cursor: pointer; opacity: 0.6;';
         clearColorBtn.onclick = (e) => {
             e.preventDefault();
-            addPaletteItem('', true);
+            addPaletteItem('', true); // 選択中の色を空文字で上書き（実質消去）
         };
-        inlinePaletteColors.appendChild(clearColorBtn);
+        modalPaletteColors.appendChild(clearColorBtn);
 
-        // すべての言葉を見出しグループごとに描画
-        inlinePaletteWords.innerHTML = '';
-        PALETTE_GROUPS.forEach(group => {
+        // 対象となるグループ見出しを取得
+        let targetScores = [];
+        if (zone === 'high') targetScores = [100, 85];
+        else if (zone === 'mid') targetScores = [65, 50, 35];
+        else if (zone === 'low') targetScores = [15, 0];
+        else targetScores = [100, 85, 65, 50, 35, 15, 0]; // 未選択の場合は全部出す
+
+        const targetGroups = PALETTE_GROUPS.filter(g => targetScores.includes(g.score));
+
+        // 言葉を見出しグループごとに描画
+        modalPaletteWords.innerHTML = '';
+        targetGroups.forEach(group => {
             // グループのコンテナ
             const groupDiv = document.createElement('div');
             groupDiv.className = 'palette-group';
@@ -273,31 +291,62 @@ document.addEventListener('DOMContentLoaded', () => {
             group.words.forEach(word => {
                 const btn = document.createElement('button');
                 btn.textContent = word;
-                btn.style.cssText = 'font-size: 0.85rem; padding: 6px 12px; border: 1px solid #D6D2CA; background: #FFF; border-radius: 20px; color: #5C5446; cursor: pointer; margin-bottom:4px;';
+                btn.style.cssText = 'font-size: 0.9rem; padding: 10px 16px; border: 1px solid #EAE6DB; background: #FFF; border-radius: 24px; color: #5C5446; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.03); margin-bottom: 4px;';
                 btn.onclick = (e) => { 
                     e.preventDefault(); 
                     addPaletteItem(word, false);
-                    // 内部スコアの更新（パレットから選んだ言葉に応じてより細かい数値をセット）
+                    // 内部スコアの更新
                     selectedRecordType = group.score.toString();
+                    
+                    // モーダルを自動で閉じる（お好みで）
+                    if (wordPaletteModal) {
+                        wordPaletteModal.classList.remove('active');
+                        document.body.classList.remove('modal-open');
+                    }
                 };
                 chipsDiv.appendChild(btn);
             });
             
             groupDiv.appendChild(chipsDiv);
-            inlinePaletteWords.appendChild(groupDiv);
+            modalPaletteWords.appendChild(groupDiv);
         });
     }
 
-    const homeStateButtons = document.querySelectorAll('#homeTab .state-button');
-    const paletteToggleBtn = document.getElementById('paletteToggleBtn');
+    // 選択肢から選ぶ（リボン）ボタンの挙動：モーダルを開く
+    if (paletteToggleBtn && wordPaletteModal) {
+        paletteToggleBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            // 現在の選択ゾーン（high, mid, low）を判別する
+            // state-buttonにselected-zoneがついているか調べる
+            let activeZone = null;
+            homeStateButtons.forEach(btn => {
+                if (btn.classList.contains('selected-zone')) {
+                    activeZone = btn.getAttribute('data-type');
+                }
+            });
+            
+            // モーダルを描画
+            renderModalPalette(activeZone);
+            
+            // モーダルを表示
+            wordPaletteModal.classList.add('active');
+            document.body.classList.add('modal-open');
+        });
+    }
 
-    // パレットの全項目を最初に一回描画しておく
-    renderInlinePalette();
-
-    // 選択肢から選ぶ（リボン）ボタンの挙動
-    if (paletteToggleBtn && inlinePaletteArea) {
-        paletteToggleBtn.addEventListener('click', () => {
-            inlinePaletteArea.classList.toggle('revealed');
+    // モーダルを閉じる
+    if (closeWordPaletteModal) {
+        closeWordPaletteModal.addEventListener('click', () => {
+            wordPaletteModal.classList.remove('active');
+            document.body.classList.remove('modal-open');
+        });
+    }
+    if (wordPaletteModal) {
+        wordPaletteModal.addEventListener('click', (e) => {
+            if (e.target === wordPaletteModal) {
+                wordPaletteModal.classList.remove('active');
+                document.body.classList.remove('modal-open');
+            }
         });
     }
 
@@ -362,11 +411,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 // UIリセット
                 dailyMemo.value = '';
                 selectedRecordType = null;
-                if (inlinePaletteArea) {
-                    inlinePaletteArea.classList.remove('revealed');
-                }
-                
-                // パレット項目もリセットするならココで再描画などは不要
                 
                 // 挿入記憶もリセット
                 lastSystemInsertedColor = null;

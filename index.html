@@ -35,23 +35,7 @@
                     <span class="emoji">❄️</span>
                     <span class="text">ロー（静か・おやすみ中）</span>
                 </button>
-            </div>
-            
-            <!-- リボントグルボタン -->
-            <div style="text-align: center; margin-bottom: 24px;">
-                <button id="paletteToggleBtn" class="palette-toggle-btn">
-                    <span style="margin-right: 4px;">📝</span> 選択肢から選ぶ
-                </button>
-            </div>
-            
-            <!-- パレットエリア（初期状態はCSSで高さを0にして隠す） -->
-            <div id="inlinePaletteArea" class="palette-area-hidden">
-                <p style="font-size: 0.85rem; color: #8A8172; margin-bottom: 12px; text-align: center;">🎨 いまの感覚に近い色や言葉はありますか？</p>
-                <!-- 色ボタン -->
-                <div id="inlinePaletteColors" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-bottom: 16px;"></div>
-                <!-- グループ化された言葉チップ -->
-                <div id="inlinePaletteWords" style="display: flex; flex-direction: column; gap: 16px;"></div>
-            </div>
+
             
             <div class="daily-memo-area">
                 <div class="input-group">
@@ -61,6 +45,7 @@
                 <div class="input-group" style="margin-top: 16px;">
                     <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 4px;">
                         <label for="dailyMemo" class="memo-label" style="margin-bottom: 0;">今の一言（あれば）</label>
+                        <button id="paletteToggleBtn" class="palette-toggle-ribbon">🏷 選択肢から選ぶ</button>
                     </div>
                     <input type="text" id="dailyMemo" class="memo-input" placeholder="今の気持ちや出来事など...">
                 </div>
@@ -333,6 +318,29 @@
         </button>
     </nav>
 
+    <!-- 感覚パレットモーダル (以前のUIの復元) -->
+    <div id="wordPaletteModal" class="modal">
+        <div class="modal-content" style="max-width: 90%; width: 340px; padding: 24px; border-radius: 24px;">
+            <!-- Modal header with Close btn -->
+            <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                <h3 style="font-size: 1.1rem; color: #5C5446; margin: 0;">今の感覚を選ぶ</h3>
+                <button class="modal-close" id="closeWordPaletteModal" style="border: none; background: transparent; font-size: 1.6rem; color: #8A8172; cursor: pointer;">✕</button>
+            </div>
+            
+            <!-- Colors section -->
+            <div style="margin-bottom: 32px;">
+                <p style="font-size: 0.9rem; color: #8A8172; margin-bottom: 16px;">🎨 色で表すと？</p>
+                <div id="modalPaletteColors" style="display: flex; flex-wrap: wrap; gap: 12px; justify-content: flex-start;"></div>
+            </div>
+            
+            <!-- Words section -->
+            <div>
+                <p style="font-size: 0.9rem; color: #8A8172; margin-bottom: 16px;">📝 言葉で表すと？</p>
+                <div id="modalPaletteWords" style="display: flex; flex-direction: column; gap: 20px;"></div>
+            </div>
+        </div>
+    </div>
+    
     <script src="app.js?v=20240419_03"></script>
     <script>
         /*
