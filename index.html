@@ -37,38 +37,20 @@
                 </button>
             </div>
             
-            <div id="inlinePaletteArea" class="disabled-palette" style="margin-bottom: 16px; min-height: 120px; transition: opacity 0.3s ease;">
-                <p style="font-size: 0.85rem; color: #8A8172; margin-bottom: 12px; text-align: center;">🎨 いまの感覚に近い色や言葉はありますか？</p>
-                <!-- 色ボタン（既存の9色を常に表示、パレット連動時にハイライトも可能） -->
-                <div id="inlinePaletteColors" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-bottom: 16px;"></div>
-                <!-- 言葉チップ（スライダー位置に応じて自動フィルタリング） -->
-                <div id="inlinePaletteWords" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 6px;"></div>
+            <!-- リボントグルボタン -->
+            <div style="text-align: center; margin-bottom: 24px;">
+                <button id="paletteToggleBtn" class="palette-toggle-btn">
+                    <span style="margin-right: 4px;">📝</span> 選択肢から選ぶ
+                </button>
             </div>
             
-            <div id="sliderRevealArea">
-                <div class="slider-container-vertical">
-                    <div id="sliderGlowBg" class="glow-bg-vertical"></div>
-                    <!-- 0=Low, 50=Mid, 100=High -->
-                    <input type="range" id="senseSlider" class="vertical-range" min="0" max="100" value="50" step="1" list="snap-list">
-                    <datalist id="snap-list">
-                        <option value="0"></option>
-                        <option value="15"></option>
-                        <option value="35"></option>
-                        <option value="50"></option>
-                        <option value="65"></option>
-                        <option value="85"></option>
-                        <option value="100"></option>
-                    </datalist>
-                    <div class="slider-ticks">
-                        <span class="tick"></span><!-- 100 -->
-                        <span class="tick"></span><!-- 85 -->
-                        <span class="tick"></span><!-- 65 -->
-                        <span class="tick"></span><!-- 50 -->
-                        <span class="tick"></span><!-- 35 -->
-                        <span class="tick"></span><!-- 15 -->
-                        <span class="tick"></span><!-- 0 -->
-                    </div>
-                </div>
+            <!-- パレットエリア（初期状態はCSSで高さを0にして隠す） -->
+            <div id="inlinePaletteArea" class="palette-area-hidden">
+                <p style="font-size: 0.85rem; color: #8A8172; margin-bottom: 12px; text-align: center;">🎨 いまの感覚に近い色や言葉はありますか？</p>
+                <!-- 色ボタン -->
+                <div id="inlinePaletteColors" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-bottom: 16px;"></div>
+                <!-- グループ化された言葉チップ -->
+                <div id="inlinePaletteWords" style="display: flex; flex-direction: column; gap: 16px;"></div>
             </div>
             
             <div class="daily-memo-area">

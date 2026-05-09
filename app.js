@@ -182,38 +182,29 @@ document.addEventListener('DOMContentLoaded', () => {
         ]
     };
 
-    const senseSlider = document.getElementById('senseSlider');
-    const sliderGlowBg = document.getElementById('sliderGlowBg');
+    const inlinePaletteArea = document.getElementById('inlinePaletteArea');
     const inlinePaletteColors = document.getElementById('inlinePaletteColors');
     const inlinePaletteWords = document.getElementById('inlinePaletteWords');
     const COMMON_PALETTE_COLORS = ['🔴', '🟠', '🟡', '🟢', '🟤', '⚪️', '🔵', '🔘', '⚫️'];
-    const snapPoints = [0, 15, 35, 50, 65, 85, 100];
     
-    const SLIDER_WORDS = {
-        100: ['頭が真っ白になる', 'カッとなる', 'パニック', '爆発寸前', 'オーバーヒート'],
-        85: ['張り詰めている', 'ギリギリで回している', 'アラームが鳴り響いている', 'プッツンきそう'],
-        65: ['ワクワクする', '心地よい熱量がある', 'エンジンが心地よく回っている', '没頭している'],
-        50: ['穏やか', 'フラット', '呼吸が自然に出入りしている', '地に足がついている感じ', '血が巡る感じ'],
-        35: ['ホッとする', '心地よい重だるさ', '温かい毛布にくるまるような安心感', '満ち足りた休息'],
-        15: ['遠くから眺めている感じ', '感覚が薄れていく', '岩のよう', '電源が落ちそう'],
-        0: ['何も感じない', '麻痺している', '泥のよう', 'システムを保護するためのシャットダウン']
-    };
+    // ユーザー指定の7段階グループ分け（スコア対応表）
+    const PALETTE_GROUPS = [
+        { score: 100, title: 'すごくハイ（ゾーンの外）', words: ['頭が真っ白になる', 'カッとなる', 'パニック', '爆発寸前', 'オーバーヒート'] },
+        { score: 85,  title: 'ハイと大丈夫のあいだ', words: ['張り詰めている', 'ギリギリで回している', 'アラームが鳴り響いている', 'プッツンきそう'] },
+        { score: 65,  title: '大丈夫（高め・活気）', words: ['ワクワクする', '心地よい熱量がある', 'エンジンが心地よく回っている', '没頭している'] },
+        { score: 50,  title: '大丈夫（まんなか・凪）', words: ['穏やか', 'フラット', '呼吸が自然に出入りしている', '地に足がついている感じ', '血が巡る感じ'] },
+        { score: 35,  title: '大丈夫（低め・休息）', words: ['ホッとする', '心地よい重だるさ', '温かい毛布にくるまるような安心感', '満ち足りた休息'] },
+        { score: 15,  title: 'ローと大丈夫のあいだ', words: ['遠くから眺めている感じ', '感覚が薄れていく', '岩のよう', '電源が落ちそう'] },
+        { score: 0,   title: 'すごくロー（ゾーンの外）', words: ['何も感じない', '麻痺している', '泥のよう', 'システムを保護するためのシャットダウン'] }
+    ];
 
-    function getSliderColor(val) {
-        if (val >= 50) {
-            const ratio = (val - 50) / 50;
-            const r = Math.round(169 + ratio * (179 - 169));
-            const g = Math.round(188 + ratio * (94 - 188));
-            const b = Math.round(163 + ratio * (28 - 163));
-            return `rgb(${r}, ${g}, ${b})`;
-        } else {
-            const ratio = val / 50;
-            const r = Math.round(65 + ratio * (169 - 65));
-            const g = Math.round(117 + ratio * (188 - 117));
-            const b = Math.round(92 + ratio * (163 - 92));
-            return `rgb(${r}, ${g}, ${b})`;
-        }
-    }
+    // 言葉からの逆引き用辞書を自動生成
+    const WORD_TO_SCORE = {};
+    PALETTE_GROUPS.forEach(group => {
+        group.words.forEach(word => {
+            WORD_TO_SCORE[word] = group.score;
+        });
+    });
 
     let lastSystemInsertedColor = null;
     let lastSystemInsertedWord = null;
@@ -240,14 +231,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function renderInlinePalette(snapValue) {
+    function renderInlinePalette() {
         if (!inlinePaletteColors || !inlinePaletteWords) return;
         
-        // アニメーションのリセット用（フワッと光らせる）
-        inlinePaletteArea.classList.remove('palette-updated');
-        void inlinePaletteArea.offsetWidth; // reflow
-        inlinePaletteArea.classList.add('palette-updated');
-        
+        // 色ボタンの描画
         inlinePaletteColors.innerHTML = '';
         COMMON_PALETTE_COLORS.forEach(color => {
             const btn = document.createElement('button');
@@ -257,102 +244,84 @@ document.addEventListener('DOMContentLoaded', () => {
             inlinePaletteColors.appendChild(btn);
         });
         
-        // 色を消す（✖️）ボタン
         const clearColorBtn = document.createElement('button');
         clearColorBtn.innerHTML = '✖️';
         clearColorBtn.style.cssText = 'font-size: 1.2rem; padding: 4px; border: none; background: transparent; cursor: pointer; opacity: 0.6;';
         clearColorBtn.onclick = (e) => {
             e.preventDefault();
-            addPaletteItem('', true); // 選択中の色を空文字で上書き（実質消去）
+            addPaletteItem('', true);
         };
         inlinePaletteColors.appendChild(clearColorBtn);
 
+        // すべての言葉を見出しグループごとに描画
         inlinePaletteWords.innerHTML = '';
-        const words = SLIDER_WORDS[snapValue] || SLIDER_WORDS[50];
-        words.forEach(word => {
-            const btn = document.createElement('button');
-            btn.textContent = word;
-            btn.style.cssText = 'font-size: 0.85rem; padding: 6px 12px; border: 1px solid #D6D2CA; background: #FFF; border-radius: 20px; color: #5C5446; cursor: pointer; margin-bottom:4px;';
-            btn.onclick = (e) => { e.preventDefault(); addPaletteItem(word, false); };
-            inlinePaletteWords.appendChild(btn);
+        PALETTE_GROUPS.forEach(group => {
+            // グループのコンテナ
+            const groupDiv = document.createElement('div');
+            groupDiv.className = 'palette-group';
+            
+            // 見出し
+            const heading = document.createElement('div');
+            heading.className = 'palette-group-heading';
+            heading.textContent = group.title;
+            groupDiv.appendChild(heading);
+            
+            // 言葉チップのコンテナ
+            const chipsDiv = document.createElement('div');
+            chipsDiv.className = 'palette-chips-container';
+            
+            group.words.forEach(word => {
+                const btn = document.createElement('button');
+                btn.textContent = word;
+                btn.style.cssText = 'font-size: 0.85rem; padding: 6px 12px; border: 1px solid #D6D2CA; background: #FFF; border-radius: 20px; color: #5C5446; cursor: pointer; margin-bottom:4px;';
+                btn.onclick = (e) => { 
+                    e.preventDefault(); 
+                    addPaletteItem(word, false);
+                    // 内部スコアの更新（パレットから選んだ言葉に応じてより細かい数値をセット）
+                    selectedRecordType = group.score.toString();
+                };
+                chipsDiv.appendChild(btn);
+            });
+            
+            groupDiv.appendChild(chipsDiv);
+            inlinePaletteWords.appendChild(groupDiv);
         });
     }
 
     const homeStateButtons = document.querySelectorAll('#homeTab .state-button');
-    const homeButtonGroup = document.querySelector('#homeTab .button-group');
-    const sliderRevealArea = document.getElementById('sliderRevealArea');
-    const inlinePaletteArea = document.getElementById('inlinePaletteArea');
+    const paletteToggleBtn = document.getElementById('paletteToggleBtn');
 
-    if (senseSlider) {
-        selectedRecordType = null; // 初期は未選択
+    // パレットの全項目を最初に一回描画しておく
+    renderInlinePalette();
 
-        senseSlider.addEventListener('input', (e) => {
-            const val = parseInt(e.target.value);
-            selectedRecordType = val.toString();
-            if(submitRecordBtn) submitRecordBtn.disabled = false;
-            if (sliderGlowBg) {
-                sliderGlowBg.style.backgroundColor = getSliderColor(val);
-                sliderGlowBg.style.opacity = '1';
-            }
-        });
-
-        const snapSlider = () => {
-            const val = parseInt(senseSlider.value);
-            const closest = snapPoints.reduce((prev, curr) => Math.abs(curr - val) < Math.abs(prev - val) ? curr : prev);
-            senseSlider.value = closest;
-            selectedRecordType = closest.toString();
-            if (sliderGlowBg) {
-                sliderGlowBg.style.backgroundColor = getSliderColor(closest);
-                // 吸着後もふんわり発光を残す
-            }
-            renderInlinePalette(closest);
-        };
-
-        senseSlider.addEventListener('change', snapSlider);
-        senseSlider.addEventListener('touchend', snapSlider);
-        senseSlider.addEventListener('mouseup', snapSlider);
-
-        // 初期描画（感覚パレットのみ。スライダー値はニュートラルの50）
-        renderInlinePalette(50);
-
-        // ホームタブの3択ボタンを押したときの挙動
-        homeStateButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                // ボタンスタイル更新
-                homeStateButtons.forEach(btn => btn.classList.remove('selected-zone'));
-                button.classList.add('selected-zone');
-                
-                const type = button.getAttribute('data-type');
-                let valToSet = 50;
-                if (type === 'high') valToSet = 100;
-                if (type === 'low') valToSet = 0;
-                
-                // スライダーに値をセット
-                senseSlider.value = valToSet;
-                selectedRecordType = valToSet.toString();
-                
-                if (sliderGlowBg) {
-                    sliderGlowBg.style.backgroundColor = getSliderColor(valToSet);
-                    sliderGlowBg.style.opacity = '0.7';
-                }
-                renderInlinePalette(valToSet);
-                
-                if(submitRecordBtn) submitRecordBtn.disabled = false;
-                
-                // UI状態の更新
-                if (inlinePaletteArea) {
-                    inlinePaletteArea.classList.remove('disabled-palette');
-                }
-                if (homeButtonGroup) {
-                    homeButtonGroup.classList.add('shrunk');
-                }
-                // スライダー領域を展開！
-                if (sliderRevealArea) {
-                    sliderRevealArea.classList.add('revealed');
-                }
-            });
+    // 選択肢から選ぶ（リボン）ボタンの挙動
+    if (paletteToggleBtn && inlinePaletteArea) {
+        paletteToggleBtn.addEventListener('click', () => {
+            inlinePaletteArea.classList.toggle('revealed');
         });
     }
+
+    // 初期は未選択
+    selectedRecordType = null; 
+
+    // ホームタブの3択ボタンを押したときの挙動
+    homeStateButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            // ボタンスタイル更新
+            homeStateButtons.forEach(btn => btn.classList.remove('selected-zone'));
+            button.classList.add('selected-zone');
+            
+            const type = button.getAttribute('data-type');
+            let valToSet = 50;
+            if (type === 'high') valToSet = 100;
+            if (type === 'low') valToSet = 0;
+            
+            // 基本のスコアをセット（パレットで言葉を選べば更に上書きされる）
+            selectedRecordType = valToSet.toString();
+            
+            if(submitRecordBtn) submitRecordBtn.disabled = false;
+        });
+    });
 
     if (submitRecordBtn) {
         submitRecordBtn.addEventListener('click', () => {
@@ -393,20 +362,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 // UIリセット
                 dailyMemo.value = '';
                 selectedRecordType = null;
-                if (senseSlider) {
-                    senseSlider.value = 50;
-                }
-                if (sliderRevealArea) {
-                    sliderRevealArea.classList.remove('revealed');
-                }
                 if (inlinePaletteArea) {
-                    inlinePaletteArea.classList.add('disabled-palette');
+                    inlinePaletteArea.classList.remove('revealed');
                 }
-                if (homeButtonGroup) {
-                    homeButtonGroup.classList.remove('shrunk');
-                }
-                // パレットをニュートラルに戻す
-                renderInlinePalette(50);
+                
+                // パレット項目もリセットするならココで再描画などは不要
                 
                 // 挿入記憶もリセット
                 lastSystemInsertedColor = null;

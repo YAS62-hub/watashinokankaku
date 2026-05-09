@@ -955,174 +955,81 @@ input:checked + .toggle-slider::before {
     cursor: not-allowed;
 }
 
-/* 縦型スライダー用スタイル */
-.slider-container-vertical {
+/* =========================================
+   選択肢パレット・リボンボタン関連
+   ========================================= */
+
+.palette-toggle-btn {
+    background: #F7F5F0;
+    border: 1px dashed #D6D2CA;
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 0.9rem;
+    color: #8A8172;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    font-family: inherit;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.palette-toggle-btn:hover {
+    background: #EAE6DB;
+}
+
+.palette-area-hidden {
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease, opacity 0.4s ease, margin-top 0.4s ease;
+}
+
+.palette-area-hidden.revealed {
+    max-height: 2000px; /* 十分なゆとり */
+    opacity: 1;
+    margin-bottom: 24px;
+    padding-top: 8px;
+}
+
+/* パレット内のグループ見出し */
+.palette-group {
+    margin-bottom: 12px;
+}
+
+.palette-group-heading {
+    text-align: center;
+    font-size: 0.75rem;
+    color: #A39B8F;
+    margin-bottom: 8px;
     position: relative;
-    width: 60px;
-    height: 180px; /* 余白を詰めてコンパクト化 */
-    margin: 16px auto;
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
-.glow-bg-vertical {
-    position: absolute;
-    width: 60px;
-    height: 200px;
-    border-radius: 40px;
-    filter: blur(25px);
-    transition: background-color 0.4s ease, opacity 0.4s ease;
-    pointer-events: none;
-    opacity: 0;
+.palette-group-heading::before,
+.palette-group-heading::after {
+    content: "";
+    flex: 1;
+    border-bottom: 1px dotted #EAE6DB;
+    margin: 0 10px;
 }
 
-.vertical-range {
-    transform: rotate(270deg);
-    width: 160px; /* 実質的な高さ */
-    height: 20px;
-    margin: 0;
-    -webkit-appearance: none;
-    appearance: none;
-    background: transparent;
-    cursor: grab;
-    z-index: 2;
-}
-
-/* スライダー横のドット（足場） */
-.slider-ticks {
-    position: absolute;
-    height: 160px;
-    width: 60px; /* スライダー全体と同じ幅 */
-    top: 50%;
-    transform: translateY(-50%);
+.palette-chips-container {
     display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    align-items: flex-end;
-    padding-right: 2px; /* ドットを右に寄せる */
-    pointer-events: none; /* タップの邪魔をしない */
-    z-index: 1;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px;
 }
 
-/* 個々のドット */
-.slider-ticks .tick {
-    width: 4px;
-    height: 4px;
-    background-color: rgba(138, 129, 114, 0.4); /* 淡い色 */
-    border-radius: 50%;
-}
-
-/* 各吸着ポイントの正確な位置を手動調整する場合（Flexboxのspace-betweenである程度等間隔になるが、0, 15, 35...は非等間隔） */
-/* 必要に応じてposition absolute等で微調整します。今回snapPoints=[0, 15, 35, 50, 65, 85, 100]なので... */
-.slider-ticks {
-    /* flexを解除して、position absoluteによる正確な配置にするのが確実です。 */
-    display: block;
-}
-.slider-ticks .tick {
-    position: absolute;
-    right: 2px;
-}
-.slider-ticks .tick:nth-child(1) { top: 0%; }        /* 100 */
-.slider-ticks .tick:nth-child(2) { top: 15%; }       /* 85 */
-.slider-ticks .tick:nth-child(3) { top: 35%; }       /* 65 */
-.slider-ticks .tick:nth-child(4) { top: 50%; width: 6px; height: 6px; right: 1px; background-color: rgba(138, 129, 114, 0.7); } /* 50 (真ん中だけ強調) */
-.slider-ticks .tick:nth-child(5) { top: 65%; }       /* 35 */
-.slider-ticks .tick:nth-child(6) { top: 85%; }       /* 15 */
-.slider-ticks .tick:nth-child(7) { top: 100%; transform: translateY(-100%); } /* 0 */
-
-.vertical-range:active {
-    cursor: grabbing;
-}
-
-.vertical-range::-webkit-slider-runnable-track {
-    width: 100%;
-    height: 12px;
-    border-radius: 6px;
-    background: linear-gradient(to right, #41755C, #A9BCA3, #B35E1C);
-    /* 270度回転により: 左(0)=下(青/緑系), 中央(50)=中(淡緑), 右(100)=上(赤/オレンジ系)
-       ※色合いはこれまでのアプリ指定色（ロー、ミッド、ハイ）を踏襲 */
-    box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
-}
-
-.vertical-range::-moz-range-track {
-    width: 100%;
-    height: 12px;
-    border-radius: 6px;
-    background: linear-gradient(to right, #41755C, #A9BCA3, #B35E1C);
-}
-
-.vertical-range::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    height: 36px;
-    width: 36px;
-    border-radius: 50%;
-    background: #FFF;
-    border: 3px solid #FFF;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2), 0 0 0 1px rgba(0,0,0,0.05);
-    margin-top: -12px;
-    transition: transform 0.1s;
-}
-
-.vertical-range:active::-webkit-slider-thumb {
-    transform: scale(1.15);
-}
-
-.vertical-range::-moz-range-thumb {
-    height: 36px;
-    width: 36px;
-    border-radius: 50%;
-    background: #FFF;
-    border: 3px solid #FFF;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2), 0 0 0 1px rgba(0,0,0,0.05);
-    transition: transform 0.1s;
-}
-
-.vertical-range:active::-moz-range-thumb {
-    transform: scale(1.15);
-}
-
-/* スライダー展開エリアのアニメーション */
-#sliderRevealArea {
-    transition: max-height 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s ease, margin-top 0.4s ease;
-    max-height: 0;
-    opacity: 0;
-    overflow: hidden;
-    margin-top: 0;
-}
-
-#sliderRevealArea.revealed {
-    max-height: 600px; /* 十分な高さを確保 */
-    opacity: 1;
-    margin-top: 8px;
-}
-
-/* 感覚パレットの表示状態制御 */
-.disabled-palette {
-    opacity: 0.4;
-    pointer-events: none;
-    filter: grayscale(30%);
-}
-
-/* スライダー時のボタングループのスタイリング（余白を詰める） */
+/* =========================================
+   ボタングループのスタイリング（余白復活）
+   ========================================= */
 .button-group {
     transition: all 0.4s ease;
 }
 
-.button-group.shrunk {
-    margin-bottom: 8px !important;
-    gap: 8px;
-}
 
-.button-group.shrunk .state-button {
-    padding: 10px;
-    font-size: 0.8rem;
-}
-.button-group.shrunk .emoji {
-    font-size: 1.6rem;
-    margin-bottom: 4px;
-}
+
 
 /* パレット更新時のアニメーション */
 @keyframes paletteUpdateAnim {
