@@ -97,10 +97,9 @@ main {
 .state-button {
     display: flex;
     align-items: center;
-    padding: 24px 20px;
+    padding: 24px 12px; /* 左右の余白を減らして文字幅を確保 */
     border: none;
     border-radius: 24px;
-    font-size: 1.1rem;
     font-weight: 500;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -113,9 +112,7 @@ main {
 
 .state-button .text {
     white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    font-size: 1.05rem; /* サイズ調整 */
+    font-size: 0.95rem; /* 1.05remから縮小して確実に1行に収める */
 }
 
 .state-button .text, .state-button .emoji {
@@ -129,8 +126,8 @@ main {
 }
 
 .state-button .emoji {
-    font-size: 1.8rem;
-    margin-right: 16px;
+    font-size: 1.5rem;
+    margin-right: 12px;
 }
 
 .state-high {
