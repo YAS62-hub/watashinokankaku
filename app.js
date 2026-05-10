@@ -82,9 +82,18 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     
     function loadLabels() {
-        // 【緊急対応】古い文言のキャッシュを完全に削除し、決定稿を強制適用する
-        localStorage.removeItem('seAppLabels');
-        const labels = defaultLabels;
+        // 先程の強制消去ロジックを取り下げ、正常なlocalStorageの読み込みを復旧
+        const savedLabels = JSON.parse(localStorage.getItem('seAppLabels') || 'null');
+        let labels = defaultLabels;
+        
+        if (savedLabels) {
+             // 以前の不具合で残った古いデフォルト「活発・マシ」などが完全一致で入っていたら棄却する安全策
+             if (savedLabels.high === 'ハイ（活発・たかぶり・ざわざわ）') {
+                  localStorage.removeItem('seAppLabels');
+             } else {
+                  labels = savedLabels;
+             }
+        }
         
         // ホーム画面・編集画面の両方のボタンテキストを更新
         const textHighEls = document.querySelectorAll('.state-high .text');
