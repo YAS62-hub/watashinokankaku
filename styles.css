@@ -986,14 +986,22 @@ input:checked + .toggle-slider::before {
 
 /* パレット内のグループ見出し */
 .palette-group {
-    margin-bottom: 24px;
+    margin-bottom: 32px; /* ゆったりとした余白 */
 }
 
 .palette-group-heading {
     font-size: 0.85rem;
     color: #8A8172;
     margin-bottom: 12px;
-    position: relative;
+    padding: 6px 16px;
+    background-color: rgba(0, 0, 0, 0.02); /* 薄いグレーの背景 */
+    border-radius: 16px; /* カプセル型 */
+    display: inline-block;
+}
+
+.palette-group-heading-wrapper {
+    text-align: center;
+    margin-bottom: 16px;
 }
 
 .palette-chips-container {
