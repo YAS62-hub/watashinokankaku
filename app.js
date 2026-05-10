@@ -528,12 +528,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 if(typeof renderReflection === 'function') renderReflection();
                 if (popupToggle.checked) {
-                    const msgKey = getZone(record.type);
-                    const msgArray = messages[msgKey];
-                    if (msgArray && msgArray.length > 0) {
-                        const randomMsg = msgArray[Math.floor(Math.random() * msgArray.length)];
-                        showToast(randomMsg, true); // 労いメッセージ時のみお守り保存をON
-                    }
+                    // typeからスコアに変換してキーを取得する
+                    // または最新ロジックでは record.type は生スコア（もし7段階利用なら）の場合や 'high','mid','low'の場合がある
+                    // これまでの仕様ではレコードのtypeには生スコア（数字）が入っているかチェック
+                    // 実際には生スコアが使われているはずなので rawScore を使う
+                    
+                    const scoreStr = record.type; // '100', '85', etc.
+                    const possibleMsgs = AUTO_MESSAGES_POOL[scoreStr] || AUTO_MESSAGES_POOL['50'];
+                    const randomMsg = possibleMsgs[Math.floor(Math.random() * possibleMsgs.length)];
+                    
+                    setTimeout(() => {
+                        showToast(randomMsg, true);
+                    }, 300);
                 }
             } catch (err) {
                 console.error(err);
