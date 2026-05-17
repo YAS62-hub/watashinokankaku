@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>わたしのかんかく</title>
+    <link rel="stylesheet" href="styles.css?v=20240419_02">
+    <link href="https://fonts.googleapis.com/css2?family=Kosugi+Maru&family=M+PLUS+Rounded+1c:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="manifest" href="manifest.json">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- ヘッダー / 設定ボタン -->
+    <header>
+        <span class="app-title">わたしのかんかく</span>
+        <button id="settingsBtn" class="icon-button" aria-label="設定">⚙️</button>
+    </header>
+
+    <!-- メインコンテンツ -->
+    <main>
+        <!-- ホーム画面（記録） -->
+        <section id="homeTab" class="tab-content active">
+            <h1 class="gentle-question">今、どんな感じですか？</h1>
+            
+            <div class="button-group" style="margin-bottom: 24px;">
+                <button class="state-button state-high" data-type="high">
+                    <span class="emoji">🔥</span>
+                    <span class="text">ハイ（たかぶり・ざわざわ）</span>
+                </button>
+                <button class="state-button state-mid" data-type="mid">
+                    <span class="emoji">☕️</span>
+                    <span class="text">大丈夫（ほどほど・リラックス）</span>
+                </button>
+                <button class="state-button state-low" data-type="low">
+                    <span class="emoji">❄️</span>
+                    <span class="text">ロー（おもい・とおい）</span>
+                </button>
+            </div>
+            
+            <div class="daily-memo-area">
+                <div class="input-group">
+                    <label for="recordTime" class="memo-label">記録日時</label>
+                    <input type="datetime-local" id="recordTime" class="time-input">
+                </div>
+                <div class="input-group" style="margin-top: 16px;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 4px;">
+                        <label for="dailyMemo" class="memo-label" style="margin-bottom: 0;">今の一言（あれば）</label>
+                        <button id="paletteToggleBtn" class="palette-toggle-ribbon">🏷 選択肢から選ぶ</button>
+                    </div>
+                    <input type="text" id="dailyMemo" class="memo-input" placeholder="今の気持ちや出来事など...">
+                </div>
+                <button id="submitRecordBtn" class="primary-btn submit-record-btn" disabled>記録する</button>
+            </div>
+        </section>
+
+        <!-- リソース箱 -->
+        <section id="resourceTab" class="tab-content">
+            <h2 class="gentle-question">リソース箱 🎁</h2>
+            
+            <!-- 特等席：今日のリソース -->
+            <div id="todayWordArea" class="today-word-area" style="cursor: pointer;" title="タップして引き直す">
+                <div class="today-header">🎁 今日のリソース（タップで引き直し）</div>
+                <div id="todayResourceContent" class="today-content">
+                    <p id="todayWordText">右下の＋ボタンから、あなたのホッとする言葉や写真を追加してみましょう</p>
+                </div>
+            </div>
+            
+            <!-- 内部タブ -->
+            <div class="inner-tabs">
+                <button class="inner-tab-btn active" data-in-target="photoGalleryTab">📷 写真</button>
+                <button class="inner-tab-btn" data-in-target="wordGalleryTab">📝 言葉</button>
+            </div>
+            
+            <!-- 写真ギャラリー -->
+            <div id="photoGalleryTab" class="inner-tab-content active resource-gallery">
+                <!-- JSで写真のカードが追加されます -->
+            </div>
+            
+            <!-- 言葉ギャラリー -->
+            <div id="wordGalleryTab" class="inner-tab-content resource-gallery" style="display: none;">
+                <!-- JSで言葉のカードが追加されます -->
+            </div>
+            
+            <button id="addResourceFab" class="fab">+</button>
+        </section>
+
+        <!-- 振り返り画面 -->
+        <section id="reflectionTab" class="tab-content">
+            <div class="reflection-container">
+                <p class="safe-message">波があるのは、神経系が環境に合わせてしなやかに生き残ろうとしている証拠です🍵</p>
+                <div class="chart-container">
+                    <canvas id="waveChart"></canvas>
+                </div>
+                
+                <hr class="setting-divider">
+                
+                <h3 class="gentle-question" style="font-size: 1.2rem; margin-bottom: 16px;">カレンダー</h3>
+                <div class="calendar-wrapper">
+                    <div class="calendar-header">
+                        <button id="prevMonth" class="icon-button">◀</button>
+                        <span id="currentMonthLabel"></span>
+                        <button id="nextMonth" class="icon-button">▶</button>
+                    </div>
+                    <div class="calendar-days-header">
+                        <span>日</span><span>月</span><span>火</span><span>水</span><span>木</span><span>金</span><span>土</span>
+                    </div>
+                    <div class="calendar-grid" id="calendarGrid">
+                        <!-- JS generated calendar -->
+                    </div>
+                </div>
+
+                <div id="memoDisplay" class="memo-display hidden">
+                    <p class="memo-date" id="memoDateLabel"></p>
+                    <div id="memoListContainer" class="memo-list-container"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 設定モーダル -->
+        <div id="settingsModal" class="modal">
+            <div class="modal-content">
+                <button class="close-button" id="closeSettings">×</button>
+                <h3>設定</h3>
+                
+                <div class="setting-item">
+                    <label class="toggle-label">
+                        <span class="toggle-text">記録後のメッセージを表示する</span>
+                        <input type="checkbox" id="popupToggle" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                <p class="setting-note">※メッセージはシステムが自動で出しているものです。あなたの感覚を何より大切にしてください。見るのが億劫な時は、遠慮なくオフにしてくださいね。</p>
+                
+                <hr class="setting-divider">
+                
+                <div class="setting-item">
+                    <h4 class="setting-subtitle">ボタンの言葉をカスタマイズ</h4>
+                    <p class="setting-desc">あなたの感覚によりしっくりくる言葉に変更できます。自由に変えてもいいですし、選択肢から選ぶこともできます。</p>
+                    
+                    <div class="custom-input-group">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 4px;">
+                            <label for="customHigh" style="margin-bottom: 0;">🔥 (ハイ)</label>
+                            <button class="settings-palette-btn" data-target-input="customHigh" data-zone="high" style="color: var(--accent); font-size: 0.8rem; background: none; border: none; padding: 0; cursor: pointer; font-weight: bold;">🏷️ 選択肢から選ぶ</button>
+                        </div>
+                        <input type="text" id="customHigh" class="custom-input" placeholder="例：ハイ（活発・たかぶり・ざわざわ）">
+                    </div>
+                    
+                    <div class="custom-input-group">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 4px;">
+                            <label for="customMid" style="margin-bottom: 0;">☕️ (大丈夫)</label>
+                            <button class="settings-palette-btn" data-target-input="customMid" data-zone="mid" style="color: var(--accent); font-size: 0.8rem; background: none; border: none; padding: 0; cursor: pointer; font-weight: bold;">🏷️ 選択肢から選ぶ</button>
+                        </div>
+                        <input type="text" id="customMid" class="custom-input" placeholder="例：大丈夫（おだやか・マシ・いい感じ）">
+                    </div>
+                    
+                    <div class="custom-input-group">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 4px;">
+                            <label for="customLow" style="margin-bottom: 0;">❄️ (ロー)</label>
+                            <button class="settings-palette-btn" data-target-input="customLow" data-zone="low" style="color: var(--accent); font-size: 0.8rem; background: none; border: none; padding: 0; cursor: pointer; font-weight: bold;">🏷️ 選択肢から選ぶ</button>
+                        </div>
+                        <input type="text" id="customLow" class="custom-input" placeholder="例：ロー（静か・おもい・おやすみ中）">
+                    </div>
+                    
+                    <div class="settings-actions">
+                        <button id="saveSettingsBtn" class="primary-btn">保存する</button>
+                        <button id="resetSettingsBtn" class="secondary-btn">初期設定に戻す</button>
+                    </div>
+                </div>
+
+                <hr class="setting-divider">
+                
+                <div class="setting-item">
+                    <h4 class="setting-subtitle" style="margin-bottom: 8px;">データのバックアップと復元</h4>
+                    <p class="setting-desc" style="font-size: 0.85rem; margin-bottom: 12px; line-height: 1.4;">
+                        現在の記録をファイル（.json）として端末内に保存します。機種変更時などは、そのファイルを読み込むことで復元できます。
+                    </p>
+                    
+                    <div style="background-color: #F8F9FA; border: 1px solid #E9ECEF; border-radius: 8px; padding: 12px; margin-bottom: 16px; font-size: 0.8rem; color: #555; line-height: 1.5;">
+                        <strong style="display: block; margin-bottom: 4px; color: #333;">💡 保存時のヒント</strong>
+                        <ul style="margin: 0; padding-left: 20px;">
+                            <li style="margin-bottom: 4px;"><strong>iPhoneの方</strong><br>「書き出す」を押した後、共有メニューから<strong>「"ファイル"に保存」</strong>を選択してください。</li>
+                            <li><strong>Androidの方</strong><br>「書き出す」を押すと、通常は<strong>「ダウンロード」フォルダ</strong>に保存されます。</li>
+                        </ul>
+                    </div>
+
+                    <input type="file" id="importFileInput" accept=".json" class="custom-input" style="margin-bottom: 12px; font-size: 0.8rem; padding: 8px;">
+                    
+                    <div class="settings-actions">
+                        <button id="exportDataBtn" class="secondary-btn">書き出す</button>
+                        <button id="importDataBtn" class="primary-btn">復元する</button>
+                    </div>
+                </div>
+                
+                <div style="text-align: center; margin-top: 24px; padding-top: 16px; border-top: 1px solid #E9ECEF; font-size: 0.75rem; color: #ADB5BD;">
+                    アプリについて：わたしのかんかく v10.0
+                </div>
+
+            </div>
+        </div>
+
+        <!-- 編集モーダル -->
+        <div id="editRecordModal" class="modal">
+            <div class="modal-content">
+                <button class="close-button" id="closeEditModal">×</button>
+                <h3>記録の編集</h3>
+                
+                <input type="hidden" id="editRecordId">
+                <div class="setting-item">
+                    <div class="input-group">
+                        <label for="editRecordTime" class="memo-label">記録日時</label>
+                        <input type="datetime-local" id="editRecordTime" class="time-input" style="width: 100%; box-sizing: border-box;">
+                    </div>
+                    
+                    <div class="input-group" style="margin-top: 16px;">
+                        <label class="memo-label">ゾーン</label>
+                        <div class="button-group edit-zone-group" style="gap: 8px;">
+                            <button class="state-button state-high" data-type="high" style="font-size: 0.8rem; padding: 12px;"><span class="emoji">🔥</span></button>
+                            <button class="state-button state-mid" data-type="mid" style="font-size: 0.8rem; padding: 12px;"><span class="emoji">☕️</span></button>
+                            <button class="state-button state-low" data-type="low" style="font-size: 0.8rem; padding: 12px;"><span class="emoji">❄️</span></button>
+                        </div>
+                    </div>
+                    
+                    <div class="input-group" style="margin-top: 16px;">
+                        <label for="editRecordMemo" class="memo-label">今の一言</label>
+                        <input type="text" id="editRecordMemo" class="memo-input" style="width: 100%; box-sizing: border-box;">
+                    </div>
+                    
+                    <div class="settings-actions" style="margin-top: 24px;">
+                        <button id="saveEditBtn" class="primary-btn">変更を保存</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- 読み込み中オーバーレイ -->
+        <div id="loadingOverlay" class="loading-overlay hidden">
+            <div class="loading-spinner"></div>
+            <p>保存中...</p>
+        </div>
+
+        <!-- 写真拡大モーダル -->
+        <div id="photoViewModal" class="modal">
+            <div class="modal-content photo-view-content" style="position: relative; background: #FFF; padding: 20px;">
+                <button class="close-button" id="closePhotoViewModal" style="position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.6); border: none; color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; cursor: pointer; z-index: 10; margin: 0; padding: 0; line-height: 1; text-shadow: 0 0 8px rgba(255,255,255,0.8);">×</button>
+                <button id="deletePhotoBtn" style="position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.6); border: none; color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; cursor: pointer; z-index: 10; margin: 0; padding: 0; text-shadow: 0 0 8px rgba(255,255,255,0.8);">🗑</button>
+                <div class="photo-view-area" style="position: relative; margin-top: 10px;">
+                    <button id="prevPhotoBtn" style="position: absolute; left: -10px; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.6); color: white; border: none; width: 40px; height: 40px; border-radius: 50%; font-size: 1.5rem; display: none; align-items: center; justify-content: center; z-index: 10; text-shadow: 0 0 8px rgba(255,255,255,0.8);">&lt;</button>
+                    <button id="nextPhotoBtn" style="position: absolute; right: -10px; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.6); color: white; border: none; width: 40px; height: 40px; border-radius: 50%; font-size: 1.5rem; display: none; align-items: center; justify-content: center; z-index: 10; text-shadow: 0 0 8px rgba(255,255,255,0.8);">&gt;</button>
+                    <img id="photoViewImg" src="" style="width: 100%; border-radius: 12px; object-fit: contain; max-height: 70vh;">
+                    <p id="photoViewText" style="margin-top: 12px; font-size: 0.95rem;"></p>
+                </div>
+                <input type="hidden" id="photoViewResourceId">
+            </div>
+        </div>
+
+        <!-- 感覚パレットモーダル -->
+        <div id="paletteModal" class="modal">
+            <div class="modal-content" style="padding: 20px;">
+                <button class="close-button" id="closePaletteModal">×</button>
+                <h3 style="margin-bottom: 16px; font-size: 1.1rem; color: #5C5446;">今の感覚を選ぶ</h3>
+                <p style="font-size: 0.8rem; color: #8A8172; margin-bottom: 8px;">🎨 色で表すと？</p>
+                <div id="paletteColors" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px;"></div>
+                <p style="font-size: 0.8rem; color: #8A8172; margin-bottom: 8px;">📝 言葉で表すと？</p>
+                <div id="paletteWords" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px;"></div>
+            </div>
+        </div>
+
+        <!-- 新しく追加する -->
+        <div id="addResourceModal" class="modal">
+            <div class="modal-content">
+                <button class="close-button" id="closeAddResourceModal">×</button>
+                <h3>新しく追加する</h3>
+                
+                <div class="setting-item">
+                    <p class="setting-desc">どちらか一つでも、両方入力してもOKです。あなたの心が少し「ホッ」とする要素を残してみましょう。</p>
+                    
+                    <div class="resource-section" style="margin-bottom: 24px;">
+                        <label class="memo-label">📷 安心する写真（任意）</label>
+                        <div class="photo-upload-area" id="photoArea" style="margin-top: 8px;">
+                            <img id="photoPreview" src="" alt="お気に入りの写真" style="display: none;">
+                            <div id="photoPlaceholder" class="photo-placeholder">
+                                <span>写真をえらぶ</span>
+                            </div>
+                            <input type="file" id="photoInput" accept="image/*" multiple style="display: none;">
+                        </div>
+                    </div>
+
+                    <div class="resource-section">
+                        <label class="memo-label">📝 安心できる言葉やメモ（任意）</label>
+                        <textarea id="resourceNote" placeholder="大丈夫、焦らなくていいよ..." style="margin-top: 8px;"></textarea>
+                    </div>
+                    
+                    <div class="settings-actions" style="margin-top: 24px;">
+                        <button id="saveResourceBtn" class="primary-btn">大切に保存する</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- ポップアップメッセージ -->
+    <div id="toastMessage" class="toast hidden">
+        <p id="toastText"></p>
+        <div class="toast-actions">
+            <button id="saveMessageBtn" class="toast-btn primary-btn">🔖 この言葉をリソース箱に入れる</button>
+            <button id="toastClose" class="toast-btn secondary-btn">とじる</button>
+        </div>
+    </div>
+
+    <!-- 下部メニュー -->
+    <nav class="bottom-nav">
+        <button class="nav-item active" data-target="homeTab">
+            <span class="nav-icon">🌱</span>
+            <span class="nav-label">ホーム</span>
+        </button>
+        <button class="nav-item" data-target="reflectionTab">
+            <span class="nav-icon">📊</span>
+            <span class="nav-label">振り返り</span>
+        </button>
+        <button class="nav-item" data-target="resourceTab">
+            <span class="nav-icon">🎁</span>
+            <span class="nav-label">リソース箱</span>
+        </button>
+    </nav>
+
+    <!-- 感覚パレットモーダル (以前のUIの復元) -->
+    <div id="wordPaletteModal" class="modal">
+        <div class="modal-content" style="max-width: 90%; width: 340px; padding: 24px; border-radius: 24px;">
+            <!-- Modal header with Close btn -->
+            <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                <h3 style="font-size: 1.1rem; color: #5C5446; margin: 0;">今の感覚を選ぶ</h3>
+                <button class="modal-close" id="closeWordPaletteModal" style="border: none; background: transparent; font-size: 1.6rem; color: #8A8172; cursor: pointer;">✕</button>
+            </div>
+            
+            <!-- Colors section -->
+            <div style="margin-bottom: 32px;">
+                <p style="font-size: 0.9rem; color: #8A8172; margin-bottom: 16px;">🎨 色で表すと？</p>
+                <div id="modalPaletteColors" style="display: flex; flex-wrap: wrap; gap: 12px; justify-content: flex-start;"></div>
+            </div>
+            
+            <!-- Words section -->
+            <div>
+                <p style="font-size: 0.9rem; color: #8A8172; margin-bottom: 16px;">📝 言葉で表すと？</p>
+                <div id="modalPaletteWords" style="display: flex; flex-direction: column; gap: 20px;"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="app.js?v=20240419_03"></script>
+    <script>
+        /*
+        // iPhoneの強力なキャッシュを完全に無効化するため、一時的にService Workerへの干渉を全て停止します。
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                for (let registration of registrations) {
+                    registration.unregister();
+                }
+            });
+            caches.keys().then(function(names) {
+                for (let name of names) {
+                    caches.delete(name);
+                }
+            });
+        }
+        */
+    </script>
+</body>
+</html>
