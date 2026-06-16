@@ -36,3 +36,53 @@ self.addEventListener('fetch', (e) => {
             })
     );
 });
+
+// === プッシュ通知の受信と表示処理 ===
+self.addEventListener('push', function(event) {
+    // デフォルトのお守り言葉（サーバー側エラー時のフォールバック用）
+    const defaultData = {
+        title: 'わたしのかんかく',
+        body: 'アプリは無理に開かなくて大丈夫です。もしよろしければ、今のあなたを感じる時間を少しだけとってみるのはいかがでしょうか。'
+    };
+    
+    let data;
+    try {
+        data = event.data ? JSON.parse(event.data.text()) : defaultData;
+    } catch(e) {
+        data = defaultData;
+        if(event.data) data.body = event.data.text();
+    }
+    
+    const options = {
+        body: data.body,
+        icon: 'icon-512.png',
+        badge: 'icon-512.png',
+        vibrate: [100, 50, 100], // 優しい振動バイブレーション
+        data: {
+            url: '/'
+        }
+    };
+    
+    event.waitUntil(
+        self.registration.showNotification(data.title || 'わたしのかんかく', options)
+    );
+});
+
+// === 通知がタップされた時の処理 ===
+self.addEventListener('notificationclick', function(event) {
+    event.notification.close();
+    // アプリ（このサイト）を開く、または既に開かれていればフォーカスする
+    event.waitUntil(
+        clients.matchAll({ type: 'window' }).then(windowClients => {
+            for (var i = 0; i < windowClients.length; i++) {
+                var client = windowClients[i];
+                if (client.url === '/' && 'focus' in client) {
+                    return client.focus();
+                }
+            }
+            if (clients.openWindow) {
+                return clients.openWindow('/');
+            }
+        })
+    );
+});

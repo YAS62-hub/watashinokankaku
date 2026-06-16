@@ -12,6 +12,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const closeSettings = document.getElementById('closeSettings');
     const popupToggle = document.getElementById('popupToggle');
     
+    // 通知設定関連
+    const pushNotificationToggle = document.getElementById('pushNotificationToggle');
+    const pushNotificationDetails = document.getElementById('pushNotificationDetails');
+    const customScheduleArea = document.getElementById('customScheduleArea');
+    const customPresetBtn = document.getElementById('customPresetBtn');
+    const presetBtns = document.querySelectorAll('.preset-btn[data-preset]');
+    const dayBtns = document.querySelectorAll('.day-btn');
+    const customTimeInput = document.getElementById('customTimeInput');
+    const customPushMessage = document.getElementById('customPushMessage');
+    const savePushNotificationBtn = document.getElementById('savePushNotificationBtn');
+
+    // ▼ Web Push用設定 ▼
+    const PUBLIC_VAPID_KEY = 'BMJ5rnR_Mc-DW1dBvxlvGKbuaIlYPZ-930tTPk9shvIzP2GYjvPmsPJekj3UZ8Wpdhes0CiWj3ftdSkrSnBdhOo';
+    const WORKER_URL = 'https://kankaku-push-worker.yurayui.workers.dev/subscribe';
+    // ▲ ▲
+    
     // カスタマイズ関連
     const customHigh = document.getElementById('customHigh');
     const customMid = document.getElementById('customMid');
@@ -645,7 +661,99 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('seAppToggle', e.target.checked);
     });
 
-    // カスタマイズ保存
+    // === お守り通知 UIの開閉・権限要求ロジック ===
+    if (pushNotificationToggle) {
+        // ロード時の初期状態を反映
+        const savedPushSettings = JSON.parse(localStorage.getItem('seAppPushSettings') || 'null');
+        if (savedPushSettings && savedPushSettings.enabled) {
+            pushNotificationToggle.checked = true;
+            pushNotificationDetails.style.display = 'block';
+            
+            // プリセットの復元
+            if (savedPushSettings.preset === 'custom') {
+                if (customPresetBtn) customPresetBtn.classList.add('active');
+                if (customScheduleArea) customScheduleArea.style.display = 'block';
+                if (savedPushSettings.days) {
+                    dayBtns.forEach(btn => {
+                        if (savedPushSettings.days.includes(btn.getAttribute('data-day'))) {
+                            btn.classList.add('active');
+                        }
+                    });
+                }
+                if (customTimeInput) customTimeInput.value = savedPushSettings.time || '';
+            } else if (savedPushSettings.preset) {
+                const targetBtn = Array.from(presetBtns).find(b => b.getAttribute('data-preset') === savedPushSettings.preset);
+                if (targetBtn) targetBtn.classList.add('active');
+            }
+            
+            if (customPushMessage) customPushMessage.value = savedPushSettings.message || '';
+        }
+
+        // 開閉と権限リクエスト
+        pushNotificationToggle.addEventListener('change', async (e) => {
+            if (e.target.checked) {
+                pushNotificationDetails.style.display = 'block';
+                
+                // 通知権限の要求
+                if ('Notification' in window && navigator.serviceWorker) {
+                    const permission = await Notification.requestPermission();
+                    if (permission !== 'granted') {
+                        alert('通知が許可されませんでした。お使いの端末・ブラウザの設定から通知を許可してください。');
+                        e.target.checked = false;
+                        pushNotificationDetails.style.display = 'none';
+                    }
+                } else {
+                    alert('お使いのブラウザはプッシュ通知に対応していません。');
+                    e.target.checked = false;
+                    pushNotificationDetails.style.display = 'none';
+                }
+            } else {
+                pushNotificationDetails.style.display = 'none';
+            }
+        });
+    }
+
+    // プリセットボタンの選択ロジック
+    if (presetBtns) {
+        presetBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                presetBtns.forEach(b => b.classList.remove('active'));
+                if (customPresetBtn) customPresetBtn.classList.remove('active');
+                btn.classList.add('active');
+                if (customScheduleArea) customScheduleArea.style.display = 'none';
+            });
+        });
+    }
+
+    if (customPresetBtn) {
+        customPresetBtn.addEventListener('click', () => {
+            presetBtns.forEach(b => b.classList.remove('active'));
+            customPresetBtn.classList.add('active');
+            if (customScheduleArea) customScheduleArea.style.display = 'block';
+        });
+    }
+
+    if (dayBtns) {
+        dayBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                btn.classList.toggle('active');
+            });
+        });
+    }
+
+    // URLセーフなBase64デコード
+    function urlBase64ToUint8Array(base64String) {
+        const padding = '='.repeat((4 - base64String.length % 4) % 4);
+        const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
+        const rawData = window.atob(base64);
+        const outputArray = new Uint8Array(rawData.length);
+        for (let i = 0; i < rawData.length; ++i) {
+            outputArray[i] = rawData.charCodeAt(i);
+        }
+        return outputArray;
+    }
+
+    // カスタマイズ保存（全体設定用）
     saveSettingsBtn.addEventListener('click', () => {
         const newLabels = {
             high: customHigh.value || defaultLabels.high,
@@ -658,6 +766,79 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.classList.remove('modal-open');
         showToast('ボタンの言葉を保存しました🍵');
     });
+
+    // --- お守り通知専用の保存ロジック ---
+    if (savePushNotificationBtn) {
+        savePushNotificationBtn.addEventListener('click', async () => {
+            let pushEnabled = false;
+            if (pushNotificationToggle && pushNotificationToggle.checked) {
+                pushEnabled = true;
+            }
+
+            const pushSettings = {
+                enabled: pushEnabled,
+                preset: null,
+                days: [],
+                time: '',
+                message: customPushMessage ? customPushMessage.value : ''
+            };
+
+            if (pushEnabled) {
+                const activePreset = document.querySelector('.preset-btn.active');
+                if (activePreset) {
+                    pushSettings.preset = activePreset.getAttribute('data-preset');
+                } else if (customPresetBtn && customPresetBtn.classList.contains('active')) {
+                    pushSettings.preset = 'custom';
+                    const activeDays = Array.from(document.querySelectorAll('.day-btn.active')).map(b => b.getAttribute('data-day'));
+                    pushSettings.days = activeDays;
+                    pushSettings.time = customTimeInput ? customTimeInput.value : '';
+                }
+
+                // Pushサブスクリプションの取得
+                if ('serviceWorker' in navigator && 'PushManager' in window) {
+                    try {
+                        const registration = await navigator.serviceWorker.ready;
+                        let subscription = await registration.pushManager.getSubscription();
+                        if (!subscription) {
+                            try {
+                                const applicationServerKey = urlBase64ToUint8Array(PUBLIC_VAPID_KEY);
+                                subscription = await registration.pushManager.subscribe({
+                                    userVisibleOnly: true,
+                                    applicationServerKey: applicationServerKey
+                                });
+                            } catch(subErr) {
+                                console.warn('サブスクリプション登録に失敗しました。', subErr);
+                            }
+                        }
+
+                        // バックエンド(Worker)へ送信
+                        if (subscription && WORKER_URL) {
+                            try {
+                                await fetch(WORKER_URL, {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({
+                                        subscription: subscription,
+                                        settings: pushSettings
+                                    })
+                                });
+                            } catch(apiErr) {
+                                console.warn('バックエンドへの送信エラー:', apiErr);
+                            }
+                        }
+                    } catch(e) {
+                        console.error('Push Service Error:', e);
+                    }
+                }
+            }
+            
+            localStorage.setItem('seAppPushSettings', JSON.stringify(pushSettings));
+
+            settingsModal.classList.remove('active');
+            document.body.classList.remove('modal-open');
+            showToast('通知の設定を保存しました🌿');
+        });
+    }
 
     // カスタマイズ初期化
     resetSettingsBtn.addEventListener('click', () => {

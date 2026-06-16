@@ -740,12 +740,13 @@ input:checked + .toggle-slider::before {
 
 .safe-message {
     background-color: #F8F7F4;
-    padding: 16px;
+    padding: 20px 24px;       /* 左右上下の余白を広げて息苦しさを無くす */
     border-radius: 16px;
     font-size: 0.9rem;
     color: var(--text-color);
-    line-height: 1.5;
-    text-align: center;
+    line-height: 1.6;         /* 行間をあけて読みやすく */
+    word-break: auto-phrase;  /* 単語の途中での不自然な改行を防ぐ（対応ブラウザ用） */
+    overflow-wrap: break-word; /* サポート用フォールバック */
 }
 
 .chart-container {
@@ -1029,4 +1030,41 @@ input:checked + .toggle-slider::before {
 
 .palette-updated {
     animation: paletteUpdateAnim 0.3s ease;
+}
+
+/* =========================================
+   お守り通知機能設定パネル用スタイル
+   ========================================= */
+
+.preset-btn.active {
+    background-color: var(--accent);
+    color: white;
+    border-color: var(--accent);
+}
+
+.day-btn {
+    border: 1px solid #DCD6CD;
+    background-color: white;
+    color: var(--text-light);
+    width: 36px;
+    height: 36px;
+    border-radius: 18px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+
+/* 通知設定エリア内のテキスト最適化 */
+.push-desc-text {
+    font-size: 0.85rem;
+    color: var(--text-light);
+    margin-bottom: 20px;
+    line-height: 1.7;
+    word-break: auto-phrase;
+    overflow-wrap: break-word;
+    padding: 0 4px;
 }
