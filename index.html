@@ -122,12 +122,23 @@
                 <button class="close-button" id="closeSettings">×</button>
                 <h3>設定</h3>
                 
-                <div class="setting-item" style="margin-top: 16px;">
-                    <div class="safe-message" style="margin-bottom: 20px; font-size: 0.85rem; color: #8A8172;">
-                        🌿 毎日アプリを開くことや、通知を受け取ることが目的ではありません。週に1回、月に1回など、ご自身の心地よいゆったりとしたペースで通知させるのも良いかもしれません。
+                <div class="setting-card">
+                    <h4 class="setting-subtitle">通知メッセージの設定</h4>
+                    <div style="font-size: 0.85rem; color: var(--text-light); margin-bottom: 12px; line-height: 1.5;">
+                        通知は、例えば以下のような優しい言葉がランダムで届きます。
+                    </div>
+                    
+                    <div class="mockup-notification">
+                        <div class="mockup-notification-header">
+                            <div class="mockup-app-icon">か</div>
+                            わたしのかんかく
+                        </div>
+                        <div class="mockup-notification-body">
+                            アプリは無理に開かなくて大丈夫です。もしよろしければ、今のあなたを感じる時間を少しだけとってみるのはいかがでしょうか。
+                        </div>
                     </div>
 
-                    <label class="toggle-label" style="font-size: 1.05rem; font-weight: 500; color: var(--text-color);">
+                    <label class="toggle-label" style="font-size: 1.05rem; font-weight: 500; color: var(--text-color); margin-top: 20px;">
                         お守り通知を受け取る
                         <input type="checkbox" id="pushNotificationToggle">
                         <span class="toggle-slider"></span>
@@ -164,36 +175,37 @@
 
                         <hr style="border: none; border-top: 1px dashed #DCD6CD; margin: 24px 0;">
 
-                        <div style="font-weight: 500; margin-bottom:8px; color: var(--text-color);">届く言葉を自分で決める</div>
-                        <div class="push-desc-text">
-                            空欄の場合は、以下のような言葉の中から一つがランダムでゆったりと届きます。<br><br>
-                            ・アプリは無理に開かなくて大丈夫です。もしよろしければ、今のあなたを感じる時間を少しだけとってみるのはいかがでしょうか。<br>
-                            ・かんかくアプリです。もしよろしければ、今いる場所で「青いもの」を1つ、ゆっくり探してみませんか？<br>
-                            ・こんにちは、かんかくアプリです。絶好調じゃなくていい。悪い時もダメじゃない。良くも悪くもない「ちょっとマシ」を見つけられることも大切です。
-                        </div>
+                        <label class="toggle-label" style="font-weight: 500; margin-bottom:8px; color: var(--text-color);">
+                            <span class="toggle-text">通知されるメッセージを自分で決める</span>
+                            <input type="checkbox" id="customMessageToggle">
+                            <span class="toggle-slider"></span>
+                        </label>
                         
-                        <textarea id="customPushMessage" class="custom-input" placeholder="この言葉だけを毎回届けてほしい場合、ここに入力してください" style="min-height: 100px; width: 100%; box-sizing: border-box;"></textarea>
+                        <div id="customMessageArea" style="display: none; margin-top: 12px;">
+                            <textarea id="customPushMessage" class="custom-input" placeholder="届けて欲しい言葉をご自身で決めたいときは、ここにご記入ください" style="min-height: 100px; width: 100%; box-sizing: border-box;"></textarea>
+                        </div>
 
-                        <div class="settings-actions" style="margin-top: 24px;">
-                            <button id="savePushNotificationBtn" class="primary-btn" style="background-color: var(--accent);">通知の設定を保存する</button>
+                        <div class="settings-actions" style="margin-top: 24px; display: flex; gap: 8px;">
+                            <button id="savePushNotificationBtn" class="primary-btn" style="background-color: var(--accent); flex: 2; padding: 14px 20px;">通知設定を保存</button>
+                            <button id="testPushBtn" class="secondary-btn" style="flex: 1; padding: 14px 8px; font-size: 0.8rem; background-color: #f1f0ec; border-color: #dcd6cd;">テスト<br>送信する</button>
                         </div>
                     </div>
                 </div>
-
-                <hr class="setting-divider">
                 
-                <div class="setting-item">
+                <div class="setting-card">
+                    <h4 class="setting-subtitle">記録後のメッセージ設定</h4>
                     <label class="toggle-label">
                         <span class="toggle-text">記録後のメッセージを表示する</span>
                         <input type="checkbox" id="popupToggle" checked>
                         <span class="toggle-slider"></span>
                     </label>
+                    <p class="setting-note" style="margin-bottom: 20px;">※メッセージはシステムが自動で出しているものです。あなたの感覚を何より大切にしてください。見るのが億劫な時は、遠慮なくオフにしてくださいね。</p>
+                    <div class="settings-actions">
+                        <button id="savePopupSettingBtn" class="primary-btn">メッセージ設定を保存する</button>
+                    </div>
                 </div>
-                <p class="setting-note">※メッセージはシステムが自動で出しているものです。あなたの感覚を何より大切にしてください。見るのが億劫な時は、遠慮なくオフにしてくださいね。</p>
                 
-                <hr class="setting-divider">
-                
-                <div class="setting-item">
+                <div class="setting-card">
                     <h4 class="setting-subtitle">ボタンの言葉をカスタマイズ</h4>
                     <p class="setting-desc">あなたの感覚によりしっくりくる言葉に変更できます。自由に変えてもいいですし、選択肢から選ぶこともできます。</p>
                     
@@ -221,15 +233,13 @@
                         <input type="text" id="customLow" class="custom-input" placeholder="例：ロー（静か・おもい・おやすみ中）">
                     </div>
                     
-                    <div class="settings-actions">
-                        <button id="saveSettingsBtn" class="primary-btn">保存する</button>
+                    <div class="settings-actions" style="margin-top: 20px;">
+                        <button id="saveSettingsBtn" class="primary-btn" style="margin-bottom: 8px;">言葉の設定を保存する</button>
                         <button id="resetSettingsBtn" class="secondary-btn">初期設定に戻す</button>
                     </div>
                 </div>
-
-                <hr class="setting-divider">
                 
-                <div class="setting-item">
+                <div class="setting-card" style="margin-bottom: 0;">
                     <h4 class="setting-subtitle" style="margin-bottom: 8px;">データのバックアップと復元</h4>
                     <p class="setting-desc" style="font-size: 0.85rem; margin-bottom: 12px; line-height: 1.4;">
                         現在の記録をファイル（.json）として端末内に保存します。機種変更時などは、そのファイルを読み込むことで復元できます。
@@ -246,7 +256,7 @@
                     <input type="file" id="importFileInput" accept=".json" class="custom-input" style="margin-bottom: 12px; font-size: 0.8rem; padding: 8px;">
                     
                     <div class="settings-actions">
-                        <button id="exportDataBtn" class="secondary-btn">書き出す</button>
+                        <button id="exportDataBtn" class="secondary-btn" style="margin-bottom: 8px;">書き出す</button>
                         <button id="importDataBtn" class="primary-btn">復元する</button>
                     </div>
                 </div>

@@ -22,6 +22,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const customTimeInput = document.getElementById('customTimeInput');
     const customPushMessage = document.getElementById('customPushMessage');
     const savePushNotificationBtn = document.getElementById('savePushNotificationBtn');
+    const customMessageToggle = document.getElementById('customMessageToggle');
+    const customMessageArea = document.getElementById('customMessageArea');
+    const testPushBtn = document.getElementById('testPushBtn');
+
+    // ポップアップ設定用
+    const savePopupSettingBtn = document.getElementById('savePopupSettingBtn');
 
     // ▼ Web Push用設定 ▼
     const PUBLIC_VAPID_KEY = 'BMJ5rnR_Mc-DW1dBvxlvGKbuaIlYPZ-930tTPk9shvIzP2GYjvPmsPJekj3UZ8Wpdhes0CiWj3ftdSkrSnBdhOo';
@@ -657,9 +663,13 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.classList.remove('modal-open');
     });
 
-    popupToggle.addEventListener('change', (e) => {
-        localStorage.setItem('seAppToggle', e.target.checked);
-    });
+    // popupToggle の自動保存を廃止し、専用保存ボタンに変更
+    if (savePopupSettingBtn) {
+        savePopupSettingBtn.addEventListener('click', () => {
+            localStorage.setItem('seAppToggle', popupToggle.checked);
+            showToast('メッセージ表示の設定を保存しました🌿');
+        });
+    }
 
     // === お守り通知 UIの開閉・権限要求ロジック ===
     if (pushNotificationToggle) {
@@ -686,7 +696,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (targetBtn) targetBtn.classList.add('active');
             }
             
-            if (customPushMessage) customPushMessage.value = savedPushSettings.message || '';
+            if (savedPushSettings.message && savedPushSettings.message.trim() !== '') {
+                if (customMessageToggle) customMessageToggle.checked = true;
+                if (customMessageArea) customMessageArea.style.display = 'block';
+                customPushMessage.value = savedPushSettings.message;
+            } else {
+                if (customMessageToggle) customMessageToggle.checked = false;
+                if (customMessageArea) customMessageArea.style.display = 'none';
+            }
         }
 
         // 開閉と権限リクエスト
@@ -709,6 +726,62 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             } else {
                 pushNotificationDetails.style.display = 'none';
+            }
+        });
+    }
+
+    // メッセージトグルの開閉
+    if (customMessageToggle) {
+        customMessageToggle.addEventListener('change', (e) => {
+            if (e.target.checked) {
+                customMessageArea.style.display = 'block';
+            } else {
+                customMessageArea.style.display = 'none';
+            }
+        });
+    }
+
+    // 今すぐテスト通知を送るロジック
+    if (testPushBtn) {
+        testPushBtn.addEventListener('click', async () => {
+            if (!('Notification' in window) || !('serviceWorker' in navigator)) {
+                alert('お使いのブラウザはプッシュ通知テストに対応していません。');
+                return;
+            }
+            
+            let permission = Notification.permission;
+            if (permission !== 'granted') {
+                permission = await Notification.requestPermission();
+            }
+            
+            if (permission !== 'granted') {
+                alert('通知が許可されていません。スマホ・ブラウザの設定をご確認ください。');
+                return;
+            }
+
+            try {
+                const registration = await navigator.serviceWorker.ready;
+                let testMessage = 'アプリは無理に開かなくて大丈夫です。もしよろしければ、今のあなたを感じる時間を少しだけとってみるのはいかがでしょうか。';
+                
+                if (customMessageToggle && customMessageToggle.checked && customPushMessage && customPushMessage.value.trim() !== '') {
+                    testMessage = customPushMessage.value;
+                }
+                
+                showToast('数秒後にテスト通知が届きます…');
+                
+                // 3秒後にローカル通知を発火
+                setTimeout(() => {
+                    registration.showNotification('わたしのかんかく (テスト)', {
+                        body: testMessage,
+                        icon: 'icon-512.png',
+                        badge: 'icon-512.png',
+                        vibrate: [100, 50, 100],
+                        data: { url: '/' }
+                    });
+                }, 3000);
+            } catch (err) {
+                console.error('テスト送信エラー:', err);
+                alert('テスト送信に失敗しました: ' + err.message);
             }
         });
     }
