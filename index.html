@@ -123,19 +123,78 @@
                 <h3>設定</h3>
                 
                 <div class="setting-card">
-                    <h4 class="setting-subtitle">通知メッセージの設定</h4>
+                    <h4 class="setting-subtitle">ボタンの言葉をカスタマイズ</h4>
+                    <p class="setting-desc">あなたの感覚によりしっくりくる言葉に変更できます。自由に変えてもいいですし、選択肢から選ぶこともできます。</p>
+                    
+                    <div class="custom-input-group">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 4px;">
+                            <label for="customHigh" style="margin-bottom: 0;">🔥 (ハイ)</label>
+                            <button type="button" class="settings-palette-btn" data-target-input="customHigh" data-zone="high" style="color: var(--accent); font-size: 0.8rem; background: none; border: none; padding: 0; cursor: pointer; font-weight: bold;">🏷️ 選択肢から選ぶ</button>
+                        </div>
+                        <input type="text" id="customHigh" class="custom-input" placeholder="例：ハイ（活発・たかぶり・ざわざわ）">
+                    </div>
+                    
+                    <div class="custom-input-group">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 4px;">
+                            <label for="customMid" style="margin-bottom: 0;">☕️ (大丈夫)</label>
+                            <button type="button" class="settings-palette-btn" data-target-input="customMid" data-zone="mid" style="color: var(--accent); font-size: 0.8rem; background: none; border: none; padding: 0; cursor: pointer; font-weight: bold;">🏷️ 選択肢から選ぶ</button>
+                        </div>
+                        <input type="text" id="customMid" class="custom-input" placeholder="例：大丈夫（おだやか・マシ・いい感じ）">
+                    </div>
+                    
+                    <div class="custom-input-group">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 4px;">
+                            <label for="customLow" style="margin-bottom: 0;">❄️ (ロー)</label>
+                            <button type="button" class="settings-palette-btn" data-target-input="customLow" data-zone="low" style="color: var(--accent); font-size: 0.8rem; background: none; border: none; padding: 0; cursor: pointer; font-weight: bold;">🏷️ 選択肢から選ぶ</button>
+                        </div>
+                        <input type="text" id="customLow" class="custom-input" placeholder="例：ロー（静か・おもい・おやすみ中）">
+                    </div>
+                    
+                    <div class="settings-actions" style="margin-top: 20px;">
+                        <button type="button" id="saveSettingsBtn" class="primary-btn" style="margin-bottom: 8px;">言葉の設定を保存する</button>
+                        <button type="button" id="resetSettingsBtn" class="secondary-btn">初期設定に戻す</button>
+                    </div>
+                </div>
+
+                <div class="setting-card">
+                    <h4 class="setting-subtitle">記録後のメッセージ設定</h4>
+                    <label class="toggle-label">
+                        <span class="toggle-text">記録後のメッセージを表示する</span>
+                        <input type="checkbox" id="popupToggle" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                    <p class="setting-note" style="margin-bottom: 20px;">※メッセージはシステムが自動で出しています。見るのが億劫な時は遠慮なくオフにしてください。</p>
+                    
+                    <div style="font-size: 0.85rem; color: var(--text-light); margin-bottom: 12px;">表示のイメージ：</div>
+                    <div class="mockup-notification" style="margin-top:0; border: none; box-shadow: 0 4px 15px rgba(0,0,0,0.08); text-align: center; color: var(--text-color);">
+                        記録しました🍵<br>
+                        <span style="font-size: 0.8rem; color: var(--text-light); margin-top: 4px; display: inline-block;">今のあなたを感じる時間はとれましたか？</span>
+                    </div>
+                </div>
+
+                <div class="setting-card">
+                    <h4 class="setting-subtitle">お守り通知設定</h4>
                     <div style="font-size: 0.85rem; color: var(--text-light); margin-bottom: 12px; line-height: 1.5;">
-                        通知は、例えば以下のような優しい言葉がランダムで届きます。
+                        あなたが希望すれば、アプリからメッセージを通知させることができます。毎日アプリを開くことや、通知を受け取ることが目的ではありません。週に1回、月に1回など、ご自身の心地よいペースで通知させるのも良いかもしれません。
                     </div>
                     
                     <div class="mockup-notification">
                         <div class="mockup-notification-header">
-                            <div class="mockup-app-icon">か</div>
-                            わたしのかんかく
+                            <div class="mockup-app-icon">か</div>わたしのかんかく
                         </div>
-                        <div class="mockup-notification-body">
-                            アプリは無理に開かなくて大丈夫です。もしよろしければ、今のあなたを感じる時間を少しだけとってみるのはいかがでしょうか。
+                        <div class="mockup-notification-body">今、どんなことをかんじていらっしゃいますか？無理にアプリを開かなくても大丈夫です。</div>
+                    </div>
+                    <div class="mockup-notification">
+                        <div class="mockup-notification-header">
+                            <div class="mockup-app-icon">か</div>わたしのかんかく
                         </div>
+                        <div class="mockup-notification-body">もしよろしければ、今いる場所で「青いもの」を1つ、ゆっくり探してみませんか？</div>
+                    </div>
+                    <div class="mockup-notification">
+                        <div class="mockup-notification-header">
+                            <div class="mockup-app-icon">か</div>わたしのかんかく
+                        </div>
+                        <div class="mockup-notification-body">絶好調じゃなくていい。悪い時もダメじゃない。「ちょっとマシ」を見つけられることも大切です。</div>
                     </div>
 
                     <label class="toggle-label" style="font-size: 1.05rem; font-weight: 500; color: var(--text-color); margin-top: 20px;">
@@ -150,23 +209,23 @@
                         <div style="font-weight: 500; margin-bottom:12px; color: var(--text-color);">いつ届けましょうか？</div>
                         
                         <div class="preset-buttons" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px;">
-                            <button class="secondary-btn preset-btn" data-preset="mon-8">週のスタート 月曜日の 8:00頃</button>
-                            <button class="secondary-btn preset-btn" data-preset="wed-12">週の真ん中 水曜日の 12:00頃</button>
-                            <button class="secondary-btn preset-btn" data-preset="fri-20">週末の入り口 金曜日の 20:00頃</button>
-                            <button class="secondary-btn preset-btn" id="customPresetBtn">曜日と時間を自由に設定する</button>
+                            <button type="button" class="secondary-btn preset-btn" data-preset="mon-8">週のスタート 月曜日の 8:00頃</button>
+                            <button type="button" class="secondary-btn preset-btn" data-preset="wed-12">週の真ん中 水曜日の 12:00頃</button>
+                            <button type="button" class="secondary-btn preset-btn" data-preset="fri-20">週末の入り口 金曜日の 20:00頃</button>
+                            <button type="button" class="secondary-btn preset-btn" id="customPresetBtn">曜日と時間を自由に設定する</button>
                         </div>
 
                         <!-- カスタム設定パネル -->
                         <div id="customScheduleArea" style="display: none; background-color: #F8F7F4; padding: 16px; border-radius: 12px; margin-bottom: 24px; border: 1px solid rgba(0,0,0,0.03);">
                             <div style="font-size: 0.85rem; margin-bottom: 8px; color: var(--text-color);">何曜日にしますか？（複数可）</div>
                             <div class="day-selector" style="display: flex; gap: 6px; justify-content: space-between; margin-bottom: 16px;">
-                                <button class="day-btn" data-day="1">月</button>
-                                <button class="day-btn" data-day="2">火</button>
-                                <button class="day-btn" data-day="3">水</button>
-                                <button class="day-btn" data-day="4">木</button>
-                                <button class="day-btn" data-day="5">金</button>
-                                <button class="day-btn" data-day="6">土</button>
-                                <button class="day-btn" data-day="0">日</button>
+                                <button type="button" class="day-btn" data-day="1">月</button>
+                                <button type="button" class="day-btn" data-day="2">火</button>
+                                <button type="button" class="day-btn" data-day="3">水</button>
+                                <button type="button" class="day-btn" data-day="4">木</button>
+                                <button type="button" class="day-btn" data-day="5">金</button>
+                                <button type="button" class="day-btn" data-day="6">土</button>
+                                <button type="button" class="day-btn" data-day="0">日</button>
                             </div>
                             
                             <div style="font-size: 0.85rem; margin-bottom: 8px; color: var(--text-color);">何時頃が良いですか？</div>
@@ -186,56 +245,9 @@
                         </div>
 
                         <div class="settings-actions" style="margin-top: 24px; display: flex; gap: 8px;">
-                            <button id="savePushNotificationBtn" class="primary-btn" style="background-color: var(--accent); flex: 2; padding: 14px 20px;">通知設定を保存</button>
-                            <button id="testPushBtn" class="secondary-btn" style="flex: 1; padding: 14px 8px; font-size: 0.8rem; background-color: #f1f0ec; border-color: #dcd6cd;">テスト<br>送信する</button>
+                            <button type="button" id="savePushNotificationBtn" class="primary-btn" style="background-color: var(--accent); flex: 2; padding: 14px 20px;">通知設定を保存</button>
+                            <button type="button" id="testPushBtn" class="secondary-btn" style="flex: 1; padding: 14px 8px; font-size: 0.8rem; background-color: #f1f0ec; border-color: #dcd6cd;">テスト<br>送信する</button>
                         </div>
-                    </div>
-                </div>
-                
-                <div class="setting-card">
-                    <h4 class="setting-subtitle">記録後のメッセージ設定</h4>
-                    <label class="toggle-label">
-                        <span class="toggle-text">記録後のメッセージを表示する</span>
-                        <input type="checkbox" id="popupToggle" checked>
-                        <span class="toggle-slider"></span>
-                    </label>
-                    <p class="setting-note" style="margin-bottom: 20px;">※メッセージはシステムが自動で出しているものです。あなたの感覚を何より大切にしてください。見るのが億劫な時は、遠慮なくオフにしてくださいね。</p>
-                    <div class="settings-actions">
-                        <button id="savePopupSettingBtn" class="primary-btn">メッセージ設定を保存する</button>
-                    </div>
-                </div>
-                
-                <div class="setting-card">
-                    <h4 class="setting-subtitle">ボタンの言葉をカスタマイズ</h4>
-                    <p class="setting-desc">あなたの感覚によりしっくりくる言葉に変更できます。自由に変えてもいいですし、選択肢から選ぶこともできます。</p>
-                    
-                    <div class="custom-input-group">
-                        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 4px;">
-                            <label for="customHigh" style="margin-bottom: 0;">🔥 (ハイ)</label>
-                            <button class="settings-palette-btn" data-target-input="customHigh" data-zone="high" style="color: var(--accent); font-size: 0.8rem; background: none; border: none; padding: 0; cursor: pointer; font-weight: bold;">🏷️ 選択肢から選ぶ</button>
-                        </div>
-                        <input type="text" id="customHigh" class="custom-input" placeholder="例：ハイ（活発・たかぶり・ざわざわ）">
-                    </div>
-                    
-                    <div class="custom-input-group">
-                        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 4px;">
-                            <label for="customMid" style="margin-bottom: 0;">☕️ (大丈夫)</label>
-                            <button class="settings-palette-btn" data-target-input="customMid" data-zone="mid" style="color: var(--accent); font-size: 0.8rem; background: none; border: none; padding: 0; cursor: pointer; font-weight: bold;">🏷️ 選択肢から選ぶ</button>
-                        </div>
-                        <input type="text" id="customMid" class="custom-input" placeholder="例：大丈夫（おだやか・マシ・いい感じ）">
-                    </div>
-                    
-                    <div class="custom-input-group">
-                        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 4px;">
-                            <label for="customLow" style="margin-bottom: 0;">❄️ (ロー)</label>
-                            <button class="settings-palette-btn" data-target-input="customLow" data-zone="low" style="color: var(--accent); font-size: 0.8rem; background: none; border: none; padding: 0; cursor: pointer; font-weight: bold;">🏷️ 選択肢から選ぶ</button>
-                        </div>
-                        <input type="text" id="customLow" class="custom-input" placeholder="例：ロー（静か・おもい・おやすみ中）">
-                    </div>
-                    
-                    <div class="settings-actions" style="margin-top: 20px;">
-                        <button id="saveSettingsBtn" class="primary-btn" style="margin-bottom: 8px;">言葉の設定を保存する</button>
-                        <button id="resetSettingsBtn" class="secondary-btn">初期設定に戻す</button>
                     </div>
                 </div>
                 
@@ -253,11 +265,11 @@
                         </ul>
                     </div>
 
-                    <input type="file" id="importFileInput" accept=".json" class="custom-input" style="margin-bottom: 12px; font-size: 0.8rem; padding: 8px;">
+                    <input type="file" id="importFileInput" accept=".json" class="custom-input" style="margin-bottom: 12px; font-size: 0.8rem; padding: 8px; width: 100%; box-sizing: border-box;">
                     
                     <div class="settings-actions">
-                        <button id="exportDataBtn" class="secondary-btn" style="margin-bottom: 8px;">書き出す</button>
-                        <button id="importDataBtn" class="primary-btn">復元する</button>
+                        <button type="button" id="exportDataBtn" class="secondary-btn" style="margin-bottom: 8px;">書き出す</button>
+                        <button type="button" id="importDataBtn" class="primary-btn">復元する</button>
                     </div>
                 </div>
                 

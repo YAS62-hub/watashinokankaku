@@ -663,13 +663,10 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.classList.remove('modal-open');
     });
 
-    // popupToggle の自動保存を廃止し、専用保存ボタンに変更
-    if (savePopupSettingBtn) {
-        savePopupSettingBtn.addEventListener('click', () => {
-            localStorage.setItem('seAppToggle', popupToggle.checked);
-            showToast('メッセージ表示の設定を保存しました🌿');
-        });
-    }
+    // popupToggle の自動保存（専用ボタン廃止に伴い復元）
+    popupToggle.addEventListener('change', (e) => {
+        localStorage.setItem('seAppToggle', e.target.checked);
+    });
 
     // === お守り通知 UIの開閉・権限要求ロジック ===
     if (pushNotificationToggle) {
@@ -745,7 +742,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (testPushBtn) {
         testPushBtn.addEventListener('click', async () => {
             if (!('Notification' in window) || !('serviceWorker' in navigator)) {
-                alert('お使いのブラウザはプッシュ通知テストに対応していません。');
+                alert('このブラウザまたは環境ではプッシュ通知がサポートされていません。\niPhoneの場合は、Safariの共有ボタンから「ホーム画面に追加」し、ホーム画面のアイコンからアプリを開いてお試しください。');
                 return;
             }
             
@@ -755,13 +752,18 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             
             if (permission !== 'granted') {
-                alert('通知が許可されていません。スマホ・ブラウザの設定をご確認ください。');
+                alert('通知が許可されていません。スマホの設定アプリから、この「ホーム画面アプリ」への通知を許可してください。');
                 return;
             }
 
             try {
-                const registration = await navigator.serviceWorker.ready;
-                let testMessage = 'アプリは無理に開かなくて大丈夫です。もしよろしければ、今のあなたを感じる時間を少しだけとってみるのはいかがでしょうか。';
+                // 確実にアクティブなServiceWorkerを取得する
+                const registration = await navigator.serviceWorker.getRegistration();
+                if (!registration) {
+                    throw new Error('Service Workerが登録されていません。');
+                }
+
+                let testMessage = '今、どんなことをかんじていらっしゃいますか？無理にアプリを開かなくても大丈夫です。';
                 
                 if (customMessageToggle && customMessageToggle.checked && customPushMessage && customPushMessage.value.trim() !== '') {
                     testMessage = customPushMessage.value;
@@ -781,7 +783,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }, 3000);
             } catch (err) {
                 console.error('テスト送信エラー:', err);
-                alert('テスト送信に失敗しました: ' + err.message);
+                alert('テスト送信に失敗しました。\n「ホーム画面」から開いているかご確認ください。詳細: ' + err.message);
             }
         });
     }
