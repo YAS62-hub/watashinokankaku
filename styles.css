@@ -1042,6 +1042,12 @@ input:checked + .toggle-slider::before {
     border-color: var(--accent);
 }
 
+.day-btn.active {
+    background-color: var(--accent);
+    color: white;
+    border-color: var(--accent);
+}
+
 .day-btn {
     border: 1px solid #DCD6CD;
     background-color: white;

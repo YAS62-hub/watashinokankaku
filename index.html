@@ -163,7 +163,7 @@
                         <input type="checkbox" id="popupToggle" checked>
                         <span class="toggle-slider"></span>
                     </label>
-                    <p class="setting-note" style="margin-bottom: 20px;">※メッセージはシステムが自動で出しています。見るのが億劫な時は遠慮なくオフにしてください。</p>
+                    <p class="setting-note" style="margin-bottom: 20px;">※メッセージはシステムが自動で出しているものです。あなたの感覚を何より大切にしてください。見るのが億劫な時は、遠慮なくオフにしてくださいね。</p>
                     
                     <div style="font-size: 0.85rem; color: var(--text-light); margin-bottom: 12px;">表示のイメージ：</div>
                     <div class="mockup-notification" style="margin-top:0; border: none; box-shadow: 0 4px 15px rgba(0,0,0,0.08); text-align: center; color: var(--text-color);">
@@ -176,6 +176,7 @@
                     <h4 class="setting-subtitle">お守り通知設定</h4>
                     <div style="font-size: 0.85rem; color: var(--text-light); margin-bottom: 12px; line-height: 1.5;">
                         あなたが希望すれば、アプリからメッセージを通知させることができます。毎日アプリを開くことや、通知を受け取ることが目的ではありません。週に1回、月に1回など、ご自身の心地よいペースで通知させるのも良いかもしれません。
+                        <br><br>たとえば、以下のようなメッセージが通知されます：
                     </div>
                     
                     <div class="mockup-notification">
@@ -429,21 +430,15 @@
     
     <script src="app.js?v=20240419_03"></script>
     <script>
-        /*
-        // iPhoneの強力なキャッシュを完全に無効化するため、一時的にService Workerへの干渉を全て停止します。
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.getRegistrations().then(function(registrations) {
-                for (let registration of registrations) {
-                    registration.unregister();
-                }
-            });
-            caches.keys().then(function(names) {
-                for (let name of names) {
-                    caches.delete(name);
-                }
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('./sw.js').then(function(registration) {
+                    console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                }, function(err) {
+                    console.log('ServiceWorker registration failed: ', err);
+                });
             });
         }
-        */
     </script>
 </body>
 </html>
