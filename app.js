@@ -668,8 +668,37 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('seAppToggle', e.target.checked);
     });
 
-    // === お守り通知 UIの開閉・権限要求ロジック ===
+    // === お守り通知 UIの開閉・権限要求・ステータス表示ロジック ===
+    function updatePushStatusAnchor() {
+        const anchor = document.getElementById('pushStatusAnchor');
+        if (!anchor) return;
+        const saved = JSON.parse(localStorage.getItem('seAppPushSettings') || 'null');
+        
+        if (!saved || !saved.enabled) {
+            anchor.textContent = '現在の設定：オフ';
+            return;
+        }
+
+        if (saved.preset === 'custom') {
+            const dayMap = { '0':'日', '1':'月', '2':'火', '3':'水', '4':'木', '5':'金', '6':'土' };
+            const daysStr = (saved.days || []).map(d => dayMap[d]).join('・');
+            const timeStr = saved.time || '未設定';
+            anchor.textContent = `現在の設定：毎週 ${daysStr}曜日の ${timeStr} に設定中`;
+        } else if (saved.preset) {
+            const presetMap = {
+                'mon-8': '毎週 月曜日の 8:00頃',
+                'wed-12': '毎週 水曜日の 12:00頃',
+                'fri-20': '毎週 金曜日の 20:00頃'
+            };
+            anchor.textContent = `現在の設定：${presetMap[saved.preset]} に設定中`;
+        } else {
+            anchor.textContent = '現在の設定：オン (未設定)';
+        }
+    }
+
     if (pushNotificationToggle) {
+        // ロード時の設定を適用し、アンカーも更新
+        updatePushStatusAnchor();
         // ロード時の初期状態を反映
         const savedPushSettings = JSON.parse(localStorage.getItem('seAppPushSettings') || 'null');
         if (savedPushSettings && savedPushSettings.enabled) {
@@ -888,30 +917,43 @@ document.addEventListener('DOMContentLoaded', () => {
 
                         // バックエンド(Worker)へ送信
                         if (subscription && WORKER_URL) {
-                            try {
-                                await fetch(WORKER_URL, {
-                                    method: 'POST',
-                                    headers: { 'Content-Type': 'application/json' },
-                                    body: JSON.stringify({
-                                        subscription: subscription,
-                                        settings: pushSettings
-                                    })
-                                });
-                            } catch(apiErr) {
-                                console.warn('バックエンドへの送信エラー:', apiErr);
+                            const res = await fetch(WORKER_URL, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    subscription: subscription,
+                                    settings: pushSettings
+                                })
+                            });
+                            
+                            if (!res.ok) {
+                                throw new Error(`サーバーへの送信に失敗しました (ステータス: ${res.status})`);
                             }
                         }
                     } catch(e) {
                         console.error('Push Service Error:', e);
+                        alert('サーバーへの登録に失敗しました。詳細: ' + e.message);
+                        return; // エラー時はここで終了し、保存処理を中断する
                     }
                 }
             }
             
+            // 全て成功した場合のみ保存
             localStorage.setItem('seAppPushSettings', JSON.stringify(pushSettings));
+            updatePushStatusAnchor();
 
-            settingsModal.classList.remove('active');
-            document.body.classList.remove('modal-open');
-            showToast('通知の設定を保存しました🌿');
+            // UIフィードバック（ボタン一時変更）
+            const originalBtnText = savePushNotificationBtn.textContent;
+            savePushNotificationBtn.textContent = '保存しました ✔';
+            savePushNotificationBtn.style.backgroundColor = '#4caf50';
+            
+            setTimeout(() => {
+                savePushNotificationBtn.textContent = originalBtnText;
+                savePushNotificationBtn.style.backgroundColor = 'var(--accent)';
+                settingsModal.classList.remove('active');
+                document.body.classList.remove('modal-open');
+                showToast('通知の設定を保存しました🌿');
+            }, 800);
         });
     }
 
