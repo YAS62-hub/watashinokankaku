@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ▼ Web Push用設定 ▼
     const PUBLIC_VAPID_KEY = 'BMJ5rnR_Mc-DW1dBvxlvGKbuaIlYPZ-930tTPk9shvIzP2GYjvPmsPJekj3UZ8Wpdhes0CiWj3ftdSkrSnBdhOo';
-    const WORKER_URL = 'https://kankaku-push-worker.yurayui.workers.dev/subscribe';
+    const WORKER_URL = 'https://kankaku-push-worker.manayui.workers.dev/subscribe';
     // ▲ ▲
     
     // カスタマイズ関連
@@ -893,9 +893,21 @@ document.addEventListener('DOMContentLoaded', () => {
                     pushSettings.preset = activePreset.getAttribute('data-preset');
                 } else if (customPresetBtn && customPresetBtn.classList.contains('active')) {
                     pushSettings.preset = 'custom';
-                    const activeDays = Array.from(document.querySelectorAll('.day-btn.active')).map(b => b.getAttribute('data-day'));
+                    const activeDays = Array.from(document.querySelectorAll('#customScheduleArea .day-btn.active')).map(b => b.getAttribute('data-day'));
                     pushSettings.days = activeDays;
                     pushSettings.time = customTimeInput ? customTimeInput.value : '';
+                    
+                    if (activeDays.length === 0) {
+                        alert('曜日が選択されていません。最低一つは曜日を選んでくださいね🌿');
+                        return;
+                    }
+                    if (!pushSettings.time) {
+                        alert('時間が指定されていません。通知する時間を設定してください🌿');
+                        return;
+                    }
+                } else {
+                    alert('通知を受け取るタイミングを「いつ届けましょうか？」の選択肢から選んでください🌿');
+                    return;
                 }
 
                 // Pushサブスクリプションの取得
@@ -917,6 +929,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
                         // バックエンド(Worker)へ送信
                         if (subscription && WORKER_URL) {
+                            console.log('--- 通知登録リクエスト送信 ---');
+                            console.log('エンドポイント:', subscription.endpoint);
+                            console.log('送信する設定 (pushSettings):', pushSettings);
+                            
                             const res = await fetch(WORKER_URL, {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
@@ -927,12 +943,18 @@ document.addEventListener('DOMContentLoaded', () => {
                             });
                             
                             if (!res.ok) {
-                                throw new Error(`サーバーへの送信に失敗しました (ステータス: ${res.status})`);
+                                throw new Error(`サーバーへの送信に失敗しました (ステータス: ${res.status} ${res.statusText})`);
                             }
+                        } else {
+                            throw new Error('Pushサブスクリプションの取得、またはサーバーURLの設定に問題があります。');
                         }
                     } catch(e) {
                         console.error('Push Service Error:', e);
-                        alert('サーバーへの登録に失敗しました。詳細: ' + e.message);
+                        alert(`通知の設定保存に失敗しました💦\n\n【エラー詳細】\n${e.message}\n\n※「Failed to fetch」と表示される場合は、通信エラーやCORS設定起因の可能性があります。`);
+                        
+                        // エラー時もボタンの見た目を戻す（念のため）
+                        savePushNotificationBtn.textContent = '通知設定を保存';
+                        savePushNotificationBtn.style.backgroundColor = 'var(--accent)';
                         return; // エラー時はここで終了し、保存処理を中断する
                     }
                 }
