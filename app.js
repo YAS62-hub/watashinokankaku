@@ -910,10 +910,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     return;
                 }
 
-                // Pushサブスクリプションの取得
+                // Pushサブスクリプションの取得とサーバーへの送信
                 if ('serviceWorker' in navigator && 'PushManager' in window) {
+                    let currentPhase = 'フェーズA: Service Worker の準備段階';
                     try {
                         const registration = await navigator.serviceWorker.ready;
+                        
+                        currentPhase = 'フェーズB: Push Subscription の取得段階';
                         let subscription = await registration.pushManager.getSubscription();
                         if (!subscription) {
                             try {
@@ -924,16 +927,22 @@ document.addEventListener('DOMContentLoaded', () => {
                                 });
                             } catch(subErr) {
                                 console.warn('サブスクリプション登録に失敗しました。', subErr);
+                                throw new Error('サブスクリプションの登録に失敗しました (' + subErr.message + ')');
                             }
                         }
 
-                        // バックエンド(Worker)へ送信
-                        if (subscription && WORKER_URL) {
-                            console.log('--- 通知登録リクエスト送信 ---');
-                            console.log('エンドポイント:', subscription.endpoint);
-                            console.log('送信する設定 (pushSettings):', pushSettings);
-                            
-                            const res = await fetch(WORKER_URL, {
+                        if (!subscription || !WORKER_URL) {
+                            throw new Error('Pushサブスクリプションの取得、またはサーバーURLの設定に問題があります。');
+                        }
+
+                        currentPhase = 'フェーズC: Worker への fetch 送信段階 (ネットワーク等)';
+                        console.log('--- 通知登録リクエスト送信 ---');
+                        console.log('エンドポイント:', subscription.endpoint);
+                        console.log('送信する設定 (pushSettings):', pushSettings);
+                        
+                        let res;
+                        try {
+                            res = await fetch(WORKER_URL, {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify({
@@ -941,16 +950,24 @@ document.addEventListener('DOMContentLoaded', () => {
                                     settings: pushSettings
                                 })
                             });
-                            
-                            if (!res.ok) {
-                                throw new Error(`サーバーへの送信に失敗しました (ステータス: ${res.status} ${res.statusText})`);
+                        } catch (fetchErr) {
+                            throw new Error(`通信エラーによってWorkerへ到達できませんでした: ${fetchErr.message}`);
+                        }
+                        
+                        currentPhase = 'フェーズD: Worker からのレスポンス結果検証';
+                        if (!res.ok) {
+                            let serverMessage = '';
+                            try {
+                                const errJson = await res.json();
+                                serverMessage = errJson.error || JSON.stringify(errJson);
+                            } catch(parseErr) {
+                                serverMessage = await res.text();
                             }
-                        } else {
-                            throw new Error('Pushサブスクリプションの取得、またはサーバーURLの設定に問題があります。');
+                            throw new Error(`サーバーレスポンスエラー (ステータス: ${res.status})\n理由: ${serverMessage}`);
                         }
                     } catch(e) {
-                        console.error('Push Service Error:', e);
-                        alert(`通知の設定保存に失敗しました💦\n\n【エラー詳細】\n${e.message}\n\n※「Failed to fetch」と表示される場合は、通信エラーやCORS設定起因の可能性があります。`);
+                        console.error(`Push Service Error [${currentPhase}]:`, e);
+                        alert(`保存エラー [${currentPhase}]\n\n【エラー詳細】\n${e.message}`);
                         
                         // エラー時もボタンの見た目を戻す（念のため）
                         savePushNotificationBtn.textContent = '通知設定を保存';
