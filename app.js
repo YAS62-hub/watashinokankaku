@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const savePopupSettingBtn = document.getElementById('savePopupSettingBtn');
 
     // ▼ Web Push用設定 ▼
-    const PUBLIC_VAPID_KEY = 'BMJ5rnR_Mc-DW1dBvxlvGKbuaIlYPZ-930tTPk9shvIzP2GYjvPmsPJekj3UZ8Wpdhes0CiWj3ftdSkrSnBdhOo';
+    const PUBLIC_VAPID_KEY = 'BChzasvjXSzdQCs0UU2N1u79EB2HOz7m_aBHLMZ9cgWz3cwnpzrJGPFERBT3WC_0Ye5t2pIbCxHS2_VTnr5FD0w';
     const WORKER_URL = 'https://kankaku-push-worker.yurayui.workers.dev';
     // ▲ ▲
     
