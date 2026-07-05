@@ -1,4 +1,4 @@
-const CACHE_NAME = 'se-app-v3'; // バージョン。変更すると更新が強制されます
+const CACHE_NAME = 'se-app-v4'; // バージョン。変更すると更新が強制されます
 
 self.addEventListener('install', (e) => {
     self.skipWaiting(); // 新しいバージョンを即座にインストール
@@ -18,6 +18,12 @@ self.addEventListener('activate', (e) => {
 });
 
 self.addEventListener('fetch', (e) => {
+    // 外部のバックエンドAPI（通知サーバー等）への通信や、POSTリクエストはキャッシュを完全にバイパスする
+    if (e.request.method !== 'GET' || e.request.url.includes('kankaku-push-worker.yurayui.workers.dev')) {
+        e.respondWith(fetch(e.request));
+        return;
+    }
+
     // ネットワーク・ファースト戦略（常に最新を取りに行き、オフライン時のみキャッシュを使う）
     e.respondWith(
         fetch(e.request)
