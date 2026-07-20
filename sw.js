@@ -1,4 +1,4 @@
-const CACHE_NAME = 'se-app-v5'; // バージョン。変更すると更新が強制されます
+const CACHE_NAME = 'se-app-v6'; // バージョン。変更すると更新が強制されます
 
 self.addEventListener('install', (e) => {
     self.skipWaiting(); // 新しいバージョンを即座にインストール
@@ -18,19 +18,10 @@ self.addEventListener('activate', (e) => {
 });
 
 self.addEventListener('fetch', (e) => {
-    // 外部のバックエンドAPI（通知サーバー等）への通信や、POSTリクエストはキャッシュを完全にバイパスする
+    // 外部バックエンドAPI（kankaku-push-worker等）宛てのリクエスト、および非GETリクエストは
+    // e.respondWith を一切呼ばずに return するだけ。
+    // これによりSWは一切介入せず、ブラウザ本来のネットワークスタックで通信が処理される（完全パススルー）。
     if (e.request.method !== 'GET' || e.request.url.includes('kankaku-push-worker.yurayui.workers.dev')) {
-        // パススルー：キャッシュを一切使わず直接ネットワークへ転送する
-        // catch でネットワークエラー時も必ず有効な Response を返し、"null response" エラーを防ぐ
-        e.respondWith(
-            fetch(e.request).catch(err => {
-                console.warn('[SW] パススルーfetch失敗:', err);
-                return new Response(JSON.stringify({ error: 'Network error', details: err.message }), {
-                    status: 503,
-                    headers: { 'Content-Type': 'application/json' }
-                });
-            })
-        );
         return;
     }
 
