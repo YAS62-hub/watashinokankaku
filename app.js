@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ▼ Web Push用設定 ▼
     const PUBLIC_VAPID_KEY = 'BChzasvjXSzdQCs0UU2N1u79EB2HOz7m_aBHLMZ9cgWz3cwnpzrJGPFERBT3WC_0Ye5t2pIbCxHS2_VTnr5FD0w';
-    const WORKER_URL = 'https://kankaku-push-worker.yurayui.workers.dev';
+    const WORKER_URL = 'https://kankaku-push-worker.manayui.workers.dev';
     // ▲ ▲
     
     // カスタマイズ関連

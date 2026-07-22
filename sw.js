@@ -1,4 +1,4 @@
-const CACHE_NAME = 'se-app-v6'; // バージョン。変更すると更新が強制されます
+const CACHE_NAME = 'se-app-v7'; // バージョン。変更すると更新が強制されます
 
 self.addEventListener('install', (e) => {
     self.skipWaiting(); // 新しいバージョンを即座にインストール
@@ -21,7 +21,8 @@ self.addEventListener('fetch', (e) => {
     // 外部バックエンドAPI（kankaku-push-worker等）宛てのリクエスト、および非GETリクエストは
     // e.respondWith を一切呼ばずに return するだけ。
     // これによりSWは一切介入せず、ブラウザ本来のネットワークスタックで通信が処理される（完全パススルー）。
-    if (e.request.method !== 'GET' || e.request.url.includes('kankaku-push-worker.yurayui.workers.dev')) {
+    // URLのサブドメインが変わっても確実にバイパスできるよう、Worker名（kankaku-push-worker）で判定する。
+    if (e.request.method !== 'GET' || e.request.url.includes('kankaku-push-worker')) {
         return;
     }
 
