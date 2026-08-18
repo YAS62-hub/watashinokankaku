@@ -1,4 +1,4 @@
-const CACHE_NAME = 'se-app-v7'; // バージョン。変更すると更新が強制されます
+const CACHE_NAME = 'se-app-v8'; // バージョン。変更すると更新が強制されます
 
 self.addEventListener('install', (e) => {
     self.skipWaiting(); // 新しいバージョンを即座にインストール
