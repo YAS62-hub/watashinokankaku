@@ -29,9 +29,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // ポップアップ設定用
     const savePopupSettingBtn = document.getElementById('savePopupSettingBtn');
 
-    // ▼ Web Push用設定（検証用 kankaku-push-worker-dev / 検証が終わったら本番用に戻すこと） ▼
-    const PUBLIC_VAPID_KEY = 'BDfEPfaIie29hLfPLdksnn4WAlzZcNExDepZCRjDfuZ4V3mUB1ZthUclUAkRJd_Q-JHVROTC3UUY0hlMO4y2Jmo';
-    const WORKER_URL = 'https://kankaku-push-worker-dev.manayui.workers.dev';
+    // ▼ Web Push用設定（本番） ▼
+    const PUBLIC_VAPID_KEY = 'BM3cP2snk75QJ6OlTK2dMRSUmKyivtGqBq9wqhP34FhJ1rNJ_umuTDp8_4SEyHh5ncCbNjKeoPH_JdIsXWTUBSo';
+    const WORKER_URL = 'https://kankaku-push-worker.manayui.workers.dev';
     // ▲ ▲
     
     // カスタマイズ関連
