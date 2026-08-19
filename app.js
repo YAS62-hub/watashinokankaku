@@ -1829,10 +1829,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let currentPaletteTargetInput = null;
     const PALETTE_COLORS = ['🔴', '🟠', '🟡', '🟢', '🟤', '⚪️', '🔵', '🔘', '⚫️'];
+    // PALETTE_GROUPS（最新の感覚パレット）から派生させ、設定画面と記録画面の語彙が二重管理でズレないようにする
     const PALETTE_WORDS = {
-        high: ['戦闘モード', '視野が狭い', 'しゅぽしゅぽ', 'カッとなる', 'そわそわ', '頭が真っ白', 'キュッと縮こまる', '張り詰める'],
-        mid: ['地に足がついている', 'ぽかぽか', '血が巡る感じ', 'ふうっと一息', '余白', 'ホッとする', '呼吸が自然', 'ちょっといい感じ'],
-        low: ['岩のよう', '冬眠中', '電源オフ', '感覚が遠い', '泥のように休みたい', '頭にモヤ', '麻痺', '感覚が消える']
+        high: PALETTE_GROUPS.filter(g => [100, 85].includes(g.score)).flatMap(g => g.words),
+        mid: PALETTE_GROUPS.filter(g => [65, 50, 35].includes(g.score)).flatMap(g => g.words),
+        low: PALETTE_GROUPS.filter(g => [15, 0].includes(g.score)).flatMap(g => g.words)
     };
 
     function openPalette(zone, targetInputId, showColors) {
