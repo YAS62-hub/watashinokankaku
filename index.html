@@ -295,9 +295,13 @@
             <div class="modal-content tutorial-modal-content">
                 <button class="close-button" id="closeTutorial" aria-label="あとで見る">×</button>
 
+                <div class="tutorial-resume-note" id="tutorialResumeNote" style="display: none;">
+                    ホーム画面への追加、ありがとうございます。続きからご案内します。
+                </div>
+
                 <div class="tutorial-slides">
                     <div class="tutorial-slide" data-slide="1">
-                        <p class="tutorial-text">「わたしのかんかく」へようこそ。<br><br>ここは、あなたの感覚を置いてけぼりにしないための場所です。</p>
+                        <p class="tutorial-text">「わたしのかんかく」へようこそ。<br><br>ここは、あなたの感覚を置いてけぼりにしないための場所です。<br><br><span style="font-size: 0.85rem; color: var(--text-light);">ご案内する内容は、あとからいつでも変更できます。この案内も、設定画面からいつでも見返せます。</span></p>
                     </div>
                     <div class="tutorial-slide" data-slide="2">
                         <p class="tutorial-text">何よりも、あなたの今の感覚、主体性を大切にしていただきたいと願います。<br><br>ですから、アプリが提案することは、あくまで選択肢です。</p>
@@ -316,8 +320,12 @@
                     <div class="tutorial-slide" data-slide="5">
                         <p class="tutorial-text">
                             現在の記録をファイル（.json）として端末内に保存できます。機種変更時などは、そのファイルを読み込むことで復元できます。<br><br>
-                            大切な記録を守るために、時々設定画面から「バックアップファイル」をダウンロードしておくのがおすすめです。
+                            大切な記録を守るために、時々「バックアップファイル」をダウンロードしておくのがおすすめです。
                         </p>
+                        <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 12px;">
+                            <button type="button" id="tutorialTryBackupBtn" class="secondary-btn">バックアップを試してみる</button>
+                            <span style="font-size: 0.8rem; color: var(--text-light);">あとで行う場合は、設定画面からいつでもできます。</span>
+                        </div>
                     </div>
                     <div class="tutorial-slide" data-slide="6">
                         <p class="tutorial-text">記録を促さない「お守りの言葉」を、ご自身のペースで通知することもできます。<br><br>もしよろしければ、設定してみますか？</p>

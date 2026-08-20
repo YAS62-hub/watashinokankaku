@@ -1966,16 +1966,29 @@ document.addEventListener('DOMContentLoaded', () => {
     const closeTutorial = document.getElementById('closeTutorial');
     const reopenTutorialBtn = document.getElementById('reopenTutorialBtn');
     const tutorialSlide4Text = document.getElementById('tutorialSlide4Text');
+    const tutorialTryBackupBtn = document.getElementById('tutorialTryBackupBtn');
+    const tutorialResumeNote = document.getElementById('tutorialResumeNote');
 
     const TUTORIAL_TOTAL_SLIDES = 6;
+    const TUTORIAL_RESUME_KEY = 'seAppTutorialResumeSlide';
     let tutorialCurrentSlide = 1;
 
+    function isIOSDevice() {
+        return /iPhone|iPad|iPod/.test(navigator.userAgent);
+    }
+
+    function isStandaloneMode() {
+        return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+    }
+
     function getTutorialDeviceGuideText() {
-        const ua = navigator.userAgent;
-        const isIOS = /iPhone|iPad|iPod/.test(ua);
-        const isAndroid = /Android/.test(ua);
+        const isIOS = isIOSDevice();
+        const isAndroid = /Android/.test(navigator.userAgent);
         if (isIOS) {
-            return 'ホーム画面に追加すると、いつでもすぐに開けます。<br><br>Safariの共有ボタン（四角に上矢印のマーク）をタップし、「ホーム画面に追加」を選んでください。';
+            if (isStandaloneMode()) {
+                return 'ホーム画面に追加済みですね。ありがとうございます。<br><br>このまま続きをご案内します。';
+            }
+            return 'ホーム画面に追加すると、いつでもすぐに開けます。<br><br>Safariの共有ボタン（四角に上矢印のマーク）をタップし、「ホーム画面に追加」を選んでください。<br><br>追加後、ホーム画面のアイコンから開いていただくと、続きからご案内します。今のまま次へ進んでいただいても大丈夫です。';
         }
         if (isAndroid) {
             return 'ホーム画面に追加すると、いつでもすぐに開けます。<br><br>ブラウザのメニュー（︙）をタップし、「ホーム画面に追加」または「アプリをインストール」を選んでください。';
@@ -2003,13 +2016,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (tutorialCurrentSlide === 4 && tutorialSlide4Text) {
             tutorialSlide4Text.innerHTML = getTutorialDeviceGuideText();
+            // ホーム画面未追加のiOSユーザーには、追加後アイコンから開いた時に続きから再開できるよう目印を残す
+            if (isIOSDevice() && !isStandaloneMode()) {
+                localStorage.setItem(TUTORIAL_RESUME_KEY, '5');
+            }
         }
     }
 
-    function openTutorial(startSlide) {
+    function openTutorial(startSlide, resumed) {
         if (!tutorialModal) return;
         tutorialCurrentSlide = startSlide || 1;
         renderTutorialSlide();
+        if (tutorialResumeNote) tutorialResumeNote.style.display = resumed ? 'block' : 'none';
         tutorialModal.classList.add('active');
         document.body.classList.add('modal-open');
     }
@@ -2077,7 +2095,17 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    if (!localStorage.getItem('seAppTutorialSeen')) {
+    if (tutorialTryBackupBtn) {
+        tutorialTryBackupBtn.addEventListener('click', () => {
+            if (exportDataBtn) exportDataBtn.click();
+        });
+    }
+
+    const tutorialResumeSlide = localStorage.getItem(TUTORIAL_RESUME_KEY);
+    if (isStandaloneMode() && tutorialResumeSlide) {
+        localStorage.removeItem(TUTORIAL_RESUME_KEY);
+        setTimeout(() => openTutorial(Number(tutorialResumeSlide), true), 300);
+    } else if (!localStorage.getItem('seAppTutorialSeen')) {
         setTimeout(() => openTutorial(1), 300);
     }
 
