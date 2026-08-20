@@ -2053,9 +2053,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (tutorialCurrentSlide === 4 && tutorialSlide4Text) {
             const encourageAdd = renderTutorialSlide4();
-            if (tutorialNextBtn) tutorialNextBtn.classList.toggle('tutorial-next-subtle', encourageAdd);
+            if (tutorialNextBtn) {
+                tutorialNextBtn.classList.toggle('tutorial-next-subtle', encourageAdd);
+                // 絵を展開した後は「次へ」が追加操作の続きに読めてしまうため、スキップだと明示する
+                tutorialNextBtn.textContent = (encourageAdd && tutorialSlide4Revealed) ? '今は追加せず次へ' : '次へ';
+            }
         } else if (tutorialNextBtn) {
             tutorialNextBtn.classList.remove('tutorial-next-subtle');
+            tutorialNextBtn.textContent = '次へ';
         }
     }
 
@@ -2141,7 +2146,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (tutorialAddHomeBtn) {
         tutorialAddHomeBtn.addEventListener('click', () => {
             tutorialSlide4Revealed = true;
-            renderTutorialSlide4();
+            renderTutorialSlide();
         });
     }
 
