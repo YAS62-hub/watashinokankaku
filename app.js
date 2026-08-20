@@ -1981,19 +1981,43 @@ document.addEventListener('DOMContentLoaded', () => {
         return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
     }
 
-    function getTutorialDeviceGuideText() {
+    function renderTutorialSlide4() {
+        const stepsEl = document.getElementById('tutorialSteps');
         const isIOS = isIOSDevice();
         const isAndroid = /Android/.test(navigator.userAgent);
-        if (isIOS) {
-            if (isStandaloneMode()) {
-                return 'ホーム画面に追加済みですね。ありがとうございます。<br><br>このまま続きをご案内します。';
+        const isMobile = isIOS || isAndroid;
+
+        if (!isMobile) {
+            tutorialSlide4Text.innerHTML = 'このアプリは、いつでも取り出しやすいスマートフォンでご利用いただくことを想定して作っています。<br><br>もしよろしければ、お手持ちのスマートフォンでこのページを開いていただくのがおすすめです。';
+            if (stepsEl) stepsEl.style.display = 'none';
+            return false;
+        }
+
+        if (isStandaloneMode()) {
+            tutorialSlide4Text.innerHTML = 'ホーム画面に追加済みですね。ありがとうございます。<br><br>このまま続きをご案内します。';
+            if (stepsEl) stepsEl.style.display = 'none';
+            return false;
+        }
+
+        tutorialSlide4Text.innerHTML = 'ホーム画面に追加すると、いつもお使いのアプリのように開け、記録や通知もより安定してご利用いただけます。';
+        if (stepsEl) {
+            stepsEl.style.display = 'flex';
+            const label1 = document.getElementById('tutorialStepLabel1');
+            const label2 = document.getElementById('tutorialStepLabel2');
+            const label3 = document.getElementById('tutorialStepLabel3');
+            if (isIOS) {
+                if (label1) label1.textContent = '共有ボタン（見当たらなければ「•••」）をタップ';
+                if (label2) label2.textContent = '「ホーム画面に追加」を選ぶ';
+                if (label3) label3.textContent = '「追加」をタップ';
+            } else {
+                if (label1) label1.textContent = 'メニュー（︙）をタップ';
+                if (label2) label2.textContent = '「ホーム画面に追加」を選ぶ';
+                if (label3) label3.textContent = '「追加」をタップ';
             }
-            return 'ホーム画面に追加すると、いつでもすぐに開けます。<br><br>Safariの共有ボタン（四角に上矢印のマーク）をタップし、「ホーム画面に追加」を選んでください。<br><br>追加後、ホーム画面のアイコンから開いていただくと、続きからご案内します。今のまま次へ進んでいただいても大丈夫です。';
         }
-        if (isAndroid) {
-            return 'ホーム画面に追加すると、いつでもすぐに開けます。<br><br>ブラウザのメニュー（︙）をタップし、「ホーム画面に追加」または「アプリをインストール」を選んでください。';
-        }
-        return 'このアプリは、いつでも取り出しやすいスマートフォンでご利用いただくことを想定して作っています。<br><br>もしよろしければ、お手持ちのスマートフォンでこのページを開いていただくのがおすすめです。';
+        // ホーム画面未追加のユーザーには、追加後アイコンから開いた時に続きから再開できるよう目印を残す
+        localStorage.setItem(TUTORIAL_RESUME_KEY, '5');
+        return true;
     }
 
     function renderTutorialSlide() {
@@ -2015,11 +2039,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (tutorialNextBtn) tutorialNextBtn.classList.toggle('tutorial-nav-hidden', isLastSlide);
 
         if (tutorialCurrentSlide === 4 && tutorialSlide4Text) {
-            tutorialSlide4Text.innerHTML = getTutorialDeviceGuideText();
-            // ホーム画面未追加のiOSユーザーには、追加後アイコンから開いた時に続きから再開できるよう目印を残す
-            if (isIOSDevice() && !isStandaloneMode()) {
-                localStorage.setItem(TUTORIAL_RESUME_KEY, '5');
-            }
+            const encourageAdd = renderTutorialSlide4();
+            if (tutorialNextBtn) tutorialNextBtn.classList.toggle('tutorial-next-subtle', encourageAdd);
+        } else if (tutorialNextBtn) {
+            tutorialNextBtn.classList.remove('tutorial-next-subtle');
         }
     }
 
