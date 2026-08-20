@@ -1011,6 +1011,43 @@ input:checked + .toggle-slider::before {
     gap: 10px;
 }
 
+/* 設定画面カスタマイズ用パレットの折りたたみ（アコーディオン） */
+.palette-accordion-group {
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.palette-accordion-heading {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.85rem;
+    color: #5C5446;
+    padding: 10px 16px;
+    background-color: rgba(0, 0, 0, 0.02);
+    border: 1px solid #EAE6DB;
+    border-radius: 16px;
+    cursor: pointer;
+    text-align: left;
+}
+
+.palette-accordion-arrow {
+    color: #8A8172;
+    font-size: 0.75rem;
+}
+
+.palette-accordion-body {
+    display: none;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 12px 4px 0;
+}
+
+.palette-accordion-group.is-open .palette-accordion-body {
+    display: flex;
+}
+
 /* =========================================
    ボタングループのスタイリング（余白復活）
    ========================================= */

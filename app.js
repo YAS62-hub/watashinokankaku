@@ -1829,12 +1829,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let currentPaletteTargetInput = null;
     const PALETTE_COLORS = ['🔴', '🟠', '🟡', '🟢', '🟤', '⚪️', '🔵', '🔘', '⚫️'];
-    // PALETTE_GROUPS（最新の感覚パレット）から派生させ、設定画面と記録画面の語彙が二重管理でズレないようにする
-    const PALETTE_WORDS = {
-        high: PALETTE_GROUPS.filter(g => [100, 85].includes(g.score)).flatMap(g => g.words),
-        mid: PALETTE_GROUPS.filter(g => [65, 50, 35].includes(g.score)).flatMap(g => g.words),
-        low: PALETTE_GROUPS.filter(g => [15, 0].includes(g.score)).flatMap(g => g.words)
-    };
 
     function openPalette(zone, targetInputId, showColors) {
         currentPaletteTargetInput = targetInputId;
@@ -1856,15 +1850,41 @@ document.addEventListener('DOMContentLoaded', () => {
             paletteColors.style.display = 'none';
         }
 
-        // Render words
+        // Render words（ゾーンごとに折りたたみ表示。一度に全語彙を見せず、必要な分だけそっと開けるようにする）
         paletteWords.innerHTML = '';
-        const words = PALETTE_WORDS[zone] || [];
-        words.forEach(word => {
-            const btn = document.createElement('button');
-            btn.textContent = word;
-            btn.style.cssText = 'font-size: 0.85rem; padding: 6px 12px; border: 1px solid #D6D2CA; background: #FFF; border-radius: 20px; color: #5C5446; cursor: pointer; margin-bottom:4px;';
-            btn.onclick = () => addToInput(word);
-            paletteWords.appendChild(btn);
+        let targetScores = [];
+        if (zone === 'high') targetScores = [100, 85];
+        else if (zone === 'mid') targetScores = [65, 50, 35];
+        else if (zone === 'low') targetScores = [15, 0];
+
+        const targetGroups = PALETTE_GROUPS.filter(g => targetScores.includes(g.score));
+
+        targetGroups.forEach(group => {
+            const groupDiv = document.createElement('div');
+            groupDiv.className = 'palette-accordion-group';
+
+            const heading = document.createElement('button');
+            heading.type = 'button';
+            heading.className = 'palette-accordion-heading';
+            heading.innerHTML = `<span>${group.title}</span><span class="palette-accordion-arrow">▾</span>`;
+            heading.addEventListener('click', () => {
+                const isOpen = groupDiv.classList.toggle('is-open');
+                heading.querySelector('.palette-accordion-arrow').textContent = isOpen ? '▴' : '▾';
+            });
+
+            const chipsDiv = document.createElement('div');
+            chipsDiv.className = 'palette-accordion-body';
+            group.words.forEach(word => {
+                const btn = document.createElement('button');
+                btn.textContent = word;
+                btn.style.cssText = 'font-size: 0.85rem; padding: 6px 12px; border: 1px solid #D6D2CA; background: #FFF; border-radius: 20px; color: #5C5446; cursor: pointer; margin-bottom:4px;';
+                btn.onclick = () => addToInput(word);
+                chipsDiv.appendChild(btn);
+            });
+
+            groupDiv.appendChild(heading);
+            groupDiv.appendChild(chipsDiv);
+            paletteWords.appendChild(groupDiv);
         });
 
         if (paletteModal) {
