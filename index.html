@@ -172,7 +172,7 @@
                     </div>
                 </div>
 
-                <div class="setting-card">
+                <div class="setting-card" id="pushNotificationCard">
                     <h4 class="setting-subtitle" style="margin-bottom: 8px;">お守り通知設定</h4>
                     
                     <div id="pushStatusAnchor" style="background-color: #F8F7F4; border-radius: 8px; padding: 12px; margin-bottom: 16px; font-size: 0.9rem; color: var(--text-color); font-weight: 500; border: 1px solid rgba(0,0,0,0.05); text-align: center;">
@@ -283,6 +283,64 @@
                     アプリについて：わたしのかんかく v10.1.0
                 </div>
 
+                <div style="text-align: center; margin-top: 16px;">
+                    <button type="button" id="reopenTutorialBtn" class="secondary-btn" style="font-size: 0.85rem; padding: 10px 20px;">使い方をもう一度みる</button>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- 初回チュートリアルモーダル -->
+        <div id="tutorialModal" class="modal">
+            <div class="modal-content tutorial-modal-content">
+                <button class="close-button" id="closeTutorial" aria-label="あとで見る">×</button>
+
+                <div class="tutorial-slides">
+                    <div class="tutorial-slide" data-slide="1">
+                        <p class="tutorial-text">「わたしのかんかく」へようこそ。<br><br>ここは、あなたの感覚を置いてけぼりにしないための場所です。</p>
+                    </div>
+                    <div class="tutorial-slide" data-slide="2">
+                        <p class="tutorial-text">何よりも、あなたの今の感覚、主体性を大切にしていただきたいと願います。<br><br>ですから、アプリが提案することは、あくまで選択肢です。</p>
+                    </div>
+                    <div class="tutorial-slide" data-slide="3">
+                        <p class="tutorial-text">
+                            ・記録しても、しなくてもいい<br>
+                            ・「よくわからない」のも、大切な感覚<br>
+                            ・「NO！」と言って、いつでも通知やメッセージをオフにする<br><br>
+                            …これらもすべて、あなたを守る大切な選択です。
+                        </p>
+                    </div>
+                    <div class="tutorial-slide" data-slide="4">
+                        <p class="tutorial-text" id="tutorialSlide4Text"></p>
+                    </div>
+                    <div class="tutorial-slide" data-slide="5">
+                        <p class="tutorial-text">
+                            現在の記録をファイル（.json）として端末内に保存できます。機種変更時などは、そのファイルを読み込むことで復元できます。<br><br>
+                            大切な記録を守るために、時々設定画面から「バックアップファイル」をダウンロードしておくのがおすすめです。
+                        </p>
+                    </div>
+                    <div class="tutorial-slide" data-slide="6">
+                        <p class="tutorial-text">記録を促さない「お守りの言葉」を、ご自身のペースで通知することもできます。<br><br>もしよろしければ、設定してみますか？</p>
+                        <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 20px;">
+                            <button type="button" id="tutorialGoToNotificationBtn" class="primary-btn">通知設定を見てみる</button>
+                            <button type="button" id="tutorialFinishBtn" class="secondary-btn">とじる</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tutorial-dots" id="tutorialDots">
+                    <span class="tutorial-dot" data-dot="1"></span>
+                    <span class="tutorial-dot" data-dot="2"></span>
+                    <span class="tutorial-dot" data-dot="3"></span>
+                    <span class="tutorial-dot" data-dot="4"></span>
+                    <span class="tutorial-dot" data-dot="5"></span>
+                    <span class="tutorial-dot" data-dot="6"></span>
+                </div>
+
+                <div class="tutorial-nav">
+                    <button type="button" id="tutorialBackBtn" class="secondary-btn tutorial-nav-btn">戻る</button>
+                    <button type="button" id="tutorialNextBtn" class="primary-btn tutorial-nav-btn">次へ</button>
+                </div>
             </div>
         </div>
 

@@ -1955,6 +1955,132 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // === 初回チュートリアル ===
+    const tutorialModal = document.getElementById('tutorialModal');
+    const tutorialSlides = tutorialModal ? tutorialModal.querySelectorAll('.tutorial-slide') : [];
+    const tutorialDots = tutorialModal ? tutorialModal.querySelectorAll('.tutorial-dot') : [];
+    const tutorialBackBtn = document.getElementById('tutorialBackBtn');
+    const tutorialNextBtn = document.getElementById('tutorialNextBtn');
+    const tutorialGoToNotificationBtn = document.getElementById('tutorialGoToNotificationBtn');
+    const tutorialFinishBtn = document.getElementById('tutorialFinishBtn');
+    const closeTutorial = document.getElementById('closeTutorial');
+    const reopenTutorialBtn = document.getElementById('reopenTutorialBtn');
+    const tutorialSlide4Text = document.getElementById('tutorialSlide4Text');
+
+    const TUTORIAL_TOTAL_SLIDES = 6;
+    let tutorialCurrentSlide = 1;
+
+    function getTutorialDeviceGuideText() {
+        const ua = navigator.userAgent;
+        const isIOS = /iPhone|iPad|iPod/.test(ua);
+        const isAndroid = /Android/.test(ua);
+        if (isIOS) {
+            return 'ホーム画面に追加すると、いつでもすぐに開けます。<br><br>Safariの共有ボタン（四角に上矢印のマーク）をタップし、「ホーム画面に追加」を選んでください。';
+        }
+        if (isAndroid) {
+            return 'ホーム画面に追加すると、いつでもすぐに開けます。<br><br>ブラウザのメニュー（︙）をタップし、「ホーム画面に追加」または「アプリをインストール」を選んでください。';
+        }
+        return 'このアプリは、いつでも取り出しやすいスマートフォンでご利用いただくことを想定して作っています。<br><br>もしよろしければ、お手持ちのスマートフォンでこのページを開いていただくのがおすすめです。';
+    }
+
+    function renderTutorialSlide() {
+        tutorialSlides.forEach(slide => {
+            const isActive = Number(slide.dataset.slide) === tutorialCurrentSlide;
+            if (isActive) {
+                slide.classList.add('active');
+                requestAnimationFrame(() => slide.classList.add('tutorial-fade-in'));
+            } else {
+                slide.classList.remove('active', 'tutorial-fade-in');
+            }
+        });
+        tutorialDots.forEach(dot => {
+            dot.classList.toggle('active', Number(dot.dataset.dot) === tutorialCurrentSlide);
+        });
+
+        if (tutorialBackBtn) tutorialBackBtn.classList.toggle('tutorial-nav-hidden', tutorialCurrentSlide === 1);
+        const isLastSlide = tutorialCurrentSlide === TUTORIAL_TOTAL_SLIDES;
+        if (tutorialNextBtn) tutorialNextBtn.classList.toggle('tutorial-nav-hidden', isLastSlide);
+
+        if (tutorialCurrentSlide === 4 && tutorialSlide4Text) {
+            tutorialSlide4Text.innerHTML = getTutorialDeviceGuideText();
+        }
+    }
+
+    function openTutorial(startSlide) {
+        if (!tutorialModal) return;
+        tutorialCurrentSlide = startSlide || 1;
+        renderTutorialSlide();
+        tutorialModal.classList.add('active');
+        document.body.classList.add('modal-open');
+    }
+
+    function closeTutorialModal() {
+        if (!tutorialModal) return;
+        tutorialModal.classList.remove('active');
+        document.body.classList.remove('modal-open');
+        localStorage.setItem('seAppTutorialSeen', 'true');
+    }
+
+    if (tutorialNextBtn) {
+        tutorialNextBtn.addEventListener('click', () => {
+            if (tutorialCurrentSlide < TUTORIAL_TOTAL_SLIDES) {
+                tutorialCurrentSlide++;
+                renderTutorialSlide();
+            }
+        });
+    }
+
+    if (tutorialBackBtn) {
+        tutorialBackBtn.addEventListener('click', () => {
+            if (tutorialCurrentSlide > 1) {
+                tutorialCurrentSlide--;
+                renderTutorialSlide();
+            }
+        });
+    }
+
+    if (closeTutorial) {
+        closeTutorial.addEventListener('click', closeTutorialModal);
+    }
+
+    if (tutorialFinishBtn) {
+        tutorialFinishBtn.addEventListener('click', closeTutorialModal);
+    }
+
+    if (tutorialModal) {
+        tutorialModal.addEventListener('click', (e) => {
+            if (e.target === tutorialModal) closeTutorialModal();
+        });
+    }
+
+    if (tutorialGoToNotificationBtn) {
+        tutorialGoToNotificationBtn.addEventListener('click', () => {
+            closeTutorialModal();
+            if (settingsModal) {
+                settingsModal.classList.add('active');
+                document.body.classList.add('modal-open');
+                setTimeout(() => {
+                    const pushCard = document.getElementById('pushNotificationCard');
+                    if (pushCard) pushCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 100);
+            }
+        });
+    }
+
+    if (reopenTutorialBtn) {
+        reopenTutorialBtn.addEventListener('click', () => {
+            if (settingsModal) {
+                settingsModal.classList.remove('active');
+                document.body.classList.remove('modal-open');
+            }
+            setTimeout(() => openTutorial(1), 200);
+        });
+    }
+
+    if (!localStorage.getItem('seAppTutorialSeen')) {
+        setTimeout(() => openTutorial(1), 300);
+    }
+
     // 最初の一回描画
     renderResources();
     updateTodayWord();

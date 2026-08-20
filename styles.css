@@ -507,6 +507,73 @@ body.modal-open {
     font-weight: 500;
 }
 
+/* 初回チュートリアル */
+.tutorial-modal-content {
+    padding-top: 44px;
+    text-align: center;
+}
+
+.tutorial-slide {
+    display: none;
+}
+
+.tutorial-slide.active {
+    display: block;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+
+.tutorial-slide.active.tutorial-fade-in {
+    opacity: 1;
+}
+
+.tutorial-text {
+    font-size: 1.02rem;
+    line-height: 2;
+    color: var(--text-color);
+    min-height: 140px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 8px 4px;
+}
+
+.tutorial-dots {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.tutorial-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background-color: #DCD6CD;
+    transition: background-color 0.3s ease;
+}
+
+.tutorial-dot.active {
+    background-color: var(--accent);
+}
+
+.tutorial-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 24px;
+}
+
+.tutorial-nav-btn {
+    min-width: 88px;
+}
+
+#tutorialBackBtn.tutorial-nav-hidden,
+#tutorialNextBtn.tutorial-nav-hidden {
+    visibility: hidden;
+}
+
 .setting-item {
     margin-bottom: 16px;
 }
