@@ -755,7 +755,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         pushNotificationDetails.style.display = 'none';
                     }
                 } else {
-                    alert('お使いのブラウザはプッシュ通知に対応していません。');
+                    alert(getPushUnsupportedMessage());
                     e.target.checked = false;
                     pushNotificationDetails.style.display = 'none';
                 }
@@ -780,7 +780,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (testPushBtn) {
         testPushBtn.addEventListener('click', async () => {
             if (!('Notification' in window) || !('serviceWorker' in navigator)) {
-                alert('このブラウザまたは環境ではプッシュ通知がサポートされていません。\niPhoneの場合は、Safariの共有ボタンから「ホーム画面に追加」し、ホーム画面のアイコンからアプリを開いてお試しください。');
+                alert(getPushUnsupportedMessage());
                 return;
             }
             
@@ -1979,6 +1979,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function isStandaloneMode() {
         return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+    }
+
+    // 通知トグル・テスト送信ボタン共通：非対応環境向けの案内文
+    function getPushUnsupportedMessage() {
+        if (isIOSDevice() && !isStandaloneMode()) {
+            return '通知には、ホーム画面への追加が必要です。Safariの共有ボタン（なければ「•••」）から「ホーム画面に追加」していただくと通知もご利用いただけます。\n\n通知なしでも問題なくお使いいただけます。ご不明点は遠慮なく永田までご連絡ください。';
+        }
+        return 'お使いのブラウザでは通知機能をご利用いただけないようです。\n\n通知なしでも問題なくお使いいただけます。ご不明点は遠慮なく永田までご連絡ください。';
     }
 
     function renderTutorialSlide4() {
