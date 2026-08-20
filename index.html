@@ -209,6 +209,11 @@
                         <span class="toggle-slider"></span>
                     </label>
 
+                    <div id="pushIOSHomeHint" style="display: none; background-color: #F8F7F4; border-radius: 8px; padding: 10px 12px; margin-top: 12px; font-size: 0.82rem; color: var(--text-color); line-height: 1.5;">
+                        iPhoneの場合は、ホーム画面に追加すると通知が使えるようになります。
+                        <button type="button" id="pushIOSHomeHintBtn" style="display: block; margin-top: 6px; background: none; border: none; padding: 0; color: var(--accent); text-decoration: underline; font-size: 0.82rem; cursor: pointer;">案内をもう一度見る</button>
+                    </div>
+
                     <!-- トグルON時に展開される詳細設定 -->
                     <div id="pushNotificationDetails" style="display: none; margin-top: 24px;">
                         
@@ -316,6 +321,9 @@
                     </div>
                     <div class="tutorial-slide" data-slide="4">
                         <p class="tutorial-text" id="tutorialSlide4Text"></p>
+                        <div id="tutorialAddHomeAction" style="display: none;">
+                            <button type="button" id="tutorialAddHomeBtn" class="primary-btn" style="width: 100%;">ホーム画面へ追加してみる</button>
+                        </div>
                         <div class="tutorial-steps" id="tutorialSteps" style="display: none;">
                             <div class="tutorial-step">
                                 <span class="tutorial-step-icon">🔗</span>
@@ -345,9 +353,12 @@
                     </div>
                     <div class="tutorial-slide" data-slide="6">
                         <p class="tutorial-text">記録を促さない「お守りの言葉」を、ご自身のペースで通知することもできます。<br><br>もしよろしければ、設定してみますか？</p>
+                    </div>
+                    <div class="tutorial-slide" data-slide="7">
+                        <p class="tutorial-text">ここまでのご案内は以上です。<br><br>他ならぬあなた自身の大切な「かんかく」と出会うために、このアプリが少しでもお役に立てば幸いです。</p>
                         <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 20px;">
-                            <button type="button" id="tutorialGoToNotificationBtn" class="primary-btn">通知設定を見てみる</button>
-                            <button type="button" id="tutorialFinishBtn" class="secondary-btn">とじる</button>
+                            <button type="button" id="tutorialGoToNotificationBtn" class="primary-btn">通知の設定をしてみる</button>
+                            <button type="button" id="tutorialFinishBtn" class="secondary-btn">アプリを始める</button>
                         </div>
                     </div>
                 </div>
@@ -359,6 +370,7 @@
                     <span class="tutorial-dot" data-dot="4"></span>
                     <span class="tutorial-dot" data-dot="5"></span>
                     <span class="tutorial-dot" data-dot="6"></span>
+                    <span class="tutorial-dot" data-dot="7"></span>
                 </div>
 
                 <div class="tutorial-nav">

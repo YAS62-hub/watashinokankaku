@@ -1968,10 +1968,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const tutorialSlide4Text = document.getElementById('tutorialSlide4Text');
     const tutorialTryBackupBtn = document.getElementById('tutorialTryBackupBtn');
     const tutorialResumeNote = document.getElementById('tutorialResumeNote');
+    const tutorialAddHomeBtn = document.getElementById('tutorialAddHomeBtn');
 
-    const TUTORIAL_TOTAL_SLIDES = 6;
+    const TUTORIAL_TOTAL_SLIDES = 7;
     const TUTORIAL_RESUME_KEY = 'seAppTutorialResumeSlide';
     let tutorialCurrentSlide = 1;
+    let tutorialSlide4Revealed = false;
 
     function isIOSDevice() {
         return /iPhone|iPad|iPod/.test(navigator.userAgent);
@@ -1991,6 +1993,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderTutorialSlide4() {
         const stepsEl = document.getElementById('tutorialSteps');
+        const addHomeActionEl = document.getElementById('tutorialAddHomeAction');
         const isIOS = isIOSDevice();
         const isAndroid = /Android/.test(navigator.userAgent);
         const isMobile = isIOS || isAndroid;
@@ -1998,31 +2001,33 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!isMobile) {
             tutorialSlide4Text.innerHTML = 'このアプリは、いつでも取り出しやすいスマートフォンでご利用いただくことを想定して作っています。<br><br>もしよろしければ、お手持ちのスマートフォンでこのページを開いていただくのがおすすめです。';
             if (stepsEl) stepsEl.style.display = 'none';
+            if (addHomeActionEl) addHomeActionEl.style.display = 'none';
             return false;
         }
 
         if (isStandaloneMode()) {
             tutorialSlide4Text.innerHTML = 'ホーム画面に追加済みですね。ありがとうございます。<br><br>このまま続きをご案内します。';
             if (stepsEl) stepsEl.style.display = 'none';
+            if (addHomeActionEl) addHomeActionEl.style.display = 'none';
             return false;
         }
 
         tutorialSlide4Text.innerHTML = 'ホーム画面に追加すると、いつもお使いのアプリのように開け、記録や通知もより安定してご利用いただけます。';
-        if (stepsEl) {
-            stepsEl.style.display = 'flex';
-            const label1 = document.getElementById('tutorialStepLabel1');
-            const label2 = document.getElementById('tutorialStepLabel2');
-            const label3 = document.getElementById('tutorialStepLabel3');
-            if (isIOS) {
-                if (label1) label1.textContent = '共有ボタン（見当たらなければ「•••」）をタップ';
-                if (label2) label2.textContent = '「ホーム画面に追加」を選ぶ';
-                if (label3) label3.textContent = '「追加」をタップ';
-            } else {
-                if (label1) label1.textContent = 'メニュー（︙）をタップ';
-                if (label2) label2.textContent = '「ホーム画面に追加」を選ぶ';
-                if (label3) label3.textContent = '「追加」をタップ';
-            }
+        const label1 = document.getElementById('tutorialStepLabel1');
+        const label2 = document.getElementById('tutorialStepLabel2');
+        const label3 = document.getElementById('tutorialStepLabel3');
+        if (isIOS) {
+            if (label1) label1.textContent = '共有ボタン（見当たらなければ「•••」）をタップ';
+            if (label2) label2.textContent = '「ホーム画面に追加」を選ぶ';
+            if (label3) label3.textContent = '「追加」をタップ';
+        } else {
+            if (label1) label1.textContent = 'メニュー（︙）をタップ';
+            if (label2) label2.textContent = '「ホーム画面に追加」を選ぶ';
+            if (label3) label3.textContent = '「追加」をタップ';
         }
+        // ボタンを押して意図的に開くまでは、絵の手順は表示しない（読んでいる段階か行動する段階かを明確にする）
+        if (addHomeActionEl) addHomeActionEl.style.display = tutorialSlide4Revealed ? 'none' : 'block';
+        if (stepsEl) stepsEl.style.display = tutorialSlide4Revealed ? 'flex' : 'none';
         // ホーム画面未追加のユーザーには、追加後アイコンから開いた時に続きから再開できるよう目印を残す
         localStorage.setItem(TUTORIAL_RESUME_KEY, '5');
         return true;
@@ -2057,6 +2062,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function openTutorial(startSlide, resumed) {
         if (!tutorialModal) return;
         tutorialCurrentSlide = startSlide || 1;
+        tutorialSlide4Revealed = false;
         renderTutorialSlide();
         if (tutorialResumeNote) tutorialResumeNote.style.display = resumed ? 'block' : 'none';
         tutorialModal.classList.add('active');
@@ -2129,6 +2135,28 @@ document.addEventListener('DOMContentLoaded', () => {
     if (tutorialTryBackupBtn) {
         tutorialTryBackupBtn.addEventListener('click', () => {
             if (exportDataBtn) exportDataBtn.click();
+        });
+    }
+
+    if (tutorialAddHomeBtn) {
+        tutorialAddHomeBtn.addEventListener('click', () => {
+            tutorialSlide4Revealed = true;
+            renderTutorialSlide4();
+        });
+    }
+
+    const pushIOSHomeHint = document.getElementById('pushIOSHomeHint');
+    const pushIOSHomeHintBtn = document.getElementById('pushIOSHomeHintBtn');
+    if (pushIOSHomeHint && isIOSDevice() && !isStandaloneMode()) {
+        pushIOSHomeHint.style.display = 'block';
+    }
+    if (pushIOSHomeHintBtn) {
+        pushIOSHomeHintBtn.addEventListener('click', () => {
+            if (settingsModal) {
+                settingsModal.classList.remove('active');
+                document.body.classList.remove('modal-open');
+            }
+            setTimeout(() => openTutorial(4), 200);
         });
     }
 
