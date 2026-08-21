@@ -507,6 +507,137 @@ body.modal-open {
     font-weight: 500;
 }
 
+/* 初回チュートリアル */
+.tutorial-modal-content {
+    padding-top: 44px;
+    text-align: center;
+}
+
+.tutorial-resume-note {
+    background-color: #F0F3EC;
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 0.82rem;
+    color: var(--text-color);
+    text-align: center;
+    margin-bottom: 12px;
+    line-height: 1.5;
+}
+
+.tutorial-slide {
+    display: none;
+}
+
+.tutorial-slide.active {
+    display: block;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+
+.tutorial-slide.active.tutorial-fade-in {
+    opacity: 1;
+}
+
+.tutorial-text {
+    font-size: 1.02rem;
+    line-height: 2;
+    color: var(--text-color);
+    min-height: 140px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 8px 4px;
+}
+
+.tutorial-steps {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 4px;
+    padding: 0 4px;
+}
+
+.tutorial-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 84px;
+    gap: 6px;
+}
+
+.tutorial-step-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: var(--btn-low-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+}
+
+.tutorial-step-label {
+    font-size: 0.72rem;
+    line-height: 1.4;
+    color: var(--text-light);
+    text-align: center;
+}
+
+.tutorial-step-arrow {
+    color: var(--text-light);
+    font-size: 0.9rem;
+    margin-top: 12px;
+}
+
+.tutorial-next-subtle.primary-btn {
+    background-color: transparent;
+    border: none;
+    box-shadow: none;
+    color: var(--text-light);
+    font-weight: 400;
+    font-size: 0.85rem;
+    text-decoration: underline;
+    padding: 8px 4px;
+}
+
+.tutorial-dots {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.tutorial-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background-color: #DCD6CD;
+    transition: background-color 0.3s ease;
+}
+
+.tutorial-dot.active {
+    background-color: var(--accent);
+}
+
+.tutorial-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 24px;
+}
+
+.tutorial-nav-btn {
+    min-width: 88px;
+}
+
+#tutorialBackBtn.tutorial-nav-hidden,
+#tutorialNextBtn.tutorial-nav-hidden {
+    visibility: hidden;
+}
+
 .setting-item {
     margin-bottom: 16px;
 }

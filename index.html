@@ -172,7 +172,7 @@
                     </div>
                 </div>
 
-                <div class="setting-card">
+                <div class="setting-card" id="pushNotificationCard">
                     <h4 class="setting-subtitle" style="margin-bottom: 8px;">お守り通知設定</h4>
                     
                     <div id="pushStatusAnchor" style="background-color: #F8F7F4; border-radius: 8px; padding: 12px; margin-bottom: 16px; font-size: 0.9rem; color: var(--text-color); font-weight: 500; border: 1px solid rgba(0,0,0,0.05); text-align: center;">
@@ -208,6 +208,11 @@
                         <input type="checkbox" id="pushNotificationToggle">
                         <span class="toggle-slider"></span>
                     </label>
+
+                    <div id="pushIOSHomeHint" style="display: none; background-color: #F8F7F4; border-radius: 8px; padding: 10px 12px; margin-top: 12px; font-size: 0.82rem; color: var(--text-color); line-height: 1.5;">
+                        iPhoneの場合は、ホーム画面に追加すると通知が使えるようになります。
+                        <button type="button" id="pushIOSHomeHintBtn" style="display: block; margin-top: 6px; background: none; border: none; padding: 0; color: var(--accent); text-decoration: underline; font-size: 0.82rem; cursor: pointer;">案内をもう一度見る</button>
+                    </div>
 
                     <!-- トグルON時に展開される詳細設定 -->
                     <div id="pushNotificationDetails" style="display: none; margin-top: 24px;">
@@ -283,6 +288,95 @@
                     アプリについて：わたしのかんかく v10.1.0
                 </div>
 
+                <div style="text-align: center; margin-top: 16px;">
+                    <button type="button" id="reopenTutorialBtn" class="secondary-btn" style="font-size: 0.85rem; padding: 10px 20px;">使い方をもう一度みる</button>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- 初回チュートリアルモーダル -->
+        <div id="tutorialModal" class="modal">
+            <div class="modal-content tutorial-modal-content">
+                <button class="close-button" id="closeTutorial" aria-label="あとで見る">×</button>
+
+                <div class="tutorial-resume-note" id="tutorialResumeNote" style="display: none;">
+                    ホーム画面への追加、ありがとうございます。続きからご案内します。
+                </div>
+
+                <div class="tutorial-slides">
+                    <div class="tutorial-slide" data-slide="1">
+                        <p class="tutorial-text">「わたしのかんかく」へようこそ。<br><br>ここは、あなたの感覚を置いてけぼりにしないための場所です。<br><br><span style="font-size: 0.85rem; color: var(--text-light);">ご案内する内容は、あとからいつでも変更できます。この案内も、設定画面からいつでも見返せます。</span></p>
+                    </div>
+                    <div class="tutorial-slide" data-slide="2">
+                        <p class="tutorial-text">何よりも、あなたの今の感覚、主体性を大切にしていただきたいと願います。<br><br>ですから、アプリが提案することは、あくまで選択肢です。</p>
+                    </div>
+                    <div class="tutorial-slide" data-slide="3">
+                        <p class="tutorial-text">
+                            ・記録しても、しなくてもいい<br>
+                            ・「よくわからない」のも、大切な感覚<br>
+                            ・「NO！」と言って、いつでも通知やメッセージをオフにする<br><br>
+                            …これらもすべて、あなたを守る大切な選択です。
+                        </p>
+                    </div>
+                    <div class="tutorial-slide" data-slide="4">
+                        <p class="tutorial-text" id="tutorialSlide4Text"></p>
+                        <div id="tutorialAddHomeAction" style="display: none;">
+                            <button type="button" id="tutorialAddHomeBtn" class="primary-btn" style="width: 100%;">ホーム画面へ追加してみる</button>
+                        </div>
+                        <div class="tutorial-steps" id="tutorialSteps" style="display: none;">
+                            <div class="tutorial-step">
+                                <span class="tutorial-step-icon">🔗</span>
+                                <span class="tutorial-step-label" id="tutorialStepLabel1"></span>
+                            </div>
+                            <span class="tutorial-step-arrow">→</span>
+                            <div class="tutorial-step">
+                                <span class="tutorial-step-icon">➕</span>
+                                <span class="tutorial-step-label" id="tutorialStepLabel2"></span>
+                            </div>
+                            <span class="tutorial-step-arrow">→</span>
+                            <div class="tutorial-step">
+                                <span class="tutorial-step-icon">✓</span>
+                                <span class="tutorial-step-label" id="tutorialStepLabel3"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tutorial-slide" data-slide="5">
+                        <p class="tutorial-text">
+                            現在の記録をファイル（.json）として端末内に保存できます。機種変更時などは、そのファイルを読み込むことで復元できます。<br><br>
+                            大切な記録を守るために、時々「バックアップファイル」をダウンロードしておくのがおすすめです。
+                        </p>
+                        <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 12px;">
+                            <button type="button" id="tutorialTryBackupBtn" class="secondary-btn">バックアップを試してみる</button>
+                            <span style="font-size: 0.8rem; color: var(--text-light);">あとで行う場合は、設定画面からいつでもできます。</span>
+                        </div>
+                    </div>
+                    <div class="tutorial-slide" data-slide="6">
+                        <p class="tutorial-text">ご自身の心地よいペースで、「お守りの言葉」を通知することもできます。<br><br>この後、通知の設定を試すこともできます。</p>
+                    </div>
+                    <div class="tutorial-slide" data-slide="7">
+                        <p class="tutorial-text">ここまでのご案内は以上です。<br><br>他ならぬあなた自身の大切な「かんかく」と出会うために、このアプリが少しでもお役に立てば幸いです。</p>
+                        <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 20px;">
+                            <button type="button" id="tutorialGoToNotificationBtn" class="primary-btn">通知の設定をしてみる</button>
+                            <button type="button" id="tutorialFinishBtn" class="secondary-btn">アプリを始める</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tutorial-dots" id="tutorialDots">
+                    <span class="tutorial-dot" data-dot="1"></span>
+                    <span class="tutorial-dot" data-dot="2"></span>
+                    <span class="tutorial-dot" data-dot="3"></span>
+                    <span class="tutorial-dot" data-dot="4"></span>
+                    <span class="tutorial-dot" data-dot="5"></span>
+                    <span class="tutorial-dot" data-dot="6"></span>
+                    <span class="tutorial-dot" data-dot="7"></span>
+                </div>
+
+                <div class="tutorial-nav">
+                    <button type="button" id="tutorialBackBtn" class="secondary-btn tutorial-nav-btn">戻る</button>
+                    <button type="button" id="tutorialNextBtn" class="primary-btn tutorial-nav-btn">次へ</button>
+                </div>
             </div>
         </div>
 
