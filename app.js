@@ -456,7 +456,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // ガードレール：未選択の場合はモーダルを開かずにトーストを出す
             if (!activeZone) {
-                showToast('まずは、上のボタンから今の気分に近いものを選んでみてくださいね');
+                showToast('まずは、上のボタンから今の感覚に近いものを選んでみてくださいね');
                 return;
             }
             
@@ -646,14 +646,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (typeof renderResources === 'function') renderResources();
                 if (typeof updateTodayWord === 'function') updateTodayWord();
             } catch (err) {
-                alert('保存容量がいっぱいです。不要なデータを削除してください。');
+                alert('保存できる容量がいっぱいのようです。申し訳ありません。リソース箱の写真をいくつか見直していただくと、また保存できるようになります。');
                 resources.shift();
             }
         });
     }
 
     // === 設定モーダル ===
+    // 「表示のイメージ」は、実際に記録後に出るメッセージのプールから1件引いて表示する
+    // （固定の見本を書くと、言葉のリストを更新したときに実物とズレてしまうため）
+    function renderPopupSampleMessage() {
+        const sampleEl = document.getElementById('popupSampleMessage');
+        if (!sampleEl) return;
+        const allMessages = [...new Set(Object.values(AUTO_MESSAGES_POOL).flat())];
+        if (allMessages.length === 0) return;
+        sampleEl.textContent = allMessages[Math.floor(Math.random() * allMessages.length)];
+    }
+    renderPopupSampleMessage();
+
     settingsBtn.addEventListener('click', () => {
+        renderPopupSampleMessage();
         settingsModal.classList.add('active');
         document.body.classList.add('modal-open');
     });
@@ -1488,7 +1500,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const files = photoInput && photoInput.files ? Array.from(photoInput.files) : [];
 
             if (!text && files.length === 0) {
-                alert('言葉を入力するか、写真を選んでください');
+                alert('言葉か写真、どちらか一つでも入っていると保存できます。');
                 return;
             }
 
