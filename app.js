@@ -1145,6 +1145,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 plugins: { 
                     legend: { display: false },
                     tooltip: {
+                        displayColors: false,
                         callbacks: {
                             title: function(context) {
                                 // ツールチップのタイトルには正確な時間を表示
@@ -1152,6 +1153,14 @@ document.addEventListener('DOMContentLoaded', () => {
                                 const originalRecord = recentHistory[idx];
                                 const d = new Date(originalRecord.time);
                                 return `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+                            },
+                            // 数値（スコア）ではなく、そのときのゾーンの言葉を表示する
+                            label: function(context) {
+                                const originalRecord = recentHistory[context.dataIndex];
+                                const zone = getZone(originalRecord.type);
+                                const labels = JSON.parse(localStorage.getItem('seAppLabels') || 'null') || defaultLabels;
+                                const emojiMap = { 'high': '🔥', 'mid': '☕️', 'low': '❄️' };
+                                return `${emojiMap[zone]} ${labels[zone]}`;
                             }
                         }
                     }
@@ -1253,13 +1262,11 @@ document.addEventListener('DOMContentLoaded', () => {
                             
                             const zone = getZone(record.type);
                             const zoneLabel = `${emojiMap[zone]} ${savedLabels[zone]}`;
-                            // 細かい数値情報を表示したい場合はここに追加可能
-                            const detailValue = !isNaN(parseInt(record.type)) ? ` <span style="font-size: 0.75rem; color:#8E8578; margin-left:8px;">[${record.type}]</span>` : '';
                             
                             item.innerHTML = `
                                 <div class="timeline-time">${timeStr}</div>
                                 <div class="timeline-content">
-                                    <div class="timeline-zone">${zoneLabel}${detailValue}</div>
+                                    <div class="timeline-zone">${zoneLabel}</div>
                                     ${record.memo ? `<div class="timeline-memo">${record.memo}</div>` : ''}
                                     <div class="timeline-actions">
                                         <button class="action-link edit-link">編集</button>
