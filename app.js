@@ -92,6 +92,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         return String(val); // 'high', 'mid', 'low' 等
     }
+
+    // ユーザーが書いた文字をHTMLとして描画する前の共通エスケープ
+    // （「<」を含むメモが画面から消えてしまうのを防ぐ）
+    function escapeHtml(str) {
+        return String(str).replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
     
     setNowToInput(recordTimeInput);
 
@@ -304,8 +310,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     
     // ランダム抽出関数
+    // sort(() => 0.5 - Math.random()) は配列の位置によって出やすさが変わってしまうため、
+    // どの語も等しい確率で選ばれるフィッシャー・イェーツのシャッフルを使う。
     function getRandomItems(array, count) {
-        const shuffled = [...array].sort(() => 0.5 - Math.random());
+        const shuffled = [...array];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
         return shuffled.slice(0, count);
     }
 
@@ -1279,7 +1291,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <div class="timeline-time">${timeStr}</div>
                                 <div class="timeline-content">
                                     <div class="timeline-zone">${zoneLabel}</div>
-                                    ${record.memo ? `<div class="timeline-memo">${record.memo}</div>` : ''}
+                                    ${record.memo ? `<div class="timeline-memo">${escapeHtml(record.memo)}</div>` : ''}
                                     <div class="timeline-actions">
                                         <button class="action-link edit-link">編集</button>
                                         <button class="action-link delete-link">削除</button>
@@ -1312,7 +1324,9 @@ document.addEventListener('DOMContentLoaded', () => {
                                 
                                 editSelectedType = record.type;
                                 editZoneBtns.forEach(b => {
-                                    if (b.getAttribute('data-type') === record.type) b.classList.add('selected-zone');
+                                    // record.type は '100' '85' などのスコア文字列なので、
+                                    // ボタンの data-type（high/mid/low）と比べる前にゾーンへ変換する
+                                    if (b.getAttribute('data-type') === getZone(record.type)) b.classList.add('selected-zone');
                                     else b.classList.remove('selected-zone');
                                 });
                                 

@@ -81,10 +81,13 @@ self.addEventListener('notificationclick', function(event) {
     event.notification.close();
     // アプリ（このサイト）を開く、または既に開かれていればフォーカスする
     event.waitUntil(
-        clients.matchAll({ type: 'window' }).then(windowClients => {
+        // includeUncontrolled: まだこのSWの管理下に入っていないタブも探索対象に含める
+        clients.matchAll({ type: 'window', includeUncontrolled: true }).then(windowClients => {
             for (var i = 0; i < windowClients.length; i++) {
                 var client = windowClients[i];
-                if (client.url === '/' && 'focus' in client) {
+                // client.url は 'https://example.pages.dev/' のような絶対URL。
+                // 以前は '/' と直接比較していたため一致せず、常に新しい窓が開いていた。
+                if (new URL(client.url).origin === self.location.origin && 'focus' in client) {
                     return client.focus();
                 }
             }
