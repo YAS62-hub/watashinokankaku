@@ -26,9 +26,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const customMessageArea = document.getElementById('customMessageArea');
     const testPushBtn = document.getElementById('testPushBtn');
 
-    // ポップアップ設定用
-    const savePopupSettingBtn = document.getElementById('savePopupSettingBtn');
-
     // ▼ Web Push用設定（本番） ▼
     const PUBLIC_VAPID_KEY = 'BM3cP2snk75QJ6OlTK2dMRSUmKyivtGqBq9wqhP34FhJ1rNJ_umuTDp8_4SEyHh5ncCbNjKeoPH_JdIsXWTUBSo';
     const WORKER_URL = 'https://kankaku-push-worker.manayui.workers.dev';
@@ -301,9 +298,6 @@ document.addEventListener('DOMContentLoaded', () => {
         { score: 0,   title: 'すごくロー（ゾーンの外）', words: ['電源オフ', '感覚が薄い', '麻痺している', '何も感じない', '泥のよう', '自分がどこにいるかわからない', '気配を消す', '宇宙空間に浮いているよう', '深い冬眠', 'システム保護中', '自分がわからない', 'つめたい', '強制終了', '強制スリープ', '冬眠モード', '電池切れ'] }
     ];
 
-    const inlinePaletteArea = document.getElementById('inlinePaletteArea');
-    const inlinePaletteColors = document.getElementById('inlinePaletteColors');
-    const inlinePaletteWords = document.getElementById('inlinePaletteWords');
     const COMMON_PALETTE_COLORS = ['🔴', '🟠', '🟡', '🟢', '🟤', '⚪️', '🔵', '🔘', '⚫️'];
     
     
@@ -320,20 +314,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         return shuffled.slice(0, count);
     }
-
-    // 言葉からの逆引き用辞書を自動生成
-    const WORD_TO_SCORE = {};
-    PALETTE_GROUPS.forEach(group => {
-        
-            // ランダムに5-6個抽出
-            const count = Math.floor(Math.random() * 2) + 5; // 5 or 6
-            const randomWords = getRandomItems(group.words, count);
-            
-            randomWords.forEach(word => {
-
-            WORD_TO_SCORE[word] = group.score;
-        });
-    });
 
     let lastSystemInsertedColor = null;
     let lastSystemInsertedWord = null;
@@ -569,7 +549,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // 現在時刻への再セットを確実に実行
                 setNowToInput(recordTimeInput);
                 
-                if(typeof renderReflection === 'function') renderReflection();
+                renderReflection();
                 if (popupToggle.checked) {
                     // typeからスコアに変換してキーを取得する
                     // または最新ロジックでは record.type は生スコア（もし7段階利用なら）の場合や 'high','mid','low'の場合がある
@@ -648,15 +628,13 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 localStorage.setItem('seAppResources', JSON.stringify(resources));
                 // グローバルな配列も更新
-                if (typeof seAppResources !== 'undefined') {
-                    seAppResources = resources;
-                }
+                seAppResources = resources;
                 saveMessageBtn.textContent = 'リソース箱に保存しました！';
                 saveMessageBtn.disabled = true;
                 saveMessageBtn.classList.remove('primary-btn');
                 saveMessageBtn.classList.add('secondary-btn');
-                if (typeof renderResources === 'function') renderResources();
-                if (typeof updateTodayWord === 'function') updateTodayWord();
+                renderResources();
+                updateTodayWord();
             } catch (err) {
                 alert('保存できる容量がいっぱいのようです。申し訳ありません。リソース箱の写真をいくつか見直していただくと、また保存できるようになります。');
                 resources.shift();
@@ -1382,7 +1360,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // === リソース（ギャラリー）関連 ===
-    const resourceGallery = document.getElementById('resourceGallery');
     const addResourceFab = document.getElementById('addResourceFab');
     const addResourceModal = document.getElementById('addResourceModal');
     const closeAddResourceModal = document.getElementById('closeAddResourceModal');
@@ -1833,7 +1810,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // === 感覚パレットロジック ===
-    const openPaletteBtn = document.getElementById('openPaletteBtn');
     const paletteModal = document.getElementById('paletteModal');
     const closePaletteModal = document.getElementById('closePaletteModal');
     const paletteColors = document.getElementById('paletteColors');
@@ -1904,17 +1880,6 @@ document.addEventListener('DOMContentLoaded', () => {
             paletteModal.classList.add('active');
             document.body.classList.add('modal-open');
         }
-    }
-
-    if (openPaletteBtn) {
-        openPaletteBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            if (!selectedRecordType) {
-                alert('先に「🔥」「☕️」「❄️」のいずれかのボタンを選んでください。');
-                return;
-            }
-            openPalette(selectedRecordType, 'dailyMemo', true);
-        });
     }
 
     settingsPaletteBtns.forEach(btn => {

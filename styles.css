@@ -406,12 +406,6 @@ main {
     transform: scale(0.92);
 }
 
-.resource-desc {
-    font-size: 1rem;
-    margin-bottom: 12px;
-    color: var(--text-color);
-}
-
 .photo-upload-area {
     width: 100%;
     aspect-ratio: 16 / 9;
@@ -1054,8 +1048,6 @@ input:checked + .toggle-slider::before {
 }
 
 .memo-date { font-size: 0.85rem; color: var(--text-light); margin-bottom: 4px; }
-.memo-zone { font-weight: 500; margin-bottom: 8px; }
-.memo-text { font-size: 0.95rem; background-color: #F8F7F4; padding: 12px; border-radius: 12px; }
 
 /* Daily Memo Input */
 .daily-memo-area {
@@ -1189,17 +1181,6 @@ input:checked + .toggle-slider::before {
 
 
 
-/* パレット更新時のアニメーション */
-@keyframes paletteUpdateAnim {
-    0% { transform: scale(1); filter: brightness(1); }
-    50% { transform: scale(1.02); filter: brightness(1.1); }
-    100% { transform: scale(1); filter: brightness(1); }
-}
-
-.palette-updated {
-    animation: paletteUpdateAnim 0.3s ease;
-}
-
 /* =========================================
    お守り通知機能設定パネル用スタイル
    ========================================= */
@@ -1231,17 +1212,6 @@ input:checked + .toggle-slider::before {
     align-items: center;
 }
 
-
-/* 通知設定エリア内のテキスト最適化 */
-.push-desc-text {
-    font-size: 0.85rem;
-    color: var(--text-light);
-    margin-bottom: 20px;
-    line-height: 1.7;
-    word-break: auto-phrase;
-    overflow-wrap: break-word;
-    padding: 0 4px;
-}
 
 /* =========================================
    新・設定画面用カードUI
