@@ -697,7 +697,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const anchor = document.getElementById('pushStatusAnchor');
         if (!anchor) return;
         const saved = JSON.parse(localStorage.getItem('seAppPushSettings') || 'null');
-        console.log('[updatePushStatusAnchor] saved:', JSON.stringify(saved));
         
         if (!saved || !saved.enabled) {
             anchor.textContent = '現在の設定：オフ';
@@ -705,7 +704,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const preset = saved.preset;
-        console.log('[updatePushStatusAnchor] preset:', preset, 'type:', typeof preset);
 
         if (preset === 'custom') {
             const dayMap = { '0':'日', '1':'月', '2':'火', '3':'水', '4':'木', '5':'金', '6':'土' };
@@ -907,13 +905,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- お守り通知専用の保存ロジック ---
     if (savePushNotificationBtn) {
         savePushNotificationBtn.addEventListener('click', async () => {
-            console.log('=== 通知設定保存ボタン 押下 ===');
-
             let pushEnabled = false;
             if (pushNotificationToggle && pushNotificationToggle.checked) {
                 pushEnabled = true;
             }
-            console.log('[Save] pushEnabled:', pushEnabled);
 
             const pushSettings = {
                 enabled: pushEnabled,
@@ -924,22 +919,14 @@ document.addEventListener('DOMContentLoaded', () => {
             };
 
             if (pushEnabled) {
-                // デバッグ: 全ボタンの状態をログ出力
-                const allPresetBtns = document.querySelectorAll('.preset-btn');
-                allPresetBtns.forEach(b => {
-                    console.log('[Save] Button:', b.id || b.getAttribute('data-preset'), 'active:', b.classList.contains('active'));
-                });
-
                 // カスタムボタンの判定を最優先
                 const isCustomActive = customPresetBtn && customPresetBtn.classList.contains('active');
-                console.log('[Save] customPresetBtn active:', isCustomActive);
 
                 if (isCustomActive) {
                     pushSettings.preset = 'custom';
                     const activeDays = Array.from(document.querySelectorAll('#customScheduleArea .day-btn.active')).map(b => b.getAttribute('data-day'));
                     pushSettings.days = activeDays;
                     pushSettings.time = customTimeInput ? customTimeInput.value : '';
-                    console.log('[Save] Custom - days:', activeDays, 'time:', pushSettings.time);
                     
                     if (activeDays.length === 0) {
                         alert('曜日が選択されていません。最低一つは曜日を選んでくださいね🌿');
@@ -952,7 +939,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else {
                     // プリセットボタンの検索: data-preset属性を持つボタンのうちactiveなもの
                     const activePreset = document.querySelector('.preset-btn[data-preset].active');
-                    console.log('[Save] activePreset element:', activePreset, 'data-preset:', activePreset ? activePreset.getAttribute('data-preset') : 'NONE');
                     if (activePreset && activePreset.getAttribute('data-preset')) {
                         pushSettings.preset = activePreset.getAttribute('data-preset');
                     } else {
@@ -960,8 +946,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         return;
                     }
                 }
-
-                console.log('[Save] Final pushSettings:', JSON.stringify(pushSettings));
 
                 // Pushサブスクリプションの取得とサーバーへの送信
                 if ('serviceWorker' in navigator && 'PushManager' in window) {
@@ -980,7 +964,6 @@ document.addEventListener('DOMContentLoaded', () => {
                             const sameKey = currentKey.length === expectedKey.length &&
                                 currentKey.every((byte, i) => byte === expectedKey[i]);
                             if (!sameKey) {
-                                console.log('[Save] VAPID鍵が変更されたため、古い購読を解除して再取得します。');
                                 await subscription.unsubscribe();
                                 subscription = null;
                             }
@@ -1004,9 +987,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
 
                         currentPhase = 'フェーズC: Worker への fetch 送信段階 (ネットワーク等)';
-                        console.log('--- 通知登録リクエスト送信 ---');
-                        console.log('エンドポイント:', subscription.endpoint);
-                        console.log('送信する設定 (pushSettings):', pushSettings);
                         
                         let res;
                         try {
