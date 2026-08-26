@@ -2016,6 +2016,23 @@ document.addEventListener('DOMContentLoaded', () => {
         return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
     }
 
+    // LINEやMessengerなどのチャットアプリでURLをタップすると、そのアプリに組み込まれた
+    // 簡易ブラウザ（アプリ内ブラウザ）でページが開く。この中からは「ホーム画面に追加」が
+    // できず、共有ボタンも存在しないため、通常の追加手順を案内すると行き止まりになる。
+    // 名前が分かる場合はその名前を、名前は分からないがアプリ内ブラウザらしい場合は空文字を、
+    // 通常のブラウザで開かれている場合は null を返す。
+    function detectInAppBrowser() {
+        const ua = navigator.userAgent;
+        if (/\bLine\//i.test(ua)) return 'LINE';
+        if (/FBAN|FBAV|FB_IAB|FBIOS/i.test(ua)) return 'Facebook・Messenger';
+        if (/Instagram/i.test(ua)) return 'Instagram';
+        if (/Twitter/i.test(ua)) return 'X（旧Twitter）';
+        // iOSのSafariでは navigator.standalone が true / false のどちらかで必ず定義される。
+        // アプリ内ブラウザ（WKWebView）では undefined になるので、名前が分からないときの手がかりにする。
+        if (isIOSDevice() && typeof navigator.standalone === 'undefined') return '';
+        return null;
+    }
+
     // 通知トグル・テスト送信ボタン共通：非対応環境向けの案内文
     function getPushUnsupportedMessage() {
         if (isIOSDevice() && !isStandaloneMode()) {
@@ -2045,10 +2062,42 @@ document.addEventListener('DOMContentLoaded', () => {
             return false;
         }
 
-        tutorialSlide4Text.innerHTML = 'ホーム画面に追加すると、いつもお使いのアプリのように開け、記録や通知もより安定してご利用いただけます。';
         const label1 = document.getElementById('tutorialStepLabel1');
         const label2 = document.getElementById('tutorialStepLabel2');
         const label3 = document.getElementById('tutorialStepLabel3');
+        const setStepIcons = (a, b, c) => {
+            const icons = [a, b, c];
+            icons.forEach((icon, i) => {
+                const el = document.getElementById(`tutorialStepIcon${i + 1}`);
+                if (el) el.textContent = icon;
+            });
+        };
+
+        // LINE等のアプリ内ブラウザで開かれている場合。ここには共有ボタンも
+        // 「ホーム画面に追加」も無いため、通常の手順を出すと行き止まりになる。
+        // まず通常のブラウザで開き直していただく案内に差し替える。
+        const inAppBrowser = detectInAppBrowser();
+        if (inAppBrowser !== null) {
+            const appName = inAppBrowser ? `${inAppBrowser}の中のブラウザ` : 'アプリの中のブラウザ';
+            const openInLabel = isIOS ? '「Safariで開く」' : '「ブラウザで開く」';
+            tutorialSlide4Text.innerHTML =
+                `この画面は、${appName}で開かれているようです。<br><br>` +
+                'この画面からはホーム画面に追加できないため、もしよろしければ、いったん通常のブラウザで開き直していただけますか。' +
+                '<span style="display:block; margin-top:16px; font-size:0.85rem; color:var(--text-light); line-height:1.6;">' +
+                'すでにホーム画面に追加してお使いの場合、この画面には記録が表示されませんが、記録が消えたわけではありません。' +
+                'ホーム画面のアイコンから開いていただくと、これまでどおりの記録があります。</span>';
+            if (label1) label1.textContent = '画面の右下あたりのメニューをひらく';
+            if (label2) label2.textContent = `${openInLabel}を選ぶ`;
+            if (label3) label3.textContent = '開いたブラウザで「ホーム画面に追加」';
+            setStepIcons('☰', isIOS ? '🧭' : '🌐', '➕');
+            // 「ホーム画面へ追加してみる」ボタンはこの画面では実行できないので出さず、手順をそのまま見せる
+            if (addHomeActionEl) addHomeActionEl.style.display = 'none';
+            if (stepsEl) stepsEl.style.display = 'flex';
+            return true;
+        }
+
+        tutorialSlide4Text.innerHTML = 'ホーム画面に追加すると、いつもお使いのアプリのように開け、記録や通知もより安定してご利用いただけます。';
+        setStepIcons('🔗', '➕', '✓');
         if (isIOS) {
             if (label1) label1.textContent = '共有ボタン（見当たらなければ「•••」）をタップ';
             if (label2) label2.textContent = '「ホーム画面に追加」を選ぶ';
@@ -2185,8 +2234,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const pushIOSHomeHint = document.getElementById('pushIOSHomeHint');
     const pushIOSHomeHintBtn = document.getElementById('pushIOSHomeHintBtn');
-    if (pushIOSHomeHint && isIOSDevice() && !isStandaloneMode()) {
-        pushIOSHomeHint.style.display = 'block';
+    const pushIOSHomeHintText = document.getElementById('pushIOSHomeHintText');
+    if (pushIOSHomeHint && !isStandaloneMode()) {
+        const hintInAppBrowser = detectInAppBrowser();
+        if (hintInAppBrowser !== null) {
+            // アプリ内ブラウザからはホーム画面に追加できないので、まず開き直す案内を出す
+            const appName = hintInAppBrowser ? `${hintInAppBrowser}の中のブラウザ` : 'アプリの中のブラウザ';
+            if (pushIOSHomeHintText) {
+                pushIOSHomeHintText.textContent = `この画面は${appName}で開かれているようです。通知をお使いになる場合は、いったん通常のブラウザで開き直してから、ホーム画面に追加していただく必要があります。`;
+            }
+            pushIOSHomeHint.style.display = 'block';
+        } else if (isIOSDevice()) {
+            pushIOSHomeHint.style.display = 'block';
+        }
     }
     if (pushIOSHomeHintBtn) {
         pushIOSHomeHintBtn.addEventListener('click', () => {
