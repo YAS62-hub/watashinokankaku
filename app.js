@@ -801,7 +801,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     throw new Error('Service Workerが登録されていません。');
                 }
 
-                let testMessage = 'かんかくアプリです。今、どんなことをかんじていらっしゃいますか？無理にアプリを開かなくても大丈夫です。';
+                let testMessage = '今、どんなことをかんじていらっしゃいますか？無理にアプリを開かなくても大丈夫です。';
                 
                 if (customMessageToggle && customMessageToggle.checked && customPushMessage && customPushMessage.value.trim() !== '') {
                     testMessage = customPushMessage.value;
