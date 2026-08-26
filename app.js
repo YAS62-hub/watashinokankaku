@@ -26,9 +26,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const customMessageArea = document.getElementById('customMessageArea');
     const testPushBtn = document.getElementById('testPushBtn');
 
-    // ▼ Web Push用設定（本番） ▼
-    const PUBLIC_VAPID_KEY = 'BM3cP2snk75QJ6OlTK2dMRSUmKyivtGqBq9wqhP34FhJ1rNJ_umuTDp8_4SEyHh5ncCbNjKeoPH_JdIsXWTUBSo';
-    const WORKER_URL = 'https://kankaku-push-worker.manayui.workers.dev';
+    // ▼ Web Push用設定 ▼
+    // ★★★ 一時的に検証用Workerを指しています（2026-08-27 実機確認のため）★★★
+    // 実機確認が終わったら、必ず下の「本番用」に戻してからmainへマージすること。
+    // 本番用: PUBLIC_VAPID_KEY = 'BM3cP2snk75QJ6OlTK2dMRSUmKyivtGqBq9wqhP34FhJ1rNJ_umuTDp8_4SEyHh5ncCbNjKeoPH_JdIsXWTUBSo'
+    // 本番用: WORKER_URL       = 'https://kankaku-push-worker.manayui.workers.dev'
+    const PUBLIC_VAPID_KEY = 'BDfEPfaIie29hLfPLdksnn4WAlzZcNExDepZCRjDfuZ4V3mUB1ZthUclUAkRJd_Q-JHVROTC3UUY0hlMO4y2Jmo';
+    const WORKER_URL = 'https://kankaku-push-worker-dev.manayui.workers.dev';
     // ▲ ▲
     
     // カスタマイズ関連
