@@ -1831,7 +1831,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const btn = document.createElement('button');
                 btn.textContent = color;
                 btn.style.cssText = 'font-size: 1.5rem; padding: 6px; border: none; background: transparent; cursor: pointer; transition: transform 0.2s;';
-                btn.onclick = () => addToInput(color);
+                btn.onclick = () => addToInput(color, true);
                 paletteColors.appendChild(btn);
             });
         } else {
@@ -1867,7 +1867,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const btn = document.createElement('button');
                 btn.textContent = word;
                 btn.style.cssText = 'font-size: 0.85rem; padding: 6px 12px; border: 1px solid #D6D2CA; background: #FFF; border-radius: 20px; color: #5C5446; cursor: pointer; margin-bottom:4px;';
-                btn.onclick = () => addToInput(word);
+                btn.onclick = () => addToInput(word, false);
                 chipsDiv.appendChild(btn);
             });
 
@@ -1901,14 +1901,17 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    function addToInput(text) {
+    function addToInput(text, isColor) {
         const inputField = document.getElementById(currentPaletteTargetInput);
         if (inputField) {
-            if (currentPaletteTargetInput === 'dailyMemo') {
-                const current = inputField.value.trim();
-                inputField.value = current ? `${current} ${text}` : text;
-            } else {
+            const current = inputField.value.trim();
+            if (!current) {
                 inputField.value = text;
+            } else if (isColor) {
+                // 色は言葉の前に置く（「🔴 ハイ」の並びになるように）
+                inputField.value = `${text} ${current}`;
+            } else {
+                inputField.value = `${current} ${text}`;
             }
         }
         
