@@ -1818,6 +1818,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let currentPaletteTargetInput = null;
     const PALETTE_COLORS = ['🔴', '🟠', '🟡', '🟢', '🟤', '⚪️', '🔵', '🔘', '⚫️'];
+    // 入力欄ごとの初期の言葉。まだ初期のままかどうかの判定に使う
+    const PALETTE_TARGET_DEFAULTS = {
+        customHigh: defaultLabels.high,
+        customMid: defaultLabels.mid,
+        customLow: defaultLabels.low
+    };
 
     function openPalette(zone, targetInputId, showColors) {
         currentPaletteTargetInput = targetInputId;
@@ -1905,7 +1911,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const inputField = document.getElementById(currentPaletteTargetInput);
         if (inputField) {
             const current = inputField.value.trim();
-            if (!current) {
+            // 初期の言葉のままなら、それはまだユーザーが選んだ言葉ではないので置き換える。
+            // 一度変えたあとは、その人自身の言葉なので消さずに足していく
+            const isUntouched = current === PALETTE_TARGET_DEFAULTS[currentPaletteTargetInput];
+            if (!current || isUntouched) {
                 inputField.value = text;
             } else if (isColor) {
                 // 色は言葉の前に置く（「🔴 ハイ」の並びになるように）
