@@ -790,6 +790,50 @@ input:checked + .toggle-slider::before {
     line-height: 1.4;
 }
 
+/* 設定画面：ボタンの言葉のプレビュー（ホーム画面での見え方） */
+.label-preview {
+    background-color: #FAF7F2;
+    border-radius: 16px;
+    padding: 12px;
+    margin-bottom: 20px;
+}
+
+.label-preview-caption {
+    font-size: 0.75rem;
+    color: var(--text-light);
+    margin-bottom: 8px;
+}
+
+.label-preview-item {
+    padding: 14px 12px;
+    margin-bottom: 6px;
+    cursor: default;
+    box-shadow: none;
+    /* 言葉が長いと折り返すので、絵文字は上に揃える */
+    align-items: flex-start;
+}
+
+.label-preview-item:last-child {
+    margin-bottom: 0;
+}
+
+/* プレビューは押せない見た目・触れない要素として扱う */
+.label-preview-item:active {
+    transform: none;
+}
+
+.label-preview-item .emoji {
+    font-size: 1.2rem;
+    margin-right: 10px;
+    flex-shrink: 0;
+}
+
+.label-preview-item .preview-text {
+    font-size: 0.9rem;
+    line-height: 1.4;
+    word-break: break-word;
+}
+
 .custom-input-group {
     margin-bottom: 12px;
     display: flex;

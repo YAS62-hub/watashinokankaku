@@ -136,6 +136,27 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     loadLabels();
 
+    // === 設定画面：ボタンの言葉のプレビュー ===
+    // 入力欄をいじっている最中の「今の見え方」を映す。保存前の値をそのまま見せる
+    const previewEls = {
+        high: document.getElementById('previewHigh'),
+        mid: document.getElementById('previewMid'),
+        low: document.getElementById('previewLow')
+    };
+
+    function renderLabelPreview() {
+        if (!previewEls.high) return;
+        // 空欄のときは、保存時と同じく初期の言葉が入る（saveSettingsBtn と揃える）
+        previewEls.high.textContent = customHigh.value.trim() || defaultLabels.high;
+        previewEls.mid.textContent = customMid.value.trim() || defaultLabels.mid;
+        previewEls.low.textContent = customLow.value.trim() || defaultLabels.low;
+    }
+    renderLabelPreview();
+
+    [customHigh, customMid, customLow].forEach(el => {
+        if (el) el.addEventListener('input', renderLabelPreview);
+    });
+
     // 1. ポップアップのON/OFF
     const savedToggle = localStorage.getItem('seAppToggle');
     if (savedToggle !== null) {
@@ -875,6 +896,7 @@ document.addEventListener('DOMContentLoaded', () => {
         };
         localStorage.setItem('seAppLabels', JSON.stringify(newLabels));
         loadLabels();
+        renderLabelPreview();
         settingsModal.classList.remove('active');
         document.body.classList.remove('modal-open');
         showToast('ボタンの言葉を保存しました🍵');
@@ -1026,6 +1048,7 @@ document.addEventListener('DOMContentLoaded', () => {
     resetSettingsBtn.addEventListener('click', () => {
         localStorage.removeItem('seAppLabels');
         loadLabels();
+        renderLabelPreview();
         settingsModal.classList.remove('active');
         document.body.classList.remove('modal-open');
         showToast('ボタンの言葉を初期設定に戻しました🍵');
@@ -1922,6 +1945,7 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 inputField.value = `${current} ${text}`;
             }
+            renderLabelPreview();
         }
         
         if (paletteModal) {
