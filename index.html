@@ -549,6 +549,16 @@
         </div>
     </div>
     
+    <!-- 設定画面を閉じようとしたとき、ボタンの言葉が未保存なら確認する -->
+    <div id="unsavedLabelsModal" class="modal" style="z-index: 1100;">
+        <div class="modal-content" style="max-width: 90%; width: 320px; padding: 24px 20px; border-radius: 24px;">
+            <p style="font-size: 0.95rem; color: #5C5446; line-height: 1.6; margin-bottom: 20px;">ボタンの言葉が、まだ保存されていません。</p>
+            <button type="button" id="unsavedSaveBtn" class="primary-btn" style="width: 100%; margin-bottom: 8px;">保存してとじる</button>
+            <button type="button" id="unsavedDiscardBtn" class="secondary-btn" style="width: 100%; margin-bottom: 12px;">保存せずにとじる</button>
+            <button type="button" id="unsavedBackBtn" style="display: block; width: 100%; background: none; border: none; color: #8A8172; font-size: 0.85rem; padding: 4px; cursor: pointer;">もどる</button>
+        </div>
+    </div>
+
     <script src="app.js?v=20260730_fix2"></script>
     <script>
         if ('serviceWorker' in navigator) {

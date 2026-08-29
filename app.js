@@ -681,10 +681,38 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.classList.add('modal-open');
     });
 
-    closeSettings.addEventListener('click', () => {
+    function closeSettingsModal() {
         settingsModal.classList.remove('active');
         document.body.classList.remove('modal-open');
-    });
+    }
+
+    // 保存を押したときに実際に入る値。未保存かどうかの判定を saveSettingsBtn と揃える
+    function currentLabelValues() {
+        return {
+            high: customHigh.value || defaultLabels.high,
+            mid: customMid.value || defaultLabels.mid,
+            low: customLow.value || defaultLabels.low
+        };
+    }
+
+    function hasUnsavedLabelChanges() {
+        const saved = JSON.parse(localStorage.getItem('seAppLabels') || 'null') || defaultLabels;
+        const now = currentLabelValues();
+        return now.high !== saved.high || now.mid !== saved.mid || now.low !== saved.low;
+    }
+
+    const unsavedLabelsModal = document.getElementById('unsavedLabelsModal');
+
+    // 設定画面を閉じようとしたときの入口。未保存の変更があるときだけ確認をはさむ
+    function requestCloseSettings() {
+        if (hasUnsavedLabelChanges() && unsavedLabelsModal) {
+            unsavedLabelsModal.classList.add('active');
+            return;
+        }
+        closeSettingsModal();
+    }
+
+    closeSettings.addEventListener('click', requestCloseSettings);
 
     // popupToggle の自動保存（専用ボタン廃止に伴い復元）
     popupToggle.addEventListener('change', (e) => {
@@ -888,19 +916,35 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // カスタマイズ保存（全体設定用）
-    saveSettingsBtn.addEventListener('click', () => {
-        const newLabels = {
-            high: customHigh.value || defaultLabels.high,
-            mid: customMid.value || defaultLabels.mid,
-            low: customLow.value || defaultLabels.low
-        };
-        localStorage.setItem('seAppLabels', JSON.stringify(newLabels));
+    function saveLabelsAndClose() {
+        localStorage.setItem('seAppLabels', JSON.stringify(currentLabelValues()));
         loadLabels();
         renderLabelPreview();
-        settingsModal.classList.remove('active');
-        document.body.classList.remove('modal-open');
+        closeSettingsModal();
         showToast('ボタンの言葉を保存しました🍵');
-    });
+    }
+
+    saveSettingsBtn.addEventListener('click', saveLabelsAndClose);
+
+    // 未保存の確認。押した結果がそのまま書いてある3つの道を用意する
+    if (unsavedLabelsModal) {
+        const hideUnsaved = () => unsavedLabelsModal.classList.remove('active');
+
+        document.getElementById('unsavedSaveBtn').addEventListener('click', () => {
+            hideUnsaved();
+            saveLabelsAndClose();
+        });
+
+        document.getElementById('unsavedDiscardBtn').addEventListener('click', () => {
+            hideUnsaved();
+            // 入力欄を保存済みの値に戻す。次に開いたとき、やめたはずの言葉が残らないように
+            loadLabels();
+            renderLabelPreview();
+            closeSettingsModal();
+        });
+
+        document.getElementById('unsavedBackBtn').addEventListener('click', hideUnsaved);
+    }
 
     // --- お守り通知専用の保存ロジック ---
     if (savePushNotificationBtn) {
@@ -1826,6 +1870,11 @@ document.addEventListener('DOMContentLoaded', () => {
     allModals.forEach(modal => {
         modal.addEventListener('click', (e) => {
             if (e.target === modal) {
+                // 設定画面はうっかり背景に触れただけのことがあるので、未保存なら確認する
+                if (modal === settingsModal) {
+                    requestCloseSettings();
+                    return;
+                }
                 modal.classList.remove('active');
                 document.body.classList.remove('modal-open');
             }
