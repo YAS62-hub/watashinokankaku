@@ -125,7 +125,23 @@
                 <div class="setting-card">
                     <h4 class="setting-subtitle">ボタンの言葉をカスタマイズ</h4>
                     <p class="setting-desc">あなたの感覚によりしっくりくる言葉に変更できます。自由に変えてもいいですし、選択肢から選ぶこともできます。</p>
-                    
+
+                    <div class="label-preview">
+                        <p class="label-preview-caption">ホーム画面での見え方</p>
+                        <div class="label-preview-item state-button state-high">
+                            <span class="emoji">🔥</span>
+                            <span class="preview-text" id="previewHigh"></span>
+                        </div>
+                        <div class="label-preview-item state-button state-mid">
+                            <span class="emoji">☕️</span>
+                            <span class="preview-text" id="previewMid"></span>
+                        </div>
+                        <div class="label-preview-item state-button state-low">
+                            <span class="emoji">❄️</span>
+                            <span class="preview-text" id="previewLow"></span>
+                        </div>
+                    </div>
+
                     <div class="custom-input-group">
                         <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 4px;">
                             <label for="customHigh" style="margin-bottom: 0;">🔥 (ハイ)</label>
@@ -283,7 +299,7 @@
                 </div>
                 
                 <div style="text-align: center; margin-top: 24px; padding-top: 16px; border-top: 1px solid #E9ECEF; font-size: 0.75rem; color: #ADB5BD;">
-                    アプリについて：わたしのかんかく v10.1.0
+                    アプリについて：わたしのかんかく v10.2.0
                 </div>
 
                 <div style="text-align: center; margin-top: 16px;">
@@ -437,10 +453,18 @@
             <div class="modal-content" style="padding: 20px;">
                 <button class="close-button" id="closePaletteModal">×</button>
                 <h3 style="margin-bottom: 16px; font-size: 1.1rem; color: #5C5446;">ボタンの言葉を選ぶ</h3>
+                <div class="label-preview" id="palettePreview">
+                    <p class="label-preview-caption">いまの見え方</p>
+                    <div class="label-preview-item state-button" id="palettePreviewItem">
+                        <span class="emoji" id="palettePreviewEmoji"></span>
+                        <span class="preview-text" id="palettePreviewText"></span>
+                    </div>
+                </div>
                 <p style="font-size: 0.8rem; color: #8A8172; margin-bottom: 8px;">🎨 色で表すと？</p>
                 <div id="paletteColors" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px;"></div>
                 <p style="font-size: 0.8rem; color: #8A8172; margin-bottom: 8px;">📝 言葉で表すと？</p>
                 <div id="paletteWords" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px;"></div>
+                <button type="button" id="palettePreviewDone" class="primary-btn" style="width: 100%;">えらび終えた</button>
             </div>
         </div>
 
@@ -525,6 +549,16 @@
         </div>
     </div>
     
+    <!-- 設定画面を閉じようとしたとき、ボタンの言葉が未保存なら確認する -->
+    <div id="unsavedLabelsModal" class="modal" style="z-index: 1100;">
+        <div class="modal-content" style="max-width: 90%; width: 320px; padding: 24px 20px; border-radius: 24px;">
+            <p style="font-size: 0.95rem; color: #5C5446; line-height: 1.6; margin-bottom: 20px;">ボタンの言葉が、まだ保存されていません。</p>
+            <button type="button" id="unsavedSaveBtn" class="primary-btn" style="width: 100%; margin-bottom: 8px;">保存してとじる</button>
+            <button type="button" id="unsavedDiscardBtn" class="secondary-btn" style="width: 100%; margin-bottom: 12px;">保存せずにとじる</button>
+            <button type="button" id="unsavedBackBtn" style="display: block; width: 100%; background: none; border: none; color: #8A8172; font-size: 0.85rem; padding: 4px; cursor: pointer;">もどる</button>
+        </div>
+    </div>
+
     <script src="app.js?v=20260730_fix2"></script>
     <script>
         if ('serviceWorker' in navigator) {

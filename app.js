@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('App v10.1.0 starting (20260730_fix2)...');
+    console.log('App v10.2.0 starting (20260730_fix2)...');
     // === 要素の取得 ===
     const tabs = document.querySelectorAll('.tab-content');
     const navItems = document.querySelectorAll('.nav-item');
@@ -135,6 +135,27 @@ document.addEventListener('DOMContentLoaded', () => {
         if (customLow) customLow.value = labels.low;
     }
     loadLabels();
+
+    // === 設定画面：ボタンの言葉のプレビュー ===
+    // 入力欄をいじっている最中の「今の見え方」を映す。保存前の値をそのまま見せる
+    const previewEls = {
+        high: document.getElementById('previewHigh'),
+        mid: document.getElementById('previewMid'),
+        low: document.getElementById('previewLow')
+    };
+
+    function renderLabelPreview() {
+        if (!previewEls.high) return;
+        // 空欄のときは、保存時と同じく初期の言葉が入る（saveSettingsBtn と揃える）
+        previewEls.high.textContent = customHigh.value.trim() || defaultLabels.high;
+        previewEls.mid.textContent = customMid.value.trim() || defaultLabels.mid;
+        previewEls.low.textContent = customLow.value.trim() || defaultLabels.low;
+    }
+    renderLabelPreview();
+
+    [customHigh, customMid, customLow].forEach(el => {
+        if (el) el.addEventListener('input', renderLabelPreview);
+    });
 
     // 1. ポップアップのON/OFF
     const savedToggle = localStorage.getItem('seAppToggle');
@@ -660,10 +681,38 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.classList.add('modal-open');
     });
 
-    closeSettings.addEventListener('click', () => {
+    function closeSettingsModal() {
         settingsModal.classList.remove('active');
         document.body.classList.remove('modal-open');
-    });
+    }
+
+    // 保存を押したときに実際に入る値。未保存かどうかの判定を saveSettingsBtn と揃える
+    function currentLabelValues() {
+        return {
+            high: customHigh.value || defaultLabels.high,
+            mid: customMid.value || defaultLabels.mid,
+            low: customLow.value || defaultLabels.low
+        };
+    }
+
+    function hasUnsavedLabelChanges() {
+        const saved = JSON.parse(localStorage.getItem('seAppLabels') || 'null') || defaultLabels;
+        const now = currentLabelValues();
+        return now.high !== saved.high || now.mid !== saved.mid || now.low !== saved.low;
+    }
+
+    const unsavedLabelsModal = document.getElementById('unsavedLabelsModal');
+
+    // 設定画面を閉じようとしたときの入口。未保存の変更があるときだけ確認をはさむ
+    function requestCloseSettings() {
+        if (hasUnsavedLabelChanges() && unsavedLabelsModal) {
+            unsavedLabelsModal.classList.add('active');
+            return;
+        }
+        closeSettingsModal();
+    }
+
+    closeSettings.addEventListener('click', requestCloseSettings);
 
     // popupToggle の自動保存（専用ボタン廃止に伴い復元）
     popupToggle.addEventListener('change', (e) => {
@@ -867,18 +916,35 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // カスタマイズ保存（全体設定用）
-    saveSettingsBtn.addEventListener('click', () => {
-        const newLabels = {
-            high: customHigh.value || defaultLabels.high,
-            mid: customMid.value || defaultLabels.mid,
-            low: customLow.value || defaultLabels.low
-        };
-        localStorage.setItem('seAppLabels', JSON.stringify(newLabels));
+    function saveLabelsAndClose() {
+        localStorage.setItem('seAppLabels', JSON.stringify(currentLabelValues()));
         loadLabels();
-        settingsModal.classList.remove('active');
-        document.body.classList.remove('modal-open');
+        renderLabelPreview();
+        closeSettingsModal();
         showToast('ボタンの言葉を保存しました🍵');
-    });
+    }
+
+    saveSettingsBtn.addEventListener('click', saveLabelsAndClose);
+
+    // 未保存の確認。押した結果がそのまま書いてある3つの道を用意する
+    if (unsavedLabelsModal) {
+        const hideUnsaved = () => unsavedLabelsModal.classList.remove('active');
+
+        document.getElementById('unsavedSaveBtn').addEventListener('click', () => {
+            hideUnsaved();
+            saveLabelsAndClose();
+        });
+
+        document.getElementById('unsavedDiscardBtn').addEventListener('click', () => {
+            hideUnsaved();
+            // 入力欄を保存済みの値に戻す。次に開いたとき、やめたはずの言葉が残らないように
+            loadLabels();
+            renderLabelPreview();
+            closeSettingsModal();
+        });
+
+        document.getElementById('unsavedBackBtn').addEventListener('click', hideUnsaved);
+    }
 
     // --- お守り通知専用の保存ロジック ---
     if (savePushNotificationBtn) {
@@ -1026,6 +1092,7 @@ document.addEventListener('DOMContentLoaded', () => {
     resetSettingsBtn.addEventListener('click', () => {
         localStorage.removeItem('seAppLabels');
         loadLabels();
+        renderLabelPreview();
         settingsModal.classList.remove('active');
         document.body.classList.remove('modal-open');
         showToast('ボタンの言葉を初期設定に戻しました🍵');
@@ -1803,6 +1870,11 @@ document.addEventListener('DOMContentLoaded', () => {
     allModals.forEach(modal => {
         modal.addEventListener('click', (e) => {
             if (e.target === modal) {
+                // 設定画面はうっかり背景に触れただけのことがあるので、未保存なら確認する
+                if (modal === settingsModal) {
+                    requestCloseSettings();
+                    return;
+                }
                 modal.classList.remove('active');
                 document.body.classList.remove('modal-open');
             }
@@ -1817,10 +1889,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const settingsPaletteBtns = document.querySelectorAll('.settings-palette-btn');
 
     let currentPaletteTargetInput = null;
+    let currentPaletteZone = null;
+    const PALETTE_ZONE_EMOJI = { high: '🔥', mid: '☕️', low: '❄️' };
+    const PALETTE_ZONE_KEY = { customHigh: 'high', customMid: 'mid', customLow: 'low' };
     const PALETTE_COLORS = ['🔴', '🟠', '🟡', '🟢', '🟤', '⚪️', '🔵', '🔘', '⚫️'];
+    // 入力欄ごとの初期の言葉。まだ初期のままかどうかの判定に使う
+    const PALETTE_TARGET_DEFAULTS = {
+        customHigh: defaultLabels.high,
+        customMid: defaultLabels.mid,
+        customLow: defaultLabels.low
+    };
 
     function openPalette(zone, targetInputId, showColors) {
         currentPaletteTargetInput = targetInputId;
+        currentPaletteZone = zone;
 
         // Render colors
         paletteColors.innerHTML = '';
@@ -1830,8 +1912,9 @@ document.addEventListener('DOMContentLoaded', () => {
             PALETTE_COLORS.forEach(color => {
                 const btn = document.createElement('button');
                 btn.textContent = color;
-                btn.style.cssText = 'font-size: 1.5rem; padding: 6px; border: none; background: transparent; cursor: pointer; transition: transform 0.2s;';
-                btn.onclick = () => addToInput(color, true);
+                btn.className = 'palette-color-btn';
+                btn.dataset.color = color;
+                btn.onclick = () => toggleColor(color);
                 paletteColors.appendChild(btn);
             });
         } else {
@@ -1867,7 +1950,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const btn = document.createElement('button');
                 btn.textContent = word;
                 btn.style.cssText = 'font-size: 0.85rem; padding: 6px 12px; border: 1px solid #D6D2CA; background: #FFF; border-radius: 20px; color: #5C5446; cursor: pointer; margin-bottom:4px;';
-                btn.onclick = () => addToInput(word, false);
+                btn.onclick = () => addToInput(word);
                 chipsDiv.appendChild(btn);
             });
 
@@ -1875,6 +1958,8 @@ document.addEventListener('DOMContentLoaded', () => {
             groupDiv.appendChild(chipsDiv);
             paletteWords.appendChild(groupDiv);
         });
+
+        renderPaletteState();
 
         if (paletteModal) {
             paletteModal.classList.add('active');
@@ -1891,6 +1976,19 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    // 「えらび終えた」で閉じる。× と背景タップも同じで、閉じるだけ
+    // （本当の確定は設定画面の「言葉の設定を保存する」なので、ここでは何も保存しない）
+    const palettePreviewDone = document.getElementById('palettePreviewDone');
+    if (palettePreviewDone) {
+        palettePreviewDone.addEventListener('click', () => {
+            if (paletteModal) paletteModal.classList.remove('active');
+            const settingsModal = document.getElementById('settingsModal');
+            if (!settingsModal || !settingsModal.classList.contains('active')) {
+                document.body.classList.remove('modal-open');
+            }
+        });
+    }
+
     if (closePaletteModal) {
         closePaletteModal.addEventListener('click', () => {
             if (paletteModal) paletteModal.classList.remove('active');
@@ -1901,27 +1999,63 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    function addToInput(text, isColor) {
+    // 入力欄が「まだ初期の言葉のまま」か。まだユーザーが選んだ言葉ではないので置き換えてよい
+    function isLabelUntouched(current) {
+        return current === PALETTE_TARGET_DEFAULTS[currentPaletteTargetInput];
+    }
+
+    // 言葉を足す。選んでもパレットは閉じない（見え方を見ながら足していけるように）
+    function addToInput(text) {
         const inputField = document.getElementById(currentPaletteTargetInput);
-        if (inputField) {
-            const current = inputField.value.trim();
-            if (!current) {
-                inputField.value = text;
-            } else if (isColor) {
-                // 色は言葉の前に置く（「🔴 ハイ」の並びになるように）
-                inputField.value = `${text} ${current}`;
-            } else {
-                inputField.value = `${current} ${text}`;
-            }
+        if (!inputField) return;
+        const current = inputField.value.trim();
+        if (!current || isLabelUntouched(current)) {
+            inputField.value = text;
+        } else {
+            inputField.value = `${current} ${text}`;
         }
-        
-        if (paletteModal) {
-            paletteModal.classList.remove('active');
-            const settingsModal = document.getElementById('settingsModal');
-            if (!settingsModal || !settingsModal.classList.contains('active')) {
-                document.body.classList.remove('modal-open');
-            }
+        renderLabelPreview();
+        renderPaletteState();
+    }
+
+    // 色は付け外しできる。もう一度押すと、その色だけ外れる
+    function toggleColor(color) {
+        const inputField = document.getElementById(currentPaletteTargetInput);
+        if (!inputField) return;
+        const current = inputField.value.trim();
+        if (!current || isLabelUntouched(current)) {
+            inputField.value = color;
+        } else if (current.includes(color)) {
+            inputField.value = current.split(color).join('').replace(/\s+/g, ' ').trim();
+        } else {
+            // 色は言葉の前に置く（「🔴 ハイ」の並びになるように）
+            inputField.value = `${color} ${current}`;
         }
+        renderLabelPreview();
+        renderPaletteState();
+    }
+
+    // パレット内のプレビューと、色の選択中の印を今の入力欄に合わせる
+    function renderPaletteState() {
+        const inputField = document.getElementById(currentPaletteTargetInput);
+        if (!inputField) return;
+        const zoneKey = currentPaletteZone || PALETTE_ZONE_KEY[currentPaletteTargetInput];
+        const value = inputField.value.trim();
+
+        const item = document.getElementById('palettePreviewItem');
+        const emojiEl = document.getElementById('palettePreviewEmoji');
+        const textEl = document.getElementById('palettePreviewText');
+        if (item && emojiEl && textEl) {
+            item.classList.remove('state-high', 'state-mid', 'state-low');
+            item.classList.add('state-' + zoneKey);
+            emojiEl.textContent = PALETTE_ZONE_EMOJI[zoneKey] || '';
+            // 空欄のときは、保存時と同じく初期の言葉が入る
+            textEl.textContent = value || PALETTE_TARGET_DEFAULTS[currentPaletteTargetInput] || '';
+        }
+
+        paletteColors.querySelectorAll('.palette-color-btn').forEach(btn => {
+            btn.classList.toggle('is-selected', value.includes(btn.dataset.color));
+        });
     }
 
     if (paletteModal) {
