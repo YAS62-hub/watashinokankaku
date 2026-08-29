@@ -111,8 +111,12 @@ main {
 }
 
 .state-button .text {
-    white-space: nowrap;
-    font-size: 0.95rem; /* 1.05remから縮小して確実に1行に収める */
+    /* 以前は white-space: nowrap で1行に収めていたが、長い言葉が画面外に切れて
+       読めなくなるため折り返すようにした。初期の言葉は3つとも1行に収まるので、
+       言葉を変えていない人の見た目は変わらない */
+    font-size: 0.95rem;
+    line-height: 1.4;
+    overflow-wrap: break-word;
 }
 
 .state-button .text, .state-button .emoji {
@@ -809,8 +813,6 @@ input:checked + .toggle-slider::before {
     margin-bottom: 6px;
     cursor: default;
     box-shadow: none;
-    /* 言葉が長いと折り返すので、絵文字は上に揃える */
-    align-items: flex-start;
 }
 
 .label-preview-item:last-child {
@@ -832,6 +834,26 @@ input:checked + .toggle-slider::before {
     font-size: 0.9rem;
     line-height: 1.4;
     word-break: break-word;
+}
+
+/* 感覚パレット：色のボタン（選択中は輪をつける。もう一度押すと外れる） */
+.palette-color-btn {
+    font-size: 1.5rem;
+    line-height: 1;
+    padding: 6px;
+    border: none;
+    border-radius: 50%;
+    background: transparent;
+    cursor: pointer;
+    transition: box-shadow 0.2s, transform 0.2s;
+}
+
+.palette-color-btn.is-selected {
+    box-shadow: 0 0 0 3px var(--accent);
+}
+
+.palette-color-btn:active {
+    transform: scale(0.94);
 }
 
 .custom-input-group {

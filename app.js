@@ -1840,6 +1840,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const settingsPaletteBtns = document.querySelectorAll('.settings-palette-btn');
 
     let currentPaletteTargetInput = null;
+    let currentPaletteZone = null;
+    const PALETTE_ZONE_EMOJI = { high: '🔥', mid: '☕️', low: '❄️' };
+    const PALETTE_ZONE_KEY = { customHigh: 'high', customMid: 'mid', customLow: 'low' };
     const PALETTE_COLORS = ['🔴', '🟠', '🟡', '🟢', '🟤', '⚪️', '🔵', '🔘', '⚫️'];
     // 入力欄ごとの初期の言葉。まだ初期のままかどうかの判定に使う
     const PALETTE_TARGET_DEFAULTS = {
@@ -1850,6 +1853,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function openPalette(zone, targetInputId, showColors) {
         currentPaletteTargetInput = targetInputId;
+        currentPaletteZone = zone;
 
         // Render colors
         paletteColors.innerHTML = '';
@@ -1859,8 +1863,9 @@ document.addEventListener('DOMContentLoaded', () => {
             PALETTE_COLORS.forEach(color => {
                 const btn = document.createElement('button');
                 btn.textContent = color;
-                btn.style.cssText = 'font-size: 1.5rem; padding: 6px; border: none; background: transparent; cursor: pointer; transition: transform 0.2s;';
-                btn.onclick = () => addToInput(color, true);
+                btn.className = 'palette-color-btn';
+                btn.dataset.color = color;
+                btn.onclick = () => toggleColor(color);
                 paletteColors.appendChild(btn);
             });
         } else {
@@ -1896,7 +1901,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const btn = document.createElement('button');
                 btn.textContent = word;
                 btn.style.cssText = 'font-size: 0.85rem; padding: 6px 12px; border: 1px solid #D6D2CA; background: #FFF; border-radius: 20px; color: #5C5446; cursor: pointer; margin-bottom:4px;';
-                btn.onclick = () => addToInput(word, false);
+                btn.onclick = () => addToInput(word);
                 chipsDiv.appendChild(btn);
             });
 
@@ -1904,6 +1909,8 @@ document.addEventListener('DOMContentLoaded', () => {
             groupDiv.appendChild(chipsDiv);
             paletteWords.appendChild(groupDiv);
         });
+
+        renderPaletteState();
 
         if (paletteModal) {
             paletteModal.classList.add('active');
@@ -1920,6 +1927,19 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    // 「えらび終えた」で閉じる。× と背景タップも同じで、閉じるだけ
+    // （本当の確定は設定画面の「言葉の設定を保存する」なので、ここでは何も保存しない）
+    const palettePreviewDone = document.getElementById('palettePreviewDone');
+    if (palettePreviewDone) {
+        palettePreviewDone.addEventListener('click', () => {
+            if (paletteModal) paletteModal.classList.remove('active');
+            const settingsModal = document.getElementById('settingsModal');
+            if (!settingsModal || !settingsModal.classList.contains('active')) {
+                document.body.classList.remove('modal-open');
+            }
+        });
+    }
+
     if (closePaletteModal) {
         closePaletteModal.addEventListener('click', () => {
             if (paletteModal) paletteModal.classList.remove('active');
@@ -1930,31 +1950,63 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    function addToInput(text, isColor) {
+    // 入力欄が「まだ初期の言葉のまま」か。まだユーザーが選んだ言葉ではないので置き換えてよい
+    function isLabelUntouched(current) {
+        return current === PALETTE_TARGET_DEFAULTS[currentPaletteTargetInput];
+    }
+
+    // 言葉を足す。選んでもパレットは閉じない（見え方を見ながら足していけるように）
+    function addToInput(text) {
         const inputField = document.getElementById(currentPaletteTargetInput);
-        if (inputField) {
-            const current = inputField.value.trim();
-            // 初期の言葉のままなら、それはまだユーザーが選んだ言葉ではないので置き換える。
-            // 一度変えたあとは、その人自身の言葉なので消さずに足していく
-            const isUntouched = current === PALETTE_TARGET_DEFAULTS[currentPaletteTargetInput];
-            if (!current || isUntouched) {
-                inputField.value = text;
-            } else if (isColor) {
-                // 色は言葉の前に置く（「🔴 ハイ」の並びになるように）
-                inputField.value = `${text} ${current}`;
-            } else {
-                inputField.value = `${current} ${text}`;
-            }
-            renderLabelPreview();
+        if (!inputField) return;
+        const current = inputField.value.trim();
+        if (!current || isLabelUntouched(current)) {
+            inputField.value = text;
+        } else {
+            inputField.value = `${current} ${text}`;
         }
-        
-        if (paletteModal) {
-            paletteModal.classList.remove('active');
-            const settingsModal = document.getElementById('settingsModal');
-            if (!settingsModal || !settingsModal.classList.contains('active')) {
-                document.body.classList.remove('modal-open');
-            }
+        renderLabelPreview();
+        renderPaletteState();
+    }
+
+    // 色は付け外しできる。もう一度押すと、その色だけ外れる
+    function toggleColor(color) {
+        const inputField = document.getElementById(currentPaletteTargetInput);
+        if (!inputField) return;
+        const current = inputField.value.trim();
+        if (!current || isLabelUntouched(current)) {
+            inputField.value = color;
+        } else if (current.includes(color)) {
+            inputField.value = current.split(color).join('').replace(/\s+/g, ' ').trim();
+        } else {
+            // 色は言葉の前に置く（「🔴 ハイ」の並びになるように）
+            inputField.value = `${color} ${current}`;
         }
+        renderLabelPreview();
+        renderPaletteState();
+    }
+
+    // パレット内のプレビューと、色の選択中の印を今の入力欄に合わせる
+    function renderPaletteState() {
+        const inputField = document.getElementById(currentPaletteTargetInput);
+        if (!inputField) return;
+        const zoneKey = currentPaletteZone || PALETTE_ZONE_KEY[currentPaletteTargetInput];
+        const value = inputField.value.trim();
+
+        const item = document.getElementById('palettePreviewItem');
+        const emojiEl = document.getElementById('palettePreviewEmoji');
+        const textEl = document.getElementById('palettePreviewText');
+        if (item && emojiEl && textEl) {
+            item.classList.remove('state-high', 'state-mid', 'state-low');
+            item.classList.add('state-' + zoneKey);
+            emojiEl.textContent = PALETTE_ZONE_EMOJI[zoneKey] || '';
+            // 空欄のときは、保存時と同じく初期の言葉が入る
+            textEl.textContent = value || PALETTE_TARGET_DEFAULTS[currentPaletteTargetInput] || '';
+        }
+
+        paletteColors.querySelectorAll('.palette-color-btn').forEach(btn => {
+            btn.classList.toggle('is-selected', value.includes(btn.dataset.color));
+        });
     }
 
     if (paletteModal) {

@@ -453,10 +453,18 @@
             <div class="modal-content" style="padding: 20px;">
                 <button class="close-button" id="closePaletteModal">×</button>
                 <h3 style="margin-bottom: 16px; font-size: 1.1rem; color: #5C5446;">ボタンの言葉を選ぶ</h3>
+                <div class="label-preview" id="palettePreview">
+                    <p class="label-preview-caption">いまの見え方</p>
+                    <div class="label-preview-item state-button" id="palettePreviewItem">
+                        <span class="emoji" id="palettePreviewEmoji"></span>
+                        <span class="preview-text" id="palettePreviewText"></span>
+                    </div>
+                </div>
                 <p style="font-size: 0.8rem; color: #8A8172; margin-bottom: 8px;">🎨 色で表すと？</p>
                 <div id="paletteColors" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px;"></div>
                 <p style="font-size: 0.8rem; color: #8A8172; margin-bottom: 8px;">📝 言葉で表すと？</p>
                 <div id="paletteWords" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px;"></div>
+                <button type="button" id="palettePreviewDone" class="primary-btn" style="width: 100%;">えらび終えた</button>
             </div>
         </div>
 
