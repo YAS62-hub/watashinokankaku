@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('App v10.2.0 starting (20260730_fix2)...');
+    console.log('App v10.2.1 starting (20260730_fix2)...');
     // === 要素の取得 ===
     const tabs = document.querySelectorAll('.tab-content');
     const navItems = document.querySelectorAll('.nav-item');
@@ -1142,80 +1142,94 @@ document.addEventListener('DOMContentLoaded', () => {
             return 0; // low
         });
         
+        // グラフの部品（Chart.js）はアプリ内の chart.umd.min.js から読み込んでいる。
+        // 万一読み込めなかった場合は、グラフだけを静かに省いてカレンダーの描画へ進む。
+        // ※ここで例外が出ると renderCalendar と、この関数を呼んでいる記録処理の続き
+        //   （記録後メッセージ）まで巻き添えで止まり、実際には保存できているのに
+        //   「保存中にエラーが発生しました」という事実と異なる案内が出てしまう。
         const canvas = document.getElementById('waveChart');
-        if(!canvas) return; 
-        const ctx = canvas.getContext('2d');
-        if (chartInstance) chartInstance.destroy();
+        if (canvas && typeof Chart !== 'undefined') {
+            try {
+                const ctx = canvas.getContext('2d');
+                if (chartInstance) chartInstance.destroy();
         
-        chartInstance = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: chartLabels,
-                datasets: [{
-                    label: '状態',
-                    data: chartDataPoints,
-                    borderColor: '#A9BCA3',
-                    backgroundColor: 'rgba(169, 188, 163, 0.2)',
-                    borderWidth: 3,
-                    tension: 0.4,
-                    pointBackgroundColor: '#A9BCA3',
-                    pointRadius: 4,
-                    fill: true
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: {
-                        min: -10,
-                        max: 110,
-                        ticks: {
-                            stepSize: 50,
-                            callback: function(value) {
-                                if (value === 100) return '🔥';
-                                if (value === 50) return '☕️';
-                                if (value === 0) return '❄️';
-                                return '';
-                            },
-                            font: { size: 14 }
-                        },
-                        grid: { color: 'rgba(0,0,0,0.05)' }
+                chartInstance = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: chartLabels,
+                        datasets: [{
+                            label: '状態',
+                            data: chartDataPoints,
+                            borderColor: '#A9BCA3',
+                            backgroundColor: 'rgba(169, 188, 163, 0.2)',
+                            borderWidth: 3,
+                            tension: 0.4,
+                            pointBackgroundColor: '#A9BCA3',
+                            pointRadius: 4,
+                            fill: true
+                        }]
                     },
-                    x: {
-                        grid: { display: false },
-                        ticks: {
-                            font: { size: 10 },
-                            maxRotation: 45,
-                            minRotation: 45
-                        }
-                    }
-                },
-                plugins: { 
-                    legend: { display: false },
-                    tooltip: {
-                        displayColors: false,
-                        callbacks: {
-                            title: function(context) {
-                                // ツールチップのタイトルには正確な時間を表示
-                                const idx = context[0].dataIndex;
-                                const originalRecord = recentHistory[idx];
-                                const d = new Date(originalRecord.time);
-                                return `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                min: -10,
+                                max: 110,
+                                ticks: {
+                                    stepSize: 50,
+                                    callback: function(value) {
+                                        if (value === 100) return '🔥';
+                                        if (value === 50) return '☕️';
+                                        if (value === 0) return '❄️';
+                                        return '';
+                                    },
+                                    font: { size: 14 }
+                                },
+                                grid: { color: 'rgba(0,0,0,0.05)' }
                             },
-                            // 数値（スコア）ではなく、そのときのゾーンの言葉を表示する
-                            label: function(context) {
-                                const originalRecord = recentHistory[context.dataIndex];
-                                const zone = getZone(originalRecord.type);
-                                const labels = JSON.parse(localStorage.getItem('seAppLabels') || 'null') || defaultLabels;
-                                const emojiMap = { 'high': '🔥', 'mid': '☕️', 'low': '❄️' };
-                                return `${emojiMap[zone]} ${labels[zone]}`;
+                            x: {
+                                grid: { display: false },
+                                ticks: {
+                                    font: { size: 10 },
+                                    maxRotation: 45,
+                                    minRotation: 45
+                                }
+                            }
+                        },
+                        plugins: { 
+                            legend: { display: false },
+                            tooltip: {
+                                displayColors: false,
+                                callbacks: {
+                                    title: function(context) {
+                                        // ツールチップのタイトルには正確な時間を表示
+                                        const idx = context[0].dataIndex;
+                                        const originalRecord = recentHistory[idx];
+                                        const d = new Date(originalRecord.time);
+                                        return `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+                                    },
+                                    // 数値（スコア）ではなく、そのときのゾーンの言葉を表示する
+                                    label: function(context) {
+                                        const originalRecord = recentHistory[context.dataIndex];
+                                        const zone = getZone(originalRecord.type);
+                                        const labels = JSON.parse(localStorage.getItem('seAppLabels') || 'null') || defaultLabels;
+                                        const emojiMap = { 'high': '🔥', 'mid': '☕️', 'low': '❄️' };
+                                        return `${emojiMap[zone]} ${labels[zone]}`;
+                                    }
+                                }
                             }
                         }
                     }
-                }
+                });
+            } catch (err) {
+                console.error('グラフを描画できませんでした。グラフは表示せず、カレンダーの表示は続けます。', err);
             }
-        });
+        } else if (!canvas) {
+            console.warn('グラフの描画先（waveChart）が見つかりませんでした。');
+        } else {
+            console.warn('グラフの部品（Chart.js）を読み込めませんでした。グラフは表示せず、カレンダーの表示は続けます。');
+        }
         
         renderCalendar(dailyData);
     }
