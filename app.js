@@ -70,12 +70,25 @@ document.addEventListener('DOMContentLoaded', () => {
     const editZoneBtns = document.querySelectorAll('.edit-zone-group .state-button');
     let editSelectedType = null;
     
+    // 日時を、この端末の時計に合わせた文字列にする
+    function toLocalDateStr(date) {          // 例: 2026-09-03
+        const shifted = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+        return shifted.toISOString().split('T')[0];
+    }
+    function toLocalDateTimeStr(date) {      // 例: 2026-09-03T07:30
+        const shifted = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+        return shifted.toISOString().slice(0, 16);
+    }
+
+    // 記録・リソースのIDを作る
+    function createId(suffix = '') {
+        return Date.now().toString(36) + Math.random().toString(36).slice(2, 7) + suffix;
+    }
+
     // 日時の初期化
     function setNowToInput(inputEle) {
         if (!inputEle) return;
-        const now = new Date();
-        const offsetNow = new Date(now.getTime() - now.getTimezoneOffset() * 60000);
-        inputEle.value = offsetNow.toISOString().slice(0, 16);
+        inputEle.value = toLocalDateTimeStr(new Date());
     }
     
     // 汎用的なゾーン変換関数（数値や古い文字列をhigh/mid/lowに正規化）
@@ -539,7 +552,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 
                 const record = {
-                    id: Date.now().toString(36) + Math.random().toString(36).substr(2, 5),
+                    id: createId(),
                     type: selectedRecordType,
                     memo: dailyMemo.value,
                     time: dateToSave
@@ -644,7 +657,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // 新規保存
             const newResource = {
-                id: Date.now().toString(36) + Math.random().toString(36).substr(2, 5),
+                id: createId(),
                 text: currentMessage,
                 photoStr: '',
                 createdAt: new Date().toISOString()
@@ -1116,9 +1129,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const dailyData = {};
         
         history.forEach(r => {
-            const d = new Date(r.time);
-            const offset = d.getTimezoneOffset() * 60000;
-            const dateStr = new Date(d.getTime() - offset).toISOString().split('T')[0];
+            const dateStr = toLocalDateStr(new Date(r.time));
             if (!dailyData[dateStr]) {
                 dailyData[dateStr] = [];
             }
@@ -1254,9 +1265,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const firstDayOfMonth = new Date(year, month, 1).getDay();
         const daysInMonth = new Date(year, month + 1, 0).getDate();
         
-        const todayDate = new Date();
-        const offsetToday = todayDate.getTimezoneOffset() * 60000;
-        const todayStr = new Date(todayDate.getTime() - offsetToday).toISOString().split('T')[0];
+        const todayStr = toLocalDateStr(new Date());
         
         // default labels, fallback if nothing saved
         const defaultLabels = {
@@ -1362,9 +1371,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 editRecordId.value = record.id || record.time;
                                 editRecordMemo.value = record.memo || '';
                                 
-                                const d = new Date(record.time);
-                                const offsetD = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
-                                editRecordTime.value = offsetD.toISOString().slice(0, 16);
+                                editRecordTime.value = toLocalDateTimeStr(new Date(record.time));
                                 
                                 editSelectedType = record.type;
                                 editZoneBtns.forEach(b => {
@@ -1574,7 +1581,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (loadingOverlay) loadingOverlay.querySelector('p').textContent = `大切に保存しています（${i+1}/${filesToProcess.length}枚）...`;
                         const base64 = await compressImage(filesToProcess[i]);
                         newResources.push({
-                            id: Date.now().toString(36) + Math.random().toString(36).substr(2, 5) + i,
+                            id: createId(i),
                             text: (i === 0) ? text : '', // テキストは1枚目に集約
                             photoStr: base64,
                             createdAt: timestamp
@@ -1582,7 +1589,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 } else if (text) {
                     newResources.push({
-                        id: Date.now().toString(36) + Math.random().toString(36).substr(2, 5),
+                        id: createId(),
                         text: text,
                         photoStr: '',
                         createdAt: timestamp
