@@ -118,6 +118,14 @@ document.addEventListener('DOMContentLoaded', () => {
         mid: '大丈夫（ほどほど・リラックス）',
         low: 'ロー（おもい・とおい）'
     };
+
+    // ゾーンの絵文字（グラフ・カレンダー・パレットで共通）
+    const ZONE_EMOJI = { high: '🔥', mid: '☕️', low: '❄️' };
+
+    // 保存された言葉。まだ保存されていなければ初期の言葉を返す
+    function getLabels() {
+        return JSON.parse(localStorage.getItem('seAppLabels') || 'null') || defaultLabels;
+    }
     
     function loadLabels() {
         // 先程の強制消去ロジックを取り下げ、正常なlocalStorageの読み込みを復旧
@@ -714,7 +722,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function hasUnsavedLabelChanges() {
-        const saved = JSON.parse(localStorage.getItem('seAppLabels') || 'null') || defaultLabels;
+        const saved = getLabels();
         const now = currentLabelValues();
         return now.high !== saved.high || now.mid !== saved.mid || now.low !== saved.low;
     }
@@ -1195,9 +1203,9 @@ document.addEventListener('DOMContentLoaded', () => {
                                 ticks: {
                                     stepSize: 50,
                                     callback: function(value) {
-                                        if (value === 100) return '🔥';
-                                        if (value === 50) return '☕️';
-                                        if (value === 0) return '❄️';
+                                        if (value === 100) return ZONE_EMOJI.high;
+                                        if (value === 50) return ZONE_EMOJI.mid;
+                                        if (value === 0) return ZONE_EMOJI.low;
                                         return '';
                                     },
                                     font: { size: 14 }
@@ -1229,9 +1237,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                     label: function(context) {
                                         const originalRecord = recentHistory[context.dataIndex];
                                         const zone = getZone(originalRecord.type);
-                                        const labels = JSON.parse(localStorage.getItem('seAppLabels') || 'null') || defaultLabels;
-                                        const emojiMap = { 'high': '🔥', 'mid': '☕️', 'low': '❄️' };
-                                        return `${emojiMap[zone]} ${labels[zone]}`;
+                                        const labels = getLabels();
+                                        return `${ZONE_EMOJI[zone]} ${labels[zone]}`;
                                     }
                                 }
                             }
@@ -1266,13 +1273,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const daysInMonth = new Date(year, month + 1, 0).getDate();
         
         const todayStr = toLocalDateStr(new Date());
-        
-        // default labels, fallback if nothing saved
-        const defaultLabels = {
-            high: 'ハイ（たかぶり・ざわざわ）',
-            mid: '大丈夫（ほどほど・リラックス）',
-            low: 'ロー（おもい・とおい）'
-        };
         
         for (let i = 0; i < firstDayOfMonth; i++) {
             const emptyCell = document.createElement('div');
@@ -1320,8 +1320,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 // タップ時のタイムライン表示
                 cell.addEventListener('click', () => {
-                    const savedLabels = JSON.parse(localStorage.getItem('seAppLabels') || 'null') || defaultLabels;
-                    const emojiMap = { 'high': '🔥', 'mid': '☕️', 'low': '❄️' };
+                    const savedLabels = getLabels();
                     
                     document.getElementById('memoDisplay').classList.remove('hidden');
                     document.getElementById('memoDateLabel').textContent = `${month+1}月${day}日の記録`;
@@ -1338,7 +1337,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             item.className = 'timeline-item';
                             
                             const zone = getZone(record.type);
-                            const zoneLabel = `${emojiMap[zone]} ${savedLabels[zone]}`;
+                            const zoneLabel = `${ZONE_EMOJI[zone]} ${savedLabels[zone]}`;
                             
                             item.innerHTML = `
                                 <div class="timeline-time">${timeStr}</div>
@@ -1920,7 +1919,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let currentPaletteTargetInput = null;
     let currentPaletteZone = null;
-    const PALETTE_ZONE_EMOJI = { high: '🔥', mid: '☕️', low: '❄️' };
     const PALETTE_ZONE_KEY = { customHigh: 'high', customMid: 'mid', customLow: 'low' };
     // 入力欄ごとの初期の言葉。まだ初期のままかどうかの判定に使う
     const PALETTE_TARGET_DEFAULTS = {
@@ -2072,7 +2070,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (item && emojiEl && textEl) {
             item.classList.remove('state-high', 'state-mid', 'state-low');
             item.classList.add('state-' + zoneKey);
-            emojiEl.textContent = PALETTE_ZONE_EMOJI[zoneKey] || '';
+            emojiEl.textContent = ZONE_EMOJI[zoneKey] || '';
             // 空欄のときは、保存時と同じく初期の言葉が入る
             textEl.textContent = value || PALETTE_TARGET_DEFAULTS[currentPaletteTargetInput] || '';
         }
