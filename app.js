@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('App v10.2.1 starting (20260730_fix2)...');
+    console.log('App v10.2.2 starting (20260730_fix2)...');
     // === 要素の取得 ===
     const tabs = document.querySelectorAll('.tab-content');
     const navItems = document.querySelectorAll('.nav-item');
