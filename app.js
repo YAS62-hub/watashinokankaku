@@ -320,6 +320,17 @@ document.addEventListener('DOMContentLoaded', () => {
     ];
 
     const COMMON_PALETTE_COLORS = ['🔴', '🟠', '🟡', '🟢', '🟤', '⚪️', '🔵', '🔘', '⚫️'];
+
+    // ゾーン（ハイ／大丈夫／ロー）ごとに、どのサブゾーンの言葉を出すか。
+    // ホーム画面のパレットと設定画面のパレットの両方から使う（同じ対応表を2箇所に持たないため）
+    function getPaletteGroupsForZone(zone) {
+        let targetScores = [];
+        if (zone === 'high') targetScores = [100, 85];
+        else if (zone === 'mid') targetScores = [65, 50, 35];
+        else if (zone === 'low') targetScores = [15, 0];
+        else targetScores = [100, 85, 65, 50, 35, 15, 0]; // 未選択の場合は全部出す
+        return PALETTE_GROUPS.filter(g => targetScores.includes(g.score));
+    }
     
     
 
@@ -393,13 +404,7 @@ document.addEventListener('DOMContentLoaded', () => {
         modalPaletteColors.appendChild(clearColorBtn);
 
         // 対象となるグループ見出しを取得
-        let targetScores = [];
-        if (zone === 'high') targetScores = [100, 85];
-        else if (zone === 'mid') targetScores = [65, 50, 35];
-        else if (zone === 'low') targetScores = [15, 0];
-        else targetScores = [100, 85, 65, 50, 35, 15, 0]; // 未選択の場合は全部出す
-
-        const targetGroups = PALETTE_GROUPS.filter(g => targetScores.includes(g.score));
+        const targetGroups = getPaletteGroupsForZone(zone);
 
         // 言葉を見出しグループごとに描画
         modalPaletteWords.innerHTML = '';
@@ -1910,7 +1915,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentPaletteZone = null;
     const PALETTE_ZONE_EMOJI = { high: '🔥', mid: '☕️', low: '❄️' };
     const PALETTE_ZONE_KEY = { customHigh: 'high', customMid: 'mid', customLow: 'low' };
-    const PALETTE_COLORS = ['🔴', '🟠', '🟡', '🟢', '🟤', '⚪️', '🔵', '🔘', '⚫️'];
     // 入力欄ごとの初期の言葉。まだ初期のままかどうかの判定に使う
     const PALETTE_TARGET_DEFAULTS = {
         customHigh: defaultLabels.high,
@@ -1927,7 +1931,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (showColors) {
             if (paletteColors.previousElementSibling) paletteColors.previousElementSibling.style.display = 'block';
             paletteColors.style.display = 'flex';
-            PALETTE_COLORS.forEach(color => {
+            COMMON_PALETTE_COLORS.forEach(color => {
                 const btn = document.createElement('button');
                 btn.textContent = color;
                 btn.className = 'palette-color-btn';
@@ -1942,12 +1946,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Render words（ゾーンごとに折りたたみ表示。一度に全語彙を見せず、必要な分だけそっと開けるようにする）
         paletteWords.innerHTML = '';
-        let targetScores = [];
-        if (zone === 'high') targetScores = [100, 85];
-        else if (zone === 'mid') targetScores = [65, 50, 35];
-        else if (zone === 'low') targetScores = [15, 0];
-
-        const targetGroups = PALETTE_GROUPS.filter(g => targetScores.includes(g.score));
+        const targetGroups = getPaletteGroupsForZone(zone);
 
         targetGroups.forEach(group => {
             const groupDiv = document.createElement('div');
