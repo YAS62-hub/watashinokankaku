@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('App v10.2.1 starting (20260730_fix2)...');
+    console.log('App v10.2.2 starting (20260730_fix2)...');
     // === 要素の取得 ===
     const tabs = document.querySelectorAll('.tab-content');
     const navItems = document.querySelectorAll('.nav-item');
@@ -1890,7 +1890,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     return;
                 }
                 modal.classList.remove('active');
-                document.body.classList.remove('modal-open');
+                // まだ他の画面が開いているなら、スクロール止めは外さない
+                // （設定画面の上に、パレットや未保存の確認が重なっている場合）
+                if (!document.querySelector('.modal.active')) {
+                    document.body.classList.remove('modal-open');
+                }
             }
         });
     });
