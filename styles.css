@@ -891,6 +891,54 @@ input:checked + .toggle-slider::before {
     margin-top: 20px;
 }
 
+/* 見出しと箇条書きが入る、少し長めのヒント箱（.setting-note の中身違い）。
+   文字色を薄字ではなく本文色にしているのは、この箱だけ「読んでもらう必要がある手順」だから。
+   薄字（--text-light）だと背景 #F8F7F4 に対して 3.39:1 まで落ちて読みにくくなる。 */
+.setting-note-block {
+    margin-top: 0;
+    color: var(--text-color);
+}
+
+.setting-note-title {
+    display: block;
+    margin-bottom: 6px;
+}
+
+.setting-note-block ul {
+    margin: 0;
+    padding-left: 20px;
+}
+
+.setting-note-block li + li {
+    margin-top: 6px;
+}
+
+/* ファイル選択欄。ブラウザ標準の四角いボタンを、アプリの丸みに合わせる。
+   ボタンを横並びではなく「上下」にしているのは、横に並べると
+   ファイル名（や「選択されていません」）が幅を取り合って「選択さ…いません」のように
+   途中で切れてしまうため。上下なら、長いファイル名でも幅いっぱい使える。 */
+.file-input {
+    font-size: 0.8rem;
+    padding: 10px 12px;
+    line-height: 1.8;
+    width: 100%;
+}
+
+.file-input::file-selector-button {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    font-family: inherit;
+    font-size: 0.85rem;
+    color: var(--text-color);
+    background-color: #F1F0EC;
+    border: 1px solid #DCD6CD;
+    border-radius: 10px;
+    padding: 9px 12px;
+    margin: 0 0 6px 0;
+    cursor: pointer;
+}
+
 .primary-btn {
     background-color: var(--accent);
     color: white;
