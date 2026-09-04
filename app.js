@@ -572,7 +572,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 if (history.length === 5) {
                     setTimeout(() => {
-                        if (confirm('いつも大切に使ってくださりありがとうございます。\n大切な記録を守るために、時々設定画面から『バックアップファイル』をダウンロードしておくのがおすすめです。\n\n「設定画面」を開きますか？\n（OKで設定画面へ、キャンセルで閉じます）')) {
+                        if (confirm('いつも大切に使ってくださりありがとうございます。\n大切な記録を守るために、時々設定画面の『バックアップを作る』を押しておくのがおすすめです。\n\n「設定画面」を開きますか？\n（OKで設定画面へ、キャンセルで閉じます）')) {
                             const settingsModal = document.getElementById('settingsModal');
                             if (settingsModal) {
                                 settingsModal.classList.add('active');
@@ -1834,7 +1834,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 URL.revokeObjectURL(url);
             } catch (e) {
                 console.error(e);
-                alert('書き出しに失敗しました。');
+                alert('バックアップを作れませんでした。');
             }
         });
     }
