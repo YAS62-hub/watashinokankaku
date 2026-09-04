@@ -2212,7 +2212,17 @@ document.addEventListener('DOMContentLoaded', () => {
             return true;
         }
 
-        tutorialSlide4Text.innerHTML = 'ホーム画面に追加すると、いつもお使いのアプリのように開けます。<br><br>それと、もうひとつだけ。ブラウザには、しばらく開かれていないサイトのデータを整理してしまう仕組みがあります。ホーム画面に追加しておくと、その対象から外れるため、これまでの記録が残りやすくなります。<span style="display:block; margin-top:12px; font-size:0.85rem; color:var(--text-light); line-height:1.6;">（通知をお使いになる場合も、追加が必要です。通知はお使いにならなくても大丈夫です。）</span>';
+        // 結論 → 理由 → 対策 の順で置く（読むのを途中でやめても結論だけは残るように）。
+        // 「その」「これ」などの指示語は使わない（指しているものを探しに戻る手間が生まれるため）。
+        tutorialSlide4Text.innerHTML =
+            '<strong>このアプリは「ホーム画面に追加」してお使いいただくのがおすすめです。</strong>' +
+            '<ul style="text-align:left; align-self:stretch; margin:14px 0 0; padding-left:1.15em; line-height:1.75; font-size:0.95rem;">' +
+            '<li>ブラウザ（SafariやChrome）のまま使うと、しばらく使わない間に、これまでの記録が消えてしまうことがあります</li>' +
+            '<li style="margin-top:6px;">ブラウザ側の仕組みなので、アプリからは防げません</li>' +
+            '<li style="margin-top:6px;">ホーム画面に追加すると、記録は消えずに残ります</li>' +
+            '</ul>' +
+            '<span style="display:block; margin-top:12px; font-size:0.85rem; color:var(--text-light); line-height:1.6;">' +
+            '（通知をお使いになる場合も、ホーム画面への追加が必要です。通知はお使いにならなくても大丈夫です。）</span>';
         setStepIcons('🔗', '➕', '✓');
         if (isIOS) {
             if (label1) label1.textContent = '共有ボタン（見当たらなければ「•••」）をタップ';
