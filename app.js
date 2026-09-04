@@ -111,6 +111,18 @@ document.addEventListener('DOMContentLoaded', () => {
     
     setNowToInput(recordTimeInput);
 
+    // === 記録が勝手に消されないよう、ブラウザに永続化を頼む ===
+    // ブラウザには「しばらく開かれていないサイトのデータを整理する」仕組みがある。
+    // ここで永続化を頼んでおくと、その対象から外れることがある。
+    // 対応していないブラウザ（2026-09時点のiOS Safari等）では、この処理は丸ごと飛ぶ。
+    // 効いても効かなくても画面の見た目は変わらない。ユーザーには一切見せない。
+    // ★これは保険であって、本命はホーム画面への追加（チュートリアル4枚目）の方。
+    if (navigator.storage && typeof navigator.storage.persist === 'function') {
+        navigator.storage.persisted()
+            .then(already => { if (!already) return navigator.storage.persist(); })
+            .catch(() => {});
+    }
+
     // === 初期設定の読み込み ===
     // 0. カスタムラベルの読み込みと適用
     const defaultLabels = {
@@ -2140,7 +2152,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // 通知トグル・テスト送信ボタン共通：非対応環境向けの案内文
     function getPushUnsupportedMessage() {
         if (isIOSDevice() && !isStandaloneMode()) {
-            return '通知には、ホーム画面への追加が必要です。Safariの共有ボタン（なければ「•••」）から「ホーム画面に追加」していただくと通知もご利用いただけます。\n\n通知なしでも問題なくお使いいただけます。ご不明点は遠慮なく永田までご連絡ください。';
+            return '通知には、ホーム画面への追加が必要です。Safariの共有ボタン（なければ「•••」）から「ホーム画面に追加」していただけます。\n\n通知はお使いにならなくても大丈夫です。ただ、ホーム画面への追加そのものは、していただけると安心です。ブラウザには、しばらく開かれていないサイトのデータを整理してしまう仕組みがあり、追加しておくとその対象から外れるためです。\n\nご不明点は遠慮なく永田までご連絡ください。';
         }
         return 'お使いのブラウザでは通知機能をご利用いただけないようです。\n\n通知なしでも問題なくお使いいただけます。ご不明点は遠慮なく永田までご連絡ください。';
     }
@@ -2200,7 +2212,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return true;
         }
 
-        tutorialSlide4Text.innerHTML = 'ホーム画面に追加すると、いつもお使いのアプリのように開け、記録や通知もより安定してご利用いただけます。';
+        tutorialSlide4Text.innerHTML = 'ホーム画面に追加すると、いつもお使いのアプリのように開けます。<br><br>それと、もうひとつだけ。ブラウザには、しばらく開かれていないサイトのデータを整理してしまう仕組みがあります。ホーム画面に追加しておくと、その対象から外れるため、これまでの記録が残りやすくなります。<span style="display:block; margin-top:12px; font-size:0.85rem; color:var(--text-light); line-height:1.6;">（通知をお使いになる場合も、追加が必要です。通知はお使いにならなくても大丈夫です。）</span>';
         setStepIcons('🔗', '➕', '✓');
         if (isIOS) {
             if (label1) label1.textContent = '共有ボタン（見当たらなければ「•••」）をタップ';
