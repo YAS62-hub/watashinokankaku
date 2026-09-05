@@ -225,6 +225,71 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.removeItem('seAppPhoto');
     }
 
+    // ===== 写真の新しい保存場所（IndexedDB）=====
+    // 工事プラン 段階1（2026-09-06）：「読む道」だけを先に作る。
+    //   ・書き込みは一切変えていない。新しい場所へは、まだ1枚も入らない。
+    //   ・したがって、この時点では画面の見え方も動きも工事前と変わらない。
+    //   ・読む順番は「新しい場所（IndexedDB）→ 無ければ古い場所（localStorage）」。
+    //     段階4の引っ越し中は、同じ写真が新旧の両方に並ぶ期間が必ずあるため、
+    //     新しい方を先に見る順番でないと困る。
+    //   ・IndexedDBから読んだ写真を localStorage へ書き戻すことは絶対にしない。
+    //     書き戻すと5MBの上限に当たり、工事の意味が無くなる。
+    const PHOTO_DB_NAME = 'seAppPhotos';
+    const PHOTO_DB_VERSION = 1;
+    const PHOTO_STORE_NAME = 'photos';
+
+    // 新しい場所から読んだ写真を持っておく入れ物（リソースのid → 画像データ）
+    const idbPhotoMap = new Map();
+
+    function openPhotoDb() {
+        return new Promise((resolve, reject) => {
+            if (!window.indexedDB) {
+                reject(new Error('この環境ではIndexedDBが使えません'));
+                return;
+            }
+            const req = indexedDB.open(PHOTO_DB_NAME, PHOTO_DB_VERSION);
+            req.onupgradeneeded = () => {
+                const db = req.result;
+                if (!db.objectStoreNames.contains(PHOTO_STORE_NAME)) {
+                    db.createObjectStore(PHOTO_STORE_NAME, { keyPath: 'id' });
+                }
+            };
+            req.onsuccess = () => resolve(req.result);
+            req.onerror = () => reject(req.error);
+            req.onblocked = () => reject(new Error('IndexedDBを開けませんでした'));
+        });
+    }
+
+    // 新しい場所にある写真を、まとめて読み込む。読めた枚数を返す
+    function loadPhotosFromIdb() {
+        return openPhotoDb().then(db => new Promise((resolve, reject) => {
+            const tx = db.transaction(PHOTO_STORE_NAME, 'readonly');
+            const req = tx.objectStore(PHOTO_STORE_NAME).getAll();
+            req.onsuccess = () => {
+                (req.result || []).forEach(rec => {
+                    if (rec && rec.id && rec.photoStr) {
+                        idbPhotoMap.set(rec.id, rec.photoStr);
+                    }
+                });
+                resolve(idbPhotoMap.size);
+            };
+            req.onerror = () => reject(req.error);
+        }));
+    }
+
+    // 写真を1枚取り出す。新しい場所を先に見て、無ければ古い場所を見る
+    function getPhotoStr(res) {
+        if (!res) return '';
+        const fromIdb = idbPhotoMap.get(res.id);
+        if (fromIdb) return fromIdb;
+        return res.photoStr || '';
+    }
+
+    // そのリソースが写真を持っているか（置き場所は問わない）
+    function hasPhoto(res) {
+        return getPhotoStr(res) !== '';
+    }
+
     // === タブ切り替え ===
     navItems.forEach(item => {
         item.addEventListener('click', () => {
@@ -1657,8 +1722,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (seAppResources.length > 0) {
             const randomRes = seAppResources[Math.floor(Math.random() * seAppResources.length)];
             let html = '';
-            if (randomRes.photoStr) {
-                html += `<img src="${randomRes.photoStr}">`;
+            const randomPhoto = getPhotoStr(randomRes);
+            if (randomPhoto) {
+                html += `<img src="${randomPhoto}">`;
             } else if (randomRes.text && randomRes.text.trim() !== '') {
                 html += `<p style="font-size: 1.1rem; text-align: center;">${randomRes.text.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</p>`;
             }
@@ -1696,7 +1762,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const prevPhotoBtn = document.getElementById('prevPhotoBtn');
         const nextPhotoBtn = document.getElementById('nextPhotoBtn');
         
-        if (photoViewImg) photoViewImg.src = res.photoStr;
+        if (photoViewImg) photoViewImg.src = getPhotoStr(res);
         if (photoViewText) photoViewText.textContent = res.text || '';
         if (photoViewResourceId) photoViewResourceId.value = res.id;
         
@@ -1732,14 +1798,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (photoGalleryTab) photoGalleryTab.innerHTML = '';
         if (wordGalleryTab) wordGalleryTab.innerHTML = '';
         
-        globalPhotoResources = seAppResources.filter(r => r.photoStr);
+        globalPhotoResources = seAppResources.filter(r => hasPhoto(r));
         
         seAppResources.forEach(res => {
             // 写真ギャラリー（グリッド表示）
-            if (res.photoStr && photoGalleryTab) {
+            const resPhoto = getPhotoStr(res);
+            if (resPhoto && photoGalleryTab) {
                 const item = document.createElement('div');
                 item.className = 'photo-grid-item';
-                item.innerHTML = `<img src="${res.photoStr}" alt="写真">`;
+                item.innerHTML = `<img src="${resPhoto}" alt="写真">`;
                 
                 item.addEventListener('click', () => {
                     currentPhotoIndex = globalPhotoResources.findIndex(r => r.id === res.id);
@@ -1754,7 +1821,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             
             // 言葉タブ（リスト表示）: 画像データがない純粋なテキストのみに厳格化
-            if (!res.photoStr && res.text && res.text.trim() !== '' && wordGalleryTab) {
+            if (!resPhoto && res.text && res.text.trim() !== '' && wordGalleryTab) {
                 const card = document.createElement('div');
                 card.className = 'resource-card';
                 card.innerHTML = `
@@ -1773,6 +1840,8 @@ document.addEventListener('DOMContentLoaded', () => {
             btn.addEventListener('click', (e) => {
                 const targetBtn = e.target.closest('.delete-resource-btn');
                 if (confirm('このリソースを削除しますか？')) {
+                    // ★段階2以降の注意：新しい場所（IndexedDB）に写真が入るようになったら、
+                    //   ここでも IndexedDB 側の写真を消すこと。忘れると写真だけ残る。
                     const idToDelete = targetBtn.getAttribute('data-id');
                     seAppResources = seAppResources.filter(r => r.id !== idToDelete);
                     localStorage.setItem('seAppResources', JSON.stringify(seAppResources));
@@ -1796,6 +1865,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 deletePhotoBtn.addEventListener('click', () => {
                     const targetId = photoViewResourceId.value;
                     if (confirm('この写真を削除してもよろしいですか？')) {
+                        // ★段階2以降の注意：新しい場所（IndexedDB）に写真が入るようになったら、
+                        //   ここでも IndexedDB 側の写真を消すこと。忘れると写真だけ残る。
                         seAppResources = seAppResources.filter(r => r.id !== targetId);
                         localStorage.setItem('seAppResources', JSON.stringify(seAppResources));
                         if (photoViewModal) {
@@ -2407,4 +2478,19 @@ document.addEventListener('DOMContentLoaded', () => {
     // 最初の一回描画
     renderResources();
     updateTodayWord();
+
+    // 新しい保存場所（IndexedDB）にある写真を読み込んでから、必要なら描き直す。
+    // 段階1では新しい場所が空なので、ここは何もしないまま終わる（＝画面は変わらない）。
+    // 新しい場所が使えない環境（プライベートモード等）では、
+    // 静かに古い場所だけで動き続ける。利用者には何も知らせない。
+    // ※段階2以降は updateTodayWord() の呼び直しで「今日のリソース」が
+    //   引き直されてしまうため、そのときに扱いを決めること。
+    loadPhotosFromIdb().then(count => {
+        if (count > 0) {
+            renderResources();
+            updateTodayWord();
+        }
+    }).catch(err => {
+        console.warn('写真の新しい保存場所は使えませんでした。古い場所のまま動きます。', err);
+    });
 });
