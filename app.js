@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('App v10.2.2 starting (20260730_fix2)...');
+    console.log('App v11.0 starting (20260730_fix2)...');
     // === 要素の取得 ===
     const tabs = document.querySelectorAll('.tab-content');
     const navItems = document.querySelectorAll('.nav-item');
@@ -241,8 +241,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // 新しい場所から読んだ写真を持っておく入れ物（リソースのid → 画像データ）
     const idbPhotoMap = new Map();
 
+    // 接続は1本だけ作って使い回す。
+    // ★呼ぶたびに新しく開くと、復元のように何度も書き込む場面で接続が積み上がる。
+    let photoDbPromise = null;
     function openPhotoDb() {
-        return new Promise((resolve, reject) => {
+        if (photoDbPromise) return photoDbPromise;
+        photoDbPromise = new Promise((resolve, reject) => {
             if (!window.indexedDB) {
                 reject(new Error('この環境ではIndexedDBが使えません'));
                 return;
@@ -254,10 +258,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     db.createObjectStore(PHOTO_STORE_NAME, { keyPath: 'id' });
                 }
             };
-            req.onsuccess = () => resolve(req.result);
+            req.onsuccess = () => {
+                const db = req.result;
+                // 別のタブが作りを変えようとしたら、こちらは道を譲る
+                db.onversionchange = () => { db.close(); photoDbPromise = null; };
+                resolve(db);
+            };
             req.onerror = () => reject(req.error);
             req.onblocked = () => reject(new Error('IndexedDBを開けませんでした'));
         });
+        // 失敗したときは覚えておかない。次に呼ばれたらもう一度試せるように
+        photoDbPromise.catch(() => { photoDbPromise = null; });
+        return photoDbPromise;
     }
 
     // 新しい場所にある写真を、まとめて読み込む。読めた枚数を返す
@@ -289,6 +301,42 @@ document.addEventListener('DOMContentLoaded', () => {
     function hasPhoto(res) {
         return getPhotoStr(res) !== '';
     }
+
+    // 写真をまとめて新しい場所に入れる（復元のときだけ使う）
+    // ※ふだんの保存は今までどおり古い場所のまま。ここでは変えていない。
+    function putPhotosToIdb(records) {
+        if (!records || records.length === 0) return Promise.resolve();
+        return openPhotoDb().then(db => new Promise((resolve, reject) => {
+            const tx = db.transaction(PHOTO_STORE_NAME, 'readwrite');
+            const store = tx.objectStore(PHOTO_STORE_NAME);
+            records.forEach(rec => store.put(rec));
+            tx.oncomplete = () => resolve();
+            tx.onerror = () => reject(tx.error);
+            tx.onabort = () => reject(tx.error);
+        }));
+    }
+
+    // 復元のあと、どこからも参照されなくなった写真を新しい場所から消す。
+    // keepIds に入っていないものが対象。
+    function pruneIdbPhotos(keepIds) {
+        return openPhotoDb().then(db => new Promise((resolve, reject) => {
+            const tx = db.transaction(PHOTO_STORE_NAME, 'readwrite');
+            const store = tx.objectStore(PHOTO_STORE_NAME);
+            const req = store.getAllKeys();
+            req.onsuccess = () => {
+                (req.result || []).forEach(key => {
+                    if (!keepIds.has(key)) store.delete(key);
+                });
+            };
+            req.onerror = () => reject(req.error);
+            tx.oncomplete = () => resolve();
+            tx.onerror = () => reject(tx.error);
+            tx.onabort = () => reject(tx.error);
+        }));
+    }
+
+    // 新しい場所の写真を読み終えたかどうか。書き出しの前に必ず待つ
+    let photosReady = Promise.resolve(0);
 
     // === タブ切り替え ===
     navItems.forEach(item => {
@@ -1886,20 +1934,49 @@ document.addEventListener('DOMContentLoaded', () => {
     const importDataBtn = document.getElementById('importDataBtn');
     const importFileInput = document.getElementById('importFileInput');
 
+    // バックアップファイルの形の名前と番号。
+    // 復元するとき、これが入っていれば新しい形式、入っていなければ8月までの古い形式と判断する。
+    const BACKUP_FORMAT = 'watashinokankaku-backup';
+    const BACKUP_VERSION = 2;
+
     if (exportDataBtn) {
-        exportDataBtn.addEventListener('click', () => {
+        exportDataBtn.addEventListener('click', async () => {
             try {
-                // メモリ負荷を最小限に抑えるため、単一の巨大な文字列ではなく配列としてBlobに渡す
+                // 新しい場所の写真を読み終えるまで待つ。待たずに書き出すと写真が抜ける
+                await photosReady;
+
                 const settingsStr = localStorage.getItem('seAppSettings') || '{}';
                 const historyStr = localStorage.getItem('seAppHistory') || '[]';
-                const resourcesStr = localStorage.getItem('seAppResources') || '[]';
-                
-                const blob = new Blob([
-                    '{"seAppSettings":', JSON.stringify(settingsStr),
-                    ',"seAppHistory":', JSON.stringify(historyStr),
-                    ',"seAppResources":', JSON.stringify(resourcesStr), '}'
-                ], { type: 'application/json' });
-                
+                const resources = JSON.parse(localStorage.getItem('seAppResources') || '[]');
+
+                // 写真を本体から外し、1枚につき1行として並べる。
+                // こうしておくと、復元のときにファイル全体をいっぺんに開かず、1枚ずつ読める。
+                // 写真が増えても、書き出しも復元も途中で落ちない。
+                const photoLines = [];
+                const strippedResources = resources.map(res => {
+                    const photo = getPhotoStr(res);   // 古い場所・新しい場所の両方から集める
+                    if (photo) {
+                        photoLines.push(JSON.stringify({ id: res.id, photoStr: photo }) + '\n');
+                    }
+                    return Object.assign({}, res, { photoStr: '' });
+                });
+
+                const header = {
+                    format: BACKUP_FORMAT,
+                    version: BACKUP_VERSION,
+                    createdAt: new Date().toISOString(),
+                    photoCount: photoLines.length,
+                    seAppSettings: settingsStr,
+                    seAppHistory: historyStr,
+                    seAppResources: JSON.stringify(strippedResources)
+                };
+
+                // メモリ負荷を最小限に抑えるため、単一の巨大な文字列ではなく配列としてBlobに渡す
+                const blob = new Blob(
+                    [JSON.stringify(header) + '\n'].concat(photoLines),
+                    { type: 'application/json' }
+                );
+
                 const url = URL.createObjectURL(blob);
                 
                 const now = new Date();
@@ -1935,42 +2012,104 @@ document.addEventListener('DOMContentLoaded', () => {
                     const p = loadingOverlay.querySelector('p');
                     if (p) p.innerHTML = 'ただいま記憶を復元しています...<br>完了までこのままお待ちください。';
                 }
-                
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    setTimeout(() => {
-                        try {
-                            const parsedData = JSON.parse(e.target.result);
-                            if (parsedData.seAppHistory || parsedData.seAppResources) {
-                                // 空き容量の枯渇（残骸との衝突）を防ぐために一度確実にクリアする
-                                localStorage.removeItem('seAppSettings');
-                                localStorage.removeItem('seAppHistory');
-                                localStorage.removeItem('seAppResources');
-                                
-                                localStorage.setItem('seAppSettings', parsedData.seAppSettings || '{}');
-                                localStorage.setItem('seAppHistory', parsedData.seAppHistory || '[]');
-                                localStorage.setItem('seAppResources', parsedData.seAppResources || '[]');
-                                
-                                alert('復元が完了しました。アプリを再読み込みします。');
-                                window.location.reload();
-                            } else {
-                                if (loadingOverlay) loadingOverlay.classList.remove('active');
-                                alert('データ形式が正しくありません。正しいJSONファイルを選択してください。');
-                            }
-                        } catch (err) {
-                            console.error(err);
-                            if (loadingOverlay) loadingOverlay.classList.remove('active');
-                            alert('データの復元に失敗しました。ファイルが破損しているか、容量が大きすぎる可能性があります。');
-                        }
-                    }, 500); // UIスレッドのブロックを緩和
-                };
-                reader.onerror = () => {
-                    if (loadingOverlay) loadingOverlay.classList.remove('active');
-                    alert('ファイルの読み込みに失敗しました。');
-                };
-                reader.readAsText(file);
+
+                setTimeout(() => {   // UIスレッドのブロックを緩和
+                    restoreFromFile(file).catch(err => {
+                        console.error(err);
+                        if (loadingOverlay) loadingOverlay.classList.remove('active');
+                        alert('データの復元に失敗しました。ファイルが破損しているか、容量が大きすぎる可能性があります。');
+                    });
+                }, 500);
             }
         });
+    }
+
+    // ===== 復元 =====
+    // 新しい形式（1行目＝記録と設定／2行目以降＝写真1枚ずつ）と、
+    // 8月までの古い形式（全部が1つのかたまり）の両方を受け付ける。
+    // ★古い形式のファイルが必ず戻せることは、工事プランの合格条件。
+
+    // ファイルを1MBずつ切り出して、1行ずつ渡す。
+    // TextDecoder の stream オプションで、切れ目が日本語の途中に来ても壊れない。
+    async function readFileLines(file, onLine) {
+        const CHUNK = 1024 * 1024;
+        const decoder = new TextDecoder();
+        let offset = 0;
+        let tail = '';
+        while (offset < file.size) {
+            const buffer = await file.slice(offset, offset + CHUNK).arrayBuffer();
+            offset += CHUNK;
+            const text = decoder.decode(buffer, { stream: offset < file.size });
+            const lines = (tail + text).split('\n');
+            tail = lines.pop();
+            for (const line of lines) {
+                if (line) await onLine(line);
+            }
+        }
+        if (tail.trim()) await onLine(tail);
+    }
+
+    async function restoreFromFile(file) {
+        let header = null;
+        let isFirstLine = true;
+
+        // 新しい形式のときに使う入れ物
+        const restoredPhotoIds = new Set();
+        let buffer = [];
+        const FLUSH_EVERY = 20;   // 20枚たまったら、まとめて新しい場所へ書き込む
+
+        await readFileLines(file, async (line) => {
+            if (isFirstLine) {
+                isFirstLine = false;
+                header = JSON.parse(line);
+                return;
+            }
+            if (!header || header.format !== BACKUP_FORMAT) return;   // 古い形式に2行目は無い
+            const rec = JSON.parse(line);
+            if (rec && rec.id && rec.photoStr) {
+                buffer.push({ id: rec.id, photoStr: rec.photoStr });
+                restoredPhotoIds.add(rec.id);
+            }
+            if (buffer.length >= FLUSH_EVERY) {
+                await putPhotosToIdb(buffer);
+                buffer = [];
+                if (loadingOverlay && header.photoCount) {
+                    const p = loadingOverlay.querySelector('p');
+                    if (p) p.innerHTML = 'ただいま記憶を復元しています...<br>写真 ' + restoredPhotoIds.size + ' / ' + header.photoCount + ' 枚';
+                }
+            }
+        });
+
+        if (!header || (!header.seAppHistory && !header.seAppResources)) {
+            if (loadingOverlay) loadingOverlay.classList.remove('active');
+            alert('データ形式が正しくありません。正しいJSONファイルを選択してください。');
+            return;
+        }
+
+        if (header.format === BACKUP_FORMAT && buffer.length > 0) {
+            await putPhotosToIdb(buffer);
+        }
+
+        // ★ここまで写真を入れ切ってから、今のデータを入れ替える。
+        //   途中で失敗した場合、この行に来ないので、今のデータはまだ消えていない。
+        // 空き容量の枯渇（残骸との衝突）を防ぐために一度確実にクリアする
+        localStorage.removeItem('seAppSettings');
+        localStorage.removeItem('seAppHistory');
+        localStorage.removeItem('seAppResources');
+
+        localStorage.setItem('seAppSettings', header.seAppSettings || '{}');
+        localStorage.setItem('seAppHistory', header.seAppHistory || '[]');
+        localStorage.setItem('seAppResources', header.seAppResources || '[]');
+
+        // 今回のファイルに入っていなかった写真は、どこからも参照されないので消す。
+        // 古い形式のファイルは写真を全部そのかたまりに持っているので、
+        // restoredPhotoIds は空のまま＝新しい場所の写真は残らず消える。
+        await pruneIdbPhotos(restoredPhotoIds).catch(err => {
+            console.warn('新しい場所の後片付けができませんでした', err);
+        });
+
+        alert('復元が完了しました。アプリを再読み込みします。');
+        window.location.reload();
     }
 
     // 全モーダル共通：背景タップで閉じる処理
@@ -2485,12 +2624,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // 静かに古い場所だけで動き続ける。利用者には何も知らせない。
     // ※段階2以降は updateTodayWord() の呼び直しで「今日のリソース」が
     //   引き直されてしまうため、そのときに扱いを決めること。
-    loadPhotosFromIdb().then(count => {
+    photosReady = loadPhotosFromIdb().then(count => {
         if (count > 0) {
             renderResources();
             updateTodayWord();
         }
+        return count;
     }).catch(err => {
         console.warn('写真の新しい保存場所は使えませんでした。古い場所のまま動きます。', err);
+        return 0;
     });
 });
