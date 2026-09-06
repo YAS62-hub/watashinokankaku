@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>わたしのかんかく</title>
-    <link rel="stylesheet" href="styles.css?v=20240419_02">
+    <link rel="stylesheet" href="styles.css?v=20260906_notice">
     <link href="https://fonts.googleapis.com/css2?family=Kosugi+Maru&family=M+PLUS+Rounded+1c:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="manifest" href="manifest.json">
     <script src="chart.umd.min.js?v=4.5.1"></script>
@@ -71,6 +71,13 @@
                 <button class="inner-tab-btn" data-in-target="wordGalleryTab">📝 言葉</button>
             </div>
             
+            <!-- 写真をまとめて選ぶための行（写真タブに写真があるときだけ出る） -->
+            <div id="photoSelectBar" class="photo-select-bar" style="display: none;">
+                <button id="photoSelectStartBtn" class="photo-select-btn">選ぶ</button>
+                <button id="photoSelectCancelBtn" class="photo-select-btn" style="display: none;">やめる</button>
+                <button id="photoSelectDeleteBtn" class="photo-select-delete" style="display: none;" disabled>削除</button>
+            </div>
+
             <!-- 写真ギャラリー -->
             <div id="photoGalleryTab" class="inner-tab-content active resource-gallery">
                 <!-- JSで写真のカードが追加されます -->
@@ -298,7 +305,7 @@
                 </div>
                 
                 <div style="text-align: center; margin-top: 24px; padding-top: 16px; border-top: 1px solid #E9ECEF; font-size: 0.75rem; color: #ADB5BD;">
-                    アプリについて：わたしのかんかく v11.0
+                    アプリについて：わたしのかんかく v11.1
                 </div>
 
                 <div style="text-align: center; margin-top: 16px;">
@@ -447,6 +454,17 @@
             </div>
         </div>
 
+        <!-- お知らせ・確認の枠（アプリ共通・ブラウザ標準の箱の代わり） -->
+        <div id="noticeModal" class="modal notice-modal">
+            <div class="modal-content notice-content">
+                <div id="noticeText" class="notice-text"></div>
+                <div class="notice-actions">
+                    <button id="noticeCancelBtn" class="notice-btn notice-cancel" style="display: none;">キャンセル</button>
+                    <button id="noticeOkBtn" class="notice-btn notice-ok">OK</button>
+                </div>
+            </div>
+        </div>
+
         <!-- 感覚パレットモーダル -->
         <div id="paletteModal" class="modal">
             <div class="modal-content" style="padding: 20px;">
@@ -558,7 +576,7 @@
         </div>
     </div>
 
-    <script src="app.js?v=20260730_fix2"></script>
+    <script src="app.js?v=20260906_notice"></script>
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', function() {
