@@ -1382,3 +1382,130 @@ input:checked + .toggle-slider::before {
     color: var(--text-color);
     line-height: 1.4;
 }
+
+/* =========================================================
+   お知らせ・確認の枠（ブラウザ標準の箱の代わり）
+   ★ここは見た目だけの置き換え。出す言葉は今までと同じ。
+   ========================================================= */
+.notice-modal {
+    /* 復元中の白い覆い（.loading-overlay は 9999）より上に出す。
+       ★ここを下げると「復元が完了しました」が覆いの裏に隠れて見えなくなる。 */
+    z-index: 10000;
+}
+
+.notice-content {
+    padding: 26px 22px 20px;
+    max-width: 380px;
+}
+
+.notice-text {
+    font-size: 0.95rem;
+    line-height: 1.75;
+    color: var(--text-color);
+    white-space: pre-wrap;   /* 文中の改行をそのまま活かす */
+    overflow-wrap: break-word;
+}
+
+.notice-actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 10px;
+    margin-top: 22px;
+}
+
+.notice-btn {
+    min-width: 92px;
+    padding: 12px 16px;
+    border-radius: 14px;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.notice-btn:active {
+    transform: scale(0.98);
+}
+
+.notice-ok {
+    background-color: var(--accent);
+    color: #FFF;
+    border: none;
+    font-weight: 500;
+}
+
+.notice-cancel {
+    background-color: transparent;
+    color: var(--text-light);
+    border: 1px solid #DCD6CD;
+}
+
+/* =========================================================
+   写真をまとめて選んで削除する
+   ========================================================= */
+.photo-select-bar {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 8px;
+    margin: -4px 0 12px;
+}
+
+.photo-select-btn {
+    background-color: transparent;
+    border: 1px solid #DCD6CD;
+    color: var(--text-light);
+    border-radius: 12px;
+    padding: 8px 16px;
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+
+.photo-select-delete {
+    background-color: var(--accent);
+    color: #FFF;
+    border: none;
+    border-radius: 12px;
+    padding: 9px 16px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.photo-select-delete:disabled {
+    background-color: #E4E0D9;
+    color: #FFF;
+    cursor: default;
+}
+
+/* 丸いチェックは、選ぶ状態のときだけ出す */
+.photo-check {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.85);
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    line-height: 1;
+    color: transparent;
+}
+
+.photo-gallery-selecting .photo-check {
+    display: flex;
+}
+
+.photo-gallery-selecting .photo-grid-item.selected .photo-check {
+    background-color: var(--accent);
+    border-color: var(--accent);
+    color: #FFF;
+}
+
+.photo-gallery-selecting .photo-grid-item.selected img {
+    opacity: 0.55;
+}

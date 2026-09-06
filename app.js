@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('App v11.0 starting (20260730_fix2)...');
+    console.log('App v11.1 starting (20260906_notice)...');
     // === 要素の取得 ===
     const tabs = document.querySelectorAll('.tab-content');
     const navItems = document.querySelectorAll('.nav-item');
@@ -195,6 +195,72 @@ document.addEventListener('DOMContentLoaded', () => {
     if (savedToggle !== null) {
         popupToggle.checked = savedToggle === 'true';
     }
+
+    // ===== お知らせ・確認の枠（ブラウザ標準の箱の代わり）=====
+    // これまで alert() / confirm() が出していたのは、iPhoneやパソコン本体が出す白い箱で、
+    // アプリ側からは文字しか渡せなかった（字下げ・太字・箇条書き・枠の高さのどれも指定できない）。
+    // ここを appAlert() / appConfirm() に置き換えて、アプリ自前の枠（#noticeModal）で出す。
+    //
+    // ★この置き換えでは、出す言葉を1文字も変えていない。
+    //   ボタンの言葉も本体と同じ「OK」「キャンセル」のままにしてある。
+    //   言葉を見直すのは別の作業（言葉づくり側との調整が要るため）。
+    //
+    // ★alert() は「押されるまで止まる」が、appAlert() は止まらずに先へ進む。
+    //   呼び出し側で「読んでもらってから次へ行きたい」ときだけ await を付けること。
+    //   （例：復元完了のお知らせ。await しないと、読む前に再読み込みが走ってしまう）
+    let noticeResolve = null;
+
+    function closeNotice(answer) {
+        const modal = document.getElementById('noticeModal');
+        if (modal) modal.classList.remove('active');
+        // 設定画面などが下にまだ開いているときは、スクロール止めを外さない
+        if (!document.querySelector('.modal.active')) {
+            document.body.classList.remove('modal-open');
+        }
+        const resolve = noticeResolve;
+        noticeResolve = null;
+        if (resolve) resolve(answer);
+    }
+
+    function showNotice(message, withCancel) {
+        const modal = document.getElementById('noticeModal');
+        const textEl = document.getElementById('noticeText');
+        const okBtn = document.getElementById('noticeOkBtn');
+        const cancelBtn = document.getElementById('noticeCancelBtn');
+
+        // 枠が見つからないときは、これまでどおり本体の箱に頼る。
+        // ★ここを黙って諦めると、削除や復元の確認が出ないまま実行されかねない。
+        if (!modal || !textEl || !okBtn || !cancelBtn) {
+            if (withCancel) return Promise.resolve(window.confirm(message));
+            window.alert(message);
+            return Promise.resolve(true);
+        }
+
+        // 前の問いがまだ開いていたら、答えなかったものとして閉じる
+        if (noticeResolve) closeNotice(false);
+
+        textEl.textContent = message;   // ★HTMLとして解釈させない（文中の < > で崩れないように）
+        cancelBtn.style.display = withCancel ? 'inline-block' : 'none';
+        modal.classList.add('active');
+        document.body.classList.add('modal-open');
+
+        return new Promise(resolve => { noticeResolve = resolve; });
+    }
+
+    function appAlert(message) { return showNotice(message, false); }
+    function appConfirm(message) { return showNotice(message, true); }
+
+    (function bindNoticeButtons() {
+        const modal = document.getElementById('noticeModal');
+        const okBtn = document.getElementById('noticeOkBtn');
+        const cancelBtn = document.getElementById('noticeCancelBtn');
+        if (okBtn) okBtn.addEventListener('click', () => closeNotice(true));
+        if (cancelBtn) cancelBtn.addEventListener('click', () => closeNotice(false));
+        // 背景に触れたときは「キャンセル」と同じ扱い（＝何も起こらない側）にする
+        if (modal) modal.addEventListener('click', (e) => {
+            if (e.target === modal) closeNotice(false);
+        });
+    })();
 
     // 2. リソース箱マイグレーションと読み込み
     let seAppResources = [];
@@ -712,13 +778,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 if (history.length === 5) {
                     setTimeout(() => {
-                        if (confirm('いつも大切に使ってくださりありがとうございます。\n大切な記録を守るために、時々設定画面の『バックアップを作る』を押しておくのがおすすめです。\n\n「設定画面」を開きますか？\n（OKで設定画面へ、キャンセルで閉じます）')) {
+                        appConfirm('いつも大切に使ってくださりありがとうございます。\n大切な記録を守るために、時々設定画面の『バックアップを作る』を押しておくのがおすすめです。\n\n「設定画面」を開きますか？\n（OKで設定画面へ、キャンセルで閉じます）').then(ok => {
+                            if (!ok) return;
                             const settingsModal = document.getElementById('settingsModal');
                             if (settingsModal) {
                                 settingsModal.classList.add('active');
                                 document.body.classList.add('modal-open');
                             }
-                        }
+                        });
                     }, 500);
                 }
                 
@@ -753,7 +820,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             } catch (err) {
                 console.error(err);
-                alert('保存中にエラーが発生しました。日付の形式等を再確認してください。');
+                appAlert('保存中にエラーが発生しました。日付の形式等を再確認してください。');
                 setNowToInput(recordTimeInput); // エラー時も安全な時間にリセットしておく
             }
         });
@@ -823,7 +890,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 renderResources();
                 updateTodayWord();
             } catch (err) {
-                alert('保存できる容量がいっぱいのようです。申し訳ありません。リソース箱の写真をいくつか見直していただくと、また保存できるようになります。');
+                appAlert('保存できる容量がいっぱいのようです。申し訳ありません。リソース箱の写真をいくつか見直していただくと、また保存できるようになります。');
                 resources.shift();
             }
         });
@@ -965,12 +1032,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 if ('Notification' in window && navigator.serviceWorker) {
                     const permission = await Notification.requestPermission();
                     if (permission !== 'granted') {
-                        alert('通知が許可されませんでした。お使いの端末・ブラウザの設定から通知を許可してください。');
+                        appAlert('通知が許可されませんでした。お使いの端末・ブラウザの設定から通知を許可してください。');
                         e.target.checked = false;
                         pushNotificationDetails.style.display = 'none';
                     }
                 } else {
-                    alert(getPushUnsupportedMessage());
+                    appAlert(getPushUnsupportedMessage());
                     e.target.checked = false;
                     pushNotificationDetails.style.display = 'none';
                 }
@@ -995,7 +1062,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (testPushBtn) {
         testPushBtn.addEventListener('click', async () => {
             if (!('Notification' in window) || !('serviceWorker' in navigator)) {
-                alert(getPushUnsupportedMessage());
+                appAlert(getPushUnsupportedMessage());
                 return;
             }
             
@@ -1005,7 +1072,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             
             if (permission !== 'granted') {
-                alert('通知が許可されていません。スマホの設定アプリから、この「ホーム画面アプリ」への通知を許可してください。');
+                appAlert('通知が許可されていません。スマホの設定アプリから、この「ホーム画面アプリ」への通知を許可してください。');
                 return;
             }
 
@@ -1036,7 +1103,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }, 3000);
             } catch (err) {
                 console.error('テスト送信エラー:', err);
-                alert('テスト送信に失敗しました。\n「ホーム画面」から開いているかご確認ください。詳細: ' + err.message);
+                appAlert('テスト送信に失敗しました。\n「ホーム画面」から開いているかご確認ください。詳細: ' + err.message);
             }
         });
     }
@@ -1139,11 +1206,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     pushSettings.time = customTimeInput ? customTimeInput.value : '';
                     
                     if (activeDays.length === 0) {
-                        alert('曜日が選択されていません。最低一つは曜日を選んでくださいね🌿');
+                        appAlert('曜日が選択されていません。最低一つは曜日を選んでくださいね🌿');
                         return;
                     }
                     if (!pushSettings.time) {
-                        alert('時間が指定されていません。通知する時間を設定してください🌿');
+                        appAlert('時間が指定されていません。通知する時間を設定してください🌿');
                         return;
                     }
                 } else {
@@ -1152,7 +1219,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (activePreset && activePreset.getAttribute('data-preset')) {
                         pushSettings.preset = activePreset.getAttribute('data-preset');
                     } else {
-                        alert('通知を受け取るタイミングを「いつ届けましょうか？」の選択肢から選んでください🌿');
+                        appAlert('通知を受け取るタイミングを「いつ届けましょうか？」の選択肢から選んでください🌿');
                         return;
                     }
                 }
@@ -1225,7 +1292,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                     } catch(e) {
                         console.error(`Push Service Error [${currentPhase}]:`, e);
-                        alert(`保存エラー [${currentPhase}]\n\n【エラー詳細】\n${e.message}`);
+                        appAlert(`保存エラー [${currentPhase}]\n\n【エラー詳細】\n${e.message}`);
                         
                         // エラー時もボタンの見た目を戻す（念のため）
                         savePushNotificationBtn.textContent = '通知設定を保存';
@@ -1496,14 +1563,15 @@ document.addEventListener('DOMContentLoaded', () => {
                             const deleteBtn = item.querySelector('.delete-link');
                             
                             deleteBtn.addEventListener('click', () => {
-                                if (confirm('この記録を消してもよろしいですか？')) {
+                                appConfirm('この記録を消してもよろしいですか？').then(ok => {
+                                    if (!ok) return;
                                     let history = JSON.parse(localStorage.getItem('seAppHistory') || '[]');
                                     history = history.filter(r => (r.id || r.time) !== (record.id || record.time));
                                     localStorage.setItem('seAppHistory', JSON.stringify(history));
                                     renderReflection();
                                     document.getElementById('memoListContainer').innerHTML = '';
                                     document.getElementById('memoDisplay').classList.add('hidden');
-                                }
+                                });
                             });
                             
                             editBtn.addEventListener('click', () => {
@@ -1698,7 +1766,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const files = photoInput && photoInput.files ? Array.from(photoInput.files) : [];
 
             if (!text && files.length === 0) {
-                alert('言葉か写真、どちらか一つでも入っていると保存できます。');
+                appAlert('言葉か写真、どちらか一つでも入っていると保存できます。');
                 return;
             }
 
@@ -1758,7 +1826,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 
             } catch (err) {
                 console.error('保存処理エラー', err);
-                alert('保存に失敗しました。画像のサイズが大きいか、容量がいっぱいの可能性があります。');
+                appAlert('保存に失敗しました。画像のサイズが大きいか、容量がいっぱいの可能性があります。');
                 if (newResources.length > 0) {
                     seAppResources.splice(0, newResources.length);
                 }
@@ -1790,6 +1858,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if(targetContent) {
                 targetContent.classList.add('active');
             }
+            // 言葉タブへ移ったら「選ぶ」状態は解く（選んだまま忘れて戻ってこないように）
+            exitPhotoSelectMode();
         });
     });
 
@@ -1886,6 +1956,92 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // ===== 写真をまとめて選んで削除する =====
+    // 写真の枚数制限（一度に5枚まで）が外れたので、増えたときに片付けられる道が要る。
+    // ★「選ぶ」を押しているあいだだけ、写真をタップしても大きく開かず、印が付く。
+    // ★「すべて選ぶ」は置いていない。いちばん取り返しのつかない操作が
+    //   いちばん押しやすい場所に来ないようにするため。
+    let photoSelectMode = false;
+    const selectedPhotoIds = new Set();
+
+    function updatePhotoSelectBar() {
+        const bar = document.getElementById('photoSelectBar');
+        const startBtn = document.getElementById('photoSelectStartBtn');
+        const cancelBtn = document.getElementById('photoSelectCancelBtn');
+        const deleteBtn = document.getElementById('photoSelectDeleteBtn');
+        const photoGalleryTab = document.getElementById('photoGalleryTab');
+        if (!bar || !startBtn || !cancelBtn || !deleteBtn || !photoGalleryTab) return;
+
+        const onPhotoTab = photoGalleryTab.classList.contains('active');
+        const photoCount = photoGalleryTab.querySelectorAll('.photo-grid-item').length;
+
+        // 言葉タブを見ているとき、写真が1枚も無いときは、この行ごと出さない
+        if (!onPhotoTab || photoCount === 0) {
+            bar.style.display = 'none';
+            if (photoSelectMode) exitPhotoSelectMode();
+            return;
+        }
+        bar.style.display = 'flex';
+
+        if (photoSelectMode) {
+            photoGalleryTab.classList.add('photo-gallery-selecting');
+            startBtn.style.display = 'none';
+            cancelBtn.style.display = 'inline-block';
+            deleteBtn.style.display = 'inline-block';
+            const n = selectedPhotoIds.size;
+            deleteBtn.textContent = n > 0 ? n + '枚を削除' : '削除';
+            deleteBtn.disabled = (n === 0);
+        } else {
+            photoGalleryTab.classList.remove('photo-gallery-selecting');
+            startBtn.style.display = 'inline-block';
+            cancelBtn.style.display = 'none';
+            deleteBtn.style.display = 'none';
+        }
+    }
+
+    function exitPhotoSelectMode() {
+        photoSelectMode = false;
+        selectedPhotoIds.clear();
+        const photoGalleryTab = document.getElementById('photoGalleryTab');
+        if (photoGalleryTab) {
+            photoGalleryTab.classList.remove('photo-gallery-selecting');
+            photoGalleryTab.querySelectorAll('.photo-grid-item.selected')
+                .forEach(el => el.classList.remove('selected'));
+        }
+        updatePhotoSelectBar();
+    }
+
+    (function bindPhotoSelectButtons() {
+        const startBtn = document.getElementById('photoSelectStartBtn');
+        const cancelBtn = document.getElementById('photoSelectCancelBtn');
+        const deleteBtn = document.getElementById('photoSelectDeleteBtn');
+
+        if (startBtn) startBtn.addEventListener('click', () => {
+            photoSelectMode = true;
+            selectedPhotoIds.clear();
+            updatePhotoSelectBar();
+        });
+
+        if (cancelBtn) cancelBtn.addEventListener('click', () => exitPhotoSelectMode());
+
+        if (deleteBtn) deleteBtn.addEventListener('click', () => {
+            const ids = Array.from(selectedPhotoIds);
+            if (ids.length === 0) return;
+            appConfirm(ids.length + '枚の写真を削除してもよろしいですか？').then(ok => {
+                if (!ok) return;
+                // 記録の側から外し、保存は1回にまとめる
+                seAppResources = seAppResources.filter(r => !selectedPhotoIds.has(r.id));
+                localStorage.setItem('seAppResources', JSON.stringify(seAppResources));
+                // 工事プラン 段階2：新しい場所（IndexedDB）の写真も一緒に消す。
+                // ★消し忘れると、画面から消えたのに端末の中に写真だけが残り続ける。
+                ids.forEach(id => { deletePhotoFromIdb(id).catch(() => {}); });
+                exitPhotoSelectMode();
+                renderResources();
+                updateTodayWord();
+            });
+        });
+    })();
+
     // ギャラリー描画
     function renderResources() {
         const photoGalleryTab = document.getElementById('photoGalleryTab');
@@ -1909,9 +2065,24 @@ document.addEventListener('DOMContentLoaded', () => {
             if (resPhoto && photoGalleryTab) {
                 const item = document.createElement('div');
                 item.className = 'photo-grid-item';
-                item.innerHTML = `<img src="${resPhoto}" alt="写真">`;
+                item.innerHTML = `<img src="${resPhoto}" alt="写真"><div class="photo-check">✓</div>`;
+                item.dataset.resId = res.id;
+                // 描き直しても、選んでいた印は残す
+                if (selectedPhotoIds.has(res.id)) item.classList.add('selected');
                 
                 item.addEventListener('click', () => {
+                    // 「選ぶ」状態のあいだは、写真を大きく開かずに、印を付け外しする
+                    if (photoSelectMode) {
+                        if (selectedPhotoIds.has(res.id)) {
+                            selectedPhotoIds.delete(res.id);
+                            item.classList.remove('selected');
+                        } else {
+                            selectedPhotoIds.add(res.id);
+                            item.classList.add('selected');
+                        }
+                        updatePhotoSelectBar();
+                        return;
+                    }
                     currentPhotoIndex = globalPhotoResources.findIndex(r => r.id === res.id);
                     updatePhotoView();
                     if (photoViewModal) {
@@ -1937,12 +2108,16 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
+        // 写真が1枚も無ければ「選ぶ」は出さない。枚数が変わったので毎回合わせ直す
+        updatePhotoSelectBar();
+
         // 言葉ギャラリーの削除イベント
         const textDeleteBtns = wordGalleryTab ? wordGalleryTab.querySelectorAll('.delete-resource-btn') : [];
         textDeleteBtns.forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const targetBtn = e.target.closest('.delete-resource-btn');
-                if (confirm('このリソースを削除しますか？')) {
+                appConfirm('このリソースを削除しますか？').then(ok => {
+                    if (!ok) return;
                     const idToDelete = targetBtn.getAttribute('data-id');
                     seAppResources = seAppResources.filter(r => r.id !== idToDelete);
                     localStorage.setItem('seAppResources', JSON.stringify(seAppResources));
@@ -1951,7 +2126,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     deletePhotoFromIdb(idToDelete).catch(() => {});
                     renderResources();
                     updateTodayWord();
-                }
+                });
             });
         });
         
@@ -1968,7 +2143,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (deletePhotoBtn) {
                 deletePhotoBtn.addEventListener('click', () => {
                     const targetId = photoViewResourceId.value;
-                    if (confirm('この写真を削除してもよろしいですか？')) {
+                    appConfirm('この写真を削除してもよろしいですか？').then(ok => {
+                        if (!ok) return;
                         seAppResources = seAppResources.filter(r => r.id !== targetId);
                         localStorage.setItem('seAppResources', JSON.stringify(seAppResources));
                         // 工事プラン 段階2：新しい場所（IndexedDB）の写真も一緒に消す。
@@ -1980,7 +2156,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                         renderResources();
                         updateTodayWord();
-                    }
+                    });
                 });
             }
         }
@@ -2051,7 +2227,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 URL.revokeObjectURL(url);
             } catch (e) {
                 console.error(e);
-                alert('バックアップを作れませんでした。');
+                appAlert('バックアップを作れませんでした。');
             }
         });
     }
@@ -2060,10 +2236,15 @@ document.addEventListener('DOMContentLoaded', () => {
         importDataBtn.addEventListener('click', () => {
             const file = importFileInput.files[0];
             if (!file) {
-                alert('復元するバックアップファイルを選択してください。');
+                appAlert('復元するバックアップファイルを選択してください。');
                 return;
             }
-            if (confirm('現在のデータ（あれば）は上書きされ、一度すべて消去してから復元します。よろしいですか？')) {
+            // ★ここは復元の最終確認。今のデータを一度すべて消してから入れ直す。
+            //   「はい」を押していないのに先へ進むことが絶対に無いよう、
+            //   ok が真のときだけ中に入る形にしてある（早めに return して抜ける）。
+            appConfirm('現在のデータ（あれば）は上書きされ、一度すべて消去してから復元します。よろしいですか？').then(ok => {
+                if (!ok) return;
+
                 if (loadingOverlay) {
                     loadingOverlay.classList.add('active');
                     const p = loadingOverlay.querySelector('p');
@@ -2074,10 +2255,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     restoreFromFile(file).catch(err => {
                         console.error(err);
                         if (loadingOverlay) loadingOverlay.classList.remove('active');
-                        alert('データの復元に失敗しました。ファイルが破損しているか、容量が大きすぎる可能性があります。');
+                        appAlert('データの復元に失敗しました。ファイルが破損しているか、容量が大きすぎる可能性があります。');
                     });
                 }, 500);
-            }
+            });
         });
     }
 
@@ -2139,7 +2320,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (!header || (!header.seAppHistory && !header.seAppResources)) {
             if (loadingOverlay) loadingOverlay.classList.remove('active');
-            alert('データ形式が正しくありません。正しいJSONファイルを選択してください。');
+            appAlert('データ形式が正しくありません。正しいJSONファイルを選択してください。');
             return;
         }
 
@@ -2165,7 +2346,8 @@ document.addEventListener('DOMContentLoaded', () => {
             console.warn('新しい場所の後片付けができませんでした', err);
         });
 
-        alert('復元が完了しました。アプリを再読み込みします。');
+        // ★await を外さないこと。読む前に再読み込みが走り、お知らせが一瞬で消える
+        await appAlert('復元が完了しました。アプリを再読み込みします。');
         window.location.reload();
     }
 
