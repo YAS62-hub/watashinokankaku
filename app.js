@@ -226,14 +226,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ===== 写真の新しい保存場所（IndexedDB）=====
-    // 工事プラン 段階1（2026-09-06）：「読む道」だけを先に作る。
-    //   ・書き込みは一切変えていない。新しい場所へは、まだ1枚も入らない。
-    //   ・したがって、この時点では画面の見え方も動きも工事前と変わらない。
+    // 工事プラン 段階1（2026-09-06）：「読む道」を作った。
+    // 工事プラン 段階2（2026-09-06）：これから追加する写真を、ここへ入れるようにした。
+    //   ・すでに保存済みの写真は古い場所（localStorage）に置いたまま。引っ越しは段階4。
     //   ・読む順番は「新しい場所（IndexedDB）→ 無ければ古い場所（localStorage）」。
     //     段階4の引っ越し中は、同じ写真が新旧の両方に並ぶ期間が必ずあるため、
     //     新しい方を先に見る順番でないと困る。
     //   ・IndexedDBから読んだ写真を localStorage へ書き戻すことは絶対にしない。
     //     書き戻すと5MBの上限に当たり、工事の意味が無くなる。
+    //   ・新しい場所が使えない環境（プライベートモード等）では、
+    //     これまでどおり古い場所に入れる。利用者には何も知らせない。
     const PHOTO_DB_NAME = 'seAppPhotos';
     const PHOTO_DB_VERSION = 1;
     const PHOTO_STORE_NAME = 'photos';
@@ -302,14 +304,27 @@ document.addEventListener('DOMContentLoaded', () => {
         return getPhotoStr(res) !== '';
     }
 
-    // 写真をまとめて新しい場所に入れる（復元のときだけ使う）
-    // ※ふだんの保存は今までどおり古い場所のまま。ここでは変えていない。
+    // 写真をまとめて新しい場所に入れる（ふだんの保存でも、復元でも使う）
     function putPhotosToIdb(records) {
         if (!records || records.length === 0) return Promise.resolve();
         return openPhotoDb().then(db => new Promise((resolve, reject) => {
             const tx = db.transaction(PHOTO_STORE_NAME, 'readwrite');
             const store = tx.objectStore(PHOTO_STORE_NAME);
             records.forEach(rec => store.put(rec));
+            tx.oncomplete = () => resolve();
+            tx.onerror = () => reject(tx.error);
+            tx.onabort = () => reject(tx.error);
+        }));
+    }
+
+    // 写真を1枚、新しい場所から消す。
+    // ★リソースを消すときは必ずここも呼ぶこと。呼び忘れると、
+    //   画面からは消えたのに端末の中に写真だけが残り続ける。
+    function deletePhotoFromIdb(id) {
+        idbPhotoMap.delete(id);
+        return openPhotoDb().then(db => new Promise((resolve, reject) => {
+            const tx = db.transaction(PHOTO_STORE_NAME, 'readwrite');
+            tx.objectStore(PHOTO_STORE_NAME).delete(id);
             tx.oncomplete = () => resolve();
             tx.onerror = () => reject(tx.error);
             tx.onabort = () => reject(tx.error);
@@ -1622,15 +1637,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (photoInput) {
         photoInput.addEventListener('change', (e) => {
             const files = e.target.files;
-            if (files.length > 5) {
-                alert('申し訳ありません。システムの都合上、一度に保存できるのは5枚までとなっています。\n\n大切な記録を確実に残すため、数回に分けて保存していただけると幸いです。');
-                e.target.value = '';
-                photoPreview.style.display = 'none';
-                photoPlaceholder.innerHTML = '<span>写真をえらぶ</span>';
-                photoPlaceholder.style.display = 'flex';
-                photoArea.style.border = '2px dashed #D6D2CA';
-                return;
-            }
+            // 工事プラン 段階2（2026-09-06）：
+            //   「一度に保存できるのは5枚まで」の制限をここで外した。
+            //   古い場所（5MB）に入れていた頃は、まとめて入れると容量に当たったため。
+            //   写真の行き先を新しい場所に変えたので、枚数で止める理由が無くなった。
             if (files.length === 0) {
                 photoPreview.style.display = 'none';
                 photoPlaceholder.innerHTML = '<span>写真をえらぶ</span>';
@@ -1697,6 +1707,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (loadingOverlay) loadingOverlay.classList.add('active');
 
             let newResources = [];
+            // 新しい場所へ入れ終えた写真のid。保存に失敗して巻き戻すときに、こちらも消すため
+            const idbSavedIds = [];
             const timestamp = new Date().toISOString();
 
             try {
@@ -1704,10 +1716,25 @@ document.addEventListener('DOMContentLoaded', () => {
                     for (let i = 0; i < filesToProcess.length; i++) {
                         if (loadingOverlay) loadingOverlay.querySelector('p').textContent = `大切に保存しています（${i+1}/${filesToProcess.length}枚）...`;
                         const base64 = await compressImage(filesToProcess[i]);
+                        const newId = createId(i);
+                        // 工事プラン 段階2：写真は新しい場所（IndexedDB）へ入れ、
+                        // 記録側（localStorage）には持たせない。
+                        // ★先に写真を入れ切ってから記録を足す。逆にすると、
+                        //   写真の保存に失敗したときに「写真の無い記録」だけが残る。
+                        let savedToIdb = false;
+                        try {
+                            await putPhotosToIdb([{ id: newId, photoStr: base64 }]);
+                            idbPhotoMap.set(newId, base64);
+                            savedToIdb = true;
+                            idbSavedIds.push(newId);
+                        } catch (e) {
+                            // 新しい場所が使えない環境では、これまでどおり古い場所に入れる
+                            console.warn('写真の新しい保存場所が使えません。古い場所に保存します。', e);
+                        }
                         newResources.push({
-                            id: createId(i),
+                            id: newId,
                             text: (i === 0) ? text : '', // テキストは1枚目に集約
-                            photoStr: base64,
+                            photoStr: savedToIdb ? '' : base64,
                             createdAt: timestamp
                         });
                     }
@@ -1734,6 +1761,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert('保存に失敗しました。画像のサイズが大きいか、容量がいっぱいの可能性があります。');
                 if (newResources.length > 0) {
                     seAppResources.splice(0, newResources.length);
+                }
+                // ★巻き戻すときは、新しい場所へ入れた写真も一緒に消す。
+                //   消し忘れると、どの記録からも参照されない写真が残り続ける。
+                for (const savedId of idbSavedIds) {
+                    await deletePhotoFromIdb(savedId).catch(() => {});
                 }
             } finally {
                 if (loadingOverlay) loadingOverlay.classList.remove('active');
@@ -1762,13 +1794,27 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // 今日のリソースをセットする
-    function updateTodayWord() {
+    // 「今日のリソース」に今出しているもののid。
+    // ★起動直後、新しい保存場所の写真を読み終えた時点で一度描き直すが、
+    //   そこで引き直すと、触っていないのに画面の1枚が入れ替わる。
+    //   ホーム画面は、自分から変わらないほうがよい。
+    let todayResourceId = null;
+
+    // keepCurrent=true のときは引き直さず、今出しているものをそのまま描き直す
+    function updateTodayWord(keepCurrent) {
         const todayResourceContent = document.getElementById('todayResourceContent');
         if (!todayResourceContent) return;
         
         // 写真＋言葉の「言葉（キャプション）」が混じらないよう、画像がある場合は画像のみ、ない場合は純粋な言葉のみを表示
         if (seAppResources.length > 0) {
-            const randomRes = seAppResources[Math.floor(Math.random() * seAppResources.length)];
+            let randomRes = null;
+            if (keepCurrent === true && todayResourceId) {
+                randomRes = seAppResources.find(r => r.id === todayResourceId) || null;
+            }
+            if (!randomRes) {
+                randomRes = seAppResources[Math.floor(Math.random() * seAppResources.length)];
+            }
+            todayResourceId = randomRes.id;
             let html = '';
             const randomPhoto = getPhotoStr(randomRes);
             if (randomPhoto) {
@@ -1776,8 +1822,15 @@ document.addEventListener('DOMContentLoaded', () => {
             } else if (randomRes.text && randomRes.text.trim() !== '') {
                 html += `<p style="font-size: 1.1rem; text-align: center;">${randomRes.text.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</p>`;
             }
-            todayResourceContent.innerHTML = html;
+            // ★空で上書きしない。
+            //   起動直後、写真をまだ読み終えていない一瞬だけ html が空になる。
+            //   ここで上書きすると、ホーム画面が一度まっさらに見えてしまう。
+            //   そのままにしておけば、読み終えた時点で写真が入る。
+            if (html) {
+                todayResourceContent.innerHTML = html;
+            }
         } else {
+            todayResourceId = null;
             todayResourceContent.innerHTML = '<p id="todayWordText">右下の＋ボタンから、あなたのホッとする言葉や写真を追加してみましょう</p>';
         }
     }
@@ -1785,7 +1838,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // タップで引き直し
     const todayWordArea = document.getElementById('todayWordArea');
     if (todayWordArea) {
-        todayWordArea.addEventListener('click', updateTodayWord);
+        // ★updateTodayWord をそのまま渡さない。クリックイベントが
+        //   keepCurrent に入り、タップしても引き直せなくなる
+        todayWordArea.addEventListener('click', () => updateTodayWord());
     }
 
     // リソース箱タブが開かれた時に「今日の言葉」を更新するイベントを追加
@@ -1888,11 +1943,12 @@ document.addEventListener('DOMContentLoaded', () => {
             btn.addEventListener('click', (e) => {
                 const targetBtn = e.target.closest('.delete-resource-btn');
                 if (confirm('このリソースを削除しますか？')) {
-                    // ★段階2以降の注意：新しい場所（IndexedDB）に写真が入るようになったら、
-                    //   ここでも IndexedDB 側の写真を消すこと。忘れると写真だけ残る。
                     const idToDelete = targetBtn.getAttribute('data-id');
                     seAppResources = seAppResources.filter(r => r.id !== idToDelete);
                     localStorage.setItem('seAppResources', JSON.stringify(seAppResources));
+                    // 工事プラン 段階2：新しい場所（IndexedDB）の写真も一緒に消す。
+                    // ★消し忘れると、画面から消えたのに端末の中に写真だけが残り続ける。
+                    deletePhotoFromIdb(idToDelete).catch(() => {});
                     renderResources();
                     updateTodayWord();
                 }
@@ -1913,10 +1969,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 deletePhotoBtn.addEventListener('click', () => {
                     const targetId = photoViewResourceId.value;
                     if (confirm('この写真を削除してもよろしいですか？')) {
-                        // ★段階2以降の注意：新しい場所（IndexedDB）に写真が入るようになったら、
-                        //   ここでも IndexedDB 側の写真を消すこと。忘れると写真だけ残る。
                         seAppResources = seAppResources.filter(r => r.id !== targetId);
                         localStorage.setItem('seAppResources', JSON.stringify(seAppResources));
+                        // 工事プラン 段階2：新しい場所（IndexedDB）の写真も一緒に消す。
+                        // ★消し忘れると、画面から消えたのに端末の中に写真だけが残り続ける。
+                        deletePhotoFromIdb(targetId).catch(() => {});
                         if (photoViewModal) {
                             photoViewModal.classList.remove('active');
                             document.body.classList.remove('modal-open');
@@ -2619,15 +2676,14 @@ document.addEventListener('DOMContentLoaded', () => {
     updateTodayWord();
 
     // 新しい保存場所（IndexedDB）にある写真を読み込んでから、必要なら描き直す。
-    // 段階1では新しい場所が空なので、ここは何もしないまま終わる（＝画面は変わらない）。
     // 新しい場所が使えない環境（プライベートモード等）では、
     // 静かに古い場所だけで動き続ける。利用者には何も知らせない。
-    // ※段階2以降は updateTodayWord() の呼び直しで「今日のリソース」が
-    //   引き直されてしまうため、そのときに扱いを決めること。
+    // ★updateTodayWord(true) の true は「引き直さない」の合図。
+    //   ここで引き直すと、使っている方が見ていた1枚が、触っていないのに入れ替わる。
     photosReady = loadPhotosFromIdb().then(count => {
         if (count > 0) {
             renderResources();
-            updateTodayWord();
+            updateTodayWord(true);
         }
         return count;
     }).catch(err => {
