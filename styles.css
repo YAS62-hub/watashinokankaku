@@ -58,6 +58,13 @@ header {
     transform: scale(0.9);
 }
 
+/* 歯車ボタン：指で押せる範囲を44x44px以上に広げる。
+   見た目（位置・大きさ）は変えないので、広げた分だけ margin で打ち消している。 */
+#settingsBtn {
+    padding: 5px 10px;
+    margin: -5px -10px;
+}
+
 main {
     flex: 1;
     padding: 0 20px 80px 20px; /* nav bar offset */
