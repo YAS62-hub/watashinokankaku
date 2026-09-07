@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('App v11.1 starting (20260906_notice)...');
+    console.log('App v11.2 starting (20260906_migrate)...');
     // === 要素の取得 ===
     const tabs = document.querySelectorAll('.tab-content');
     const navItems = document.querySelectorAll('.nav-item');
@@ -414,6 +414,77 @@ document.addEventListener('DOMContentLoaded', () => {
             tx.onerror = () => reject(tx.error);
             tx.onabort = () => reject(tx.error);
         }));
+    }
+
+    // ===== 工事プラン 段階4：古い写真を、少しずつ引っ越す（2026-09-06）=====
+    // ★「移す」ことは絶対にしない。「写して、確かめて、それから消す」だけ。
+    //     ① 新しい場所（IndexedDB）に写す
+    //     ② 新しい場所から読み直して、元と1文字も違わないか確かめる
+    //     ③ そこまで確かめてから、はじめて古い場所（localStorage）の写真を空にする
+    //   ②で少しでも違えば、そこで止める。古い方は消さない。記録は失われない。
+    // ★1回の起動で数枚だけ。一度に全部やると、同じ写真が新旧2か所に並ぶ量が
+    //   一気に増えて、空きの少ない端末で途中で止まりやすくなる。
+    // ★途中で閉じても、次に開いたとき続きから。進み具合はどこにも記録しない
+    //   （「古い場所に写真が残っているか」が、そのまま目印になるため）。
+    // ★利用者から見て、画面も動きも1ミリも変わらない。読む順番が
+    //   「新しい場所 → 無ければ古い場所」なので、どちらにあっても同じ写真が出る。
+    const MIGRATE_PER_LAUNCH = 3;
+
+    // 新しい場所から写真を1枚だけ読み直す（引っ越しの②の確かめに使う）
+    function readPhotoBackFromIdb(id) {
+        return openPhotoDb().then(db => new Promise((resolve, reject) => {
+            const tx = db.transaction(PHOTO_STORE_NAME, 'readonly');
+            const req = tx.objectStore(PHOTO_STORE_NAME).get(id);
+            req.onsuccess = () => resolve(req.result ? req.result.photoStr : '');
+            req.onerror = () => reject(req.error);
+        }));
+    }
+
+    // 古い場所に残っている写真を、数枚だけ引っ越す。引っ越せた枚数を返す
+    async function migrateOldPhotos() {
+        const targets = seAppResources
+            .filter(res => res && res.id && res.photoStr)
+            .slice(0, MIGRATE_PER_LAUNCH);
+        if (targets.length === 0) return 0;
+
+        let moved = 0;
+        for (const target of targets) {
+            const id = target.id;
+            const original = target.photoStr;
+            try {
+                // ① 新しい場所に写す
+                await putPhotosToIdb([{ id: id, photoStr: original }]);
+
+                // ② 読み直して、元と同じか確かめる
+                const readBack = await readPhotoBackFromIdb(id);
+                if (readBack !== original) {
+                    // 違っていた。古い方は消さずに、ここで止める
+                    console.warn('写真の引っ越しを中止しました（写した先の中身が元と違います）', id);
+                    break;
+                }
+
+                // ③ 古い場所から消す。
+                // ★①②を待っているあいだに、その記録が消されたり、復元で
+                //   中身が入れ替わったりしている可能性がある。必ず今の中身を見に行き、
+                //   写したときと同じ写真がまだそこにある場合だけ空にする。
+                const current = seAppResources.find(r => r.id === id);
+                if (!current || current.photoStr !== original) {
+                    // 記録が消えた／中身が変わった → 今写したぶんは宙に浮くので、そのまま次へ。
+                    // どこからも参照されない写真は、復元後の片付け（pruneIdbPhotos）で消える
+                    continue;
+                }
+                idbPhotoMap.set(id, original);
+                current.photoStr = '';
+                localStorage.setItem('seAppResources', JSON.stringify(seAppResources));
+                moved++;
+            } catch (err) {
+                // 端末の空きが足りない等。古い方は消していないので、記録は失われない。
+                // 次にアプリを開いたときに、もう一度ここから続ける
+                console.warn('写真の引っ越しを見送りました。次に開いたときに続きます。', err);
+                break;
+            }
+        }
+        return moved;
     }
 
     // 新しい場所の写真を読み終えたかどうか。書き出しの前に必ず待つ
@@ -2871,5 +2942,21 @@ document.addEventListener('DOMContentLoaded', () => {
     }).catch(err => {
         console.warn('写真の新しい保存場所は使えませんでした。古い場所のまま動きます。', err);
         return 0;
+    });
+
+    // 工事プラン 段階4：古い場所に残っている写真を、少しずつ新しい場所へ引っ越す。
+    // ★起動してすぐには始めない。開いた直後は、画面を出すことを優先する。
+    // ★引っ越しに失敗しても、古い場所の写真は消していないので記録は失われない。
+    //   利用者には何も知らせない（次に開いたときに、静かに続きから再開する）。
+    photosReady.then(() => {
+        setTimeout(() => {
+            migrateOldPhotos()
+                .then(moved => {
+                    if (moved > 0) console.log('写真の引っ越し：' + moved + '枚');
+                })
+                .catch(err => {
+                    console.warn('写真の引っ越しは行いませんでした。', err);
+                });
+        }, 3000);
     });
 });
