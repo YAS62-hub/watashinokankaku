@@ -170,6 +170,16 @@ main {
     transition: box-shadow 0.2s;
 }
 
+/* ホームのパレットで、いま選ばれている色の印。
+   設定画面の .palette-color-btn.is-selected と同じ考え方・同じ太さにそろえてある。 */
+.modal-palette-color-btn {
+    border-radius: 50%;
+}
+
+.modal-palette-color-btn.is-selected-color {
+    box-shadow: 0 0 0 3px var(--accent);
+}
+
 .sub-zone-btn.selected {
     /* 3択の選択中と同じ考え方の印。ただし細く（3px→2px）、主役にしないため */
     box-shadow: 0 0 0 2px var(--accent);

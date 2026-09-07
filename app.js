@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('App v11.2.1+otameshi starting (20260907_subzone)...');
+    console.log('App v11.2.1+otameshi starting (20260907_subzone2)...');
     // === 要素の取得 ===
     const tabs = document.querySelectorAll('.tab-content');
     const navItems = document.querySelectorAll('.nav-item');
@@ -677,17 +677,34 @@ document.addEventListener('DOMContentLoaded', () => {
     const paletteToggleBtn = document.getElementById('paletteToggleBtn');
     const homeStateButtons = document.querySelectorAll('#homeTab .state-button');
 
+    // ホームのパレットで、いま選ばれている色に印を付ける（1つだけ）
+    function syncModalColorSelection(color) {
+        if (!modalPaletteColors) return;
+        modalPaletteColors.querySelectorAll('.modal-palette-color-btn').forEach(b => {
+            b.classList.toggle('is-selected-color', !!color && b.dataset.color === color);
+        });
+    }
+
     // モーダルを描画する関数
     function renderModalPalette(zone) {
         if (!modalPaletteColors || !modalPaletteWords) return;
         
         // 色ボタンの描画（色だけは常に全色表示）
+        // ★選んだ色に印を付ける（設定画面の色選びと同じ考え方。styles.css の .is-selected-color）。
+        //   印が無いと、選んだ色は「今の一言」欄に入るだけで、その欄はこの箱の裏に隠れて見えない。
+        //   ホーム側は1色だけの入れ替え式なので、印も常に1つだけ動く（設定側の付け外し式とは別物）。
         modalPaletteColors.innerHTML = '';
         COMMON_PALETTE_COLORS.forEach(color => {
             const btn = document.createElement('button');
             btn.textContent = color;
-            btn.style.cssText = 'font-size: 1.8rem; width: 44px; height: 44px; display: flex; justify-content: center; align-items: center; border: none; background: transparent; cursor: pointer; transition: transform 0.2s;';
-            btn.onclick = (e) => { e.preventDefault(); addPaletteItem(color, true); };
+            btn.className = 'modal-palette-color-btn';
+            btn.dataset.color = color;
+            btn.style.cssText = 'font-size: 1.8rem; width: 44px; height: 44px; display: flex; justify-content: center; align-items: center; border: none; background: transparent; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;';
+            btn.onclick = (e) => {
+                e.preventDefault();
+                addPaletteItem(color, true);
+                syncModalColorSelection(color);
+            };
             modalPaletteColors.appendChild(btn);
         });
         
@@ -698,11 +715,22 @@ document.addEventListener('DOMContentLoaded', () => {
         clearColorBtn.onclick = (e) => {
             e.preventDefault();
             addPaletteItem('', true); // 選択中の色を空文字で上書き（実質消去）
+            syncModalColorSelection(null);
         };
         modalPaletteColors.appendChild(clearColorBtn);
 
-        // 対象となるグループ見出しを取得
-        const targetGroups = getPaletteGroupsForZone(zone);
+        // 開き直したときに、前に選んだ色の印を戻す
+        syncModalColorSelection(lastSystemInsertedColor);
+
+        // 対象となるグループ見出しを取得。
+        // ★段階ボタンを押している人には、その段階の言葉だけを出す（案あ・2026-09-07 永田さんの決定）。
+        //   押していない人には、今までどおりゾーンの見出しを全部出す。
+        //   理由：段階を選んだ後のパレットは「段階を選び直す場所」ではなく
+        //   「今の一言をサポートする言葉を探す場所」として受け取られるため。
+        const hasChosenSubZone = selectedSubZoneScore !== null;
+        const targetGroups = hasChosenSubZone
+            ? PALETTE_GROUPS.filter(g => g.score === selectedSubZoneScore)
+            : getPaletteGroupsForZone(zone);
 
         // 言葉を見出しグループごとに描画
         modalPaletteWords.innerHTML = '';
@@ -711,17 +739,19 @@ document.addEventListener('DOMContentLoaded', () => {
             const groupDiv = document.createElement('div');
             groupDiv.className = 'palette-group';
             
-            // 見出し用ラッパー（センタリング用）
-            const headingWrapper = document.createElement('div');
-            headingWrapper.className = 'palette-group-heading-wrapper';
-            
-            // 見出し
-            const heading = document.createElement('div');
-            heading.className = 'palette-group-heading';
-            heading.textContent = group.title;
-            
-            headingWrapper.appendChild(heading);
-            groupDiv.appendChild(headingWrapper);
+            // 見出し。★段階を押している人には出さない
+            //   （同じ段階の一覧がもう一度出ると「あれ？もう選んだはずじゃ？」と戸惑うため）
+            if (!hasChosenSubZone) {
+                const headingWrapper = document.createElement('div');
+                headingWrapper.className = 'palette-group-heading-wrapper';
+
+                const heading = document.createElement('div');
+                heading.className = 'palette-group-heading';
+                heading.textContent = group.title;
+
+                headingWrapper.appendChild(heading);
+                groupDiv.appendChild(headingWrapper);
+            }
             
             // 言葉チップのコンテナ
             const chipsDiv = document.createElement('div');
@@ -744,6 +774,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     selectedRecordType = group.score.toString();
                     // 段階ボタンの印も、いま記録されるスコアに合わせる（食い違いを残さない）
                     syncSubZoneSelection(group.score);
+                    // ★段階を押したのと同じ状態にする。
+                    //   印が付いているのに次に開くと全部出る、というズレを作らないため。
+                    selectedSubZoneScore = group.score;
                     
                     // モーダルを自動で閉じる（お好みで）
                     if (wordPaletteModal) {
@@ -810,6 +843,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const subZoneArea = document.getElementById('subZoneArea');
     const subZoneRow = document.getElementById('subZoneRow');
 
+    // ★段階を「本人が押して選んだか」を覚えておく。null＝押していない。
+    //   selectedRecordType だけでは足りない。ハイの代表値100は「すごくハイ」のスコアと同じで、
+    //   押していないのか押したのかを見分けられないため。
+    let selectedSubZoneScore = null;
+
     // 3択だけを押したときの代表値（段階を取り消したら、ここへ戻る）
     function zoneDefaultScore(zone) {
         if (zone === 'high') return 100;
@@ -839,9 +877,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (already) {
                     // もう一度押したら外れる。3択の代表値に戻す
                     syncSubZoneSelection(null);
+                    selectedSubZoneScore = null;
                     selectedRecordType = zoneDefaultScore(zone).toString();
                 } else {
                     syncSubZoneSelection(group.score);
+                    selectedSubZoneScore = group.score;
                     selectedRecordType = group.score.toString();
                 }
             });
@@ -851,6 +891,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function hideSubZones() {
+        selectedSubZoneScore = null;
         if (!subZoneArea || !subZoneRow) return;
         subZoneArea.hidden = true;
         subZoneRow.innerHTML = '';
@@ -876,6 +917,7 @@ document.addEventListener('DOMContentLoaded', () => {
             selectedRecordType = valToSet.toString();
 
             // 押したゾーンに対応する段階を出す（押さなくてよい）
+            selectedSubZoneScore = null;
             renderSubZones(type);
 
             if(submitRecordBtn) submitRecordBtn.disabled = false;
