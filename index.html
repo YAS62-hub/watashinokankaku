@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>わたしのかんかく</title>
-    <link rel="stylesheet" href="styles.css?v=20260907_tap">
+    <link rel="stylesheet" href="styles.css?v=20260907_subzone">
     <link href="https://fonts.googleapis.com/css2?family=Kosugi+Maru&family=M+PLUS+Rounded+1c:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="manifest" href="manifest.json">
     <script src="chart.umd.min.js?v=4.5.1"></script>
@@ -35,6 +35,12 @@
                     <span class="emoji">❄️</span>
                     <span class="text">ロー（おもい・とおい）</span>
                 </button>
+            </div>
+
+            <!-- 3択を押したときだけ出る、段階のボタン。押さなくてよい（C-12・2026-09-07） -->
+            <div id="subZoneArea" class="sub-zone-area" hidden>
+                <div class="sub-zone-note">もう少し細かく（押さなくても記録できます）</div>
+                <div id="subZoneRow" class="sub-zone-row"></div>
             </div>
             
             <div class="daily-memo-area">
@@ -305,7 +311,7 @@
                 </div>
                 
                 <div style="text-align: center; margin-top: 24px; padding-top: 16px; border-top: 1px solid #E9ECEF; font-size: 0.75rem; color: #ADB5BD;">
-                    アプリについて：わたしのかんかく v11.2.1
+                    アプリについて：わたしのかんかく v11.2.1 ＋お試し（段階ボタン）
                 </div>
 
                 <div style="text-align: center; margin-top: 16px;">
@@ -576,7 +582,7 @@
         </div>
     </div>
 
-    <script src="app.js?v=20260907_tap"></script>
+    <script src="app.js?v=20260907_subzone"></script>
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', function() {

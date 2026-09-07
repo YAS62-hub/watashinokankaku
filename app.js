@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('App v11.2.1 starting (20260907_tap)...');
+    console.log('App v11.2.1+otameshi starting (20260907_subzone)...');
     // === 要素の取得 ===
     const tabs = document.querySelectorAll('.tab-content');
     const navItems = document.querySelectorAll('.nav-item');
@@ -608,13 +608,13 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const PALETTE_GROUPS = [
-        { score: 100, title: 'すごくハイ（ゾーンの外）', words: ['しゅぽしゅぽと機関車のよう', '戦闘モード', '逃走モード', '頭が真っ白になる', 'カッとなる', '息が浅い', '視界が狭い', '暴走列車に乗っているよう', '破裂しそう', '頭が真っ白', '暴走列車', 'オーバーヒート'] },
+        { score: 100, title: 'すごくハイ', words: ['しゅぽしゅぽと機関車のよう', '戦闘モード', '逃走モード', '頭が真っ白になる', 'カッとなる', '息が浅い', '視界が狭い', '暴走列車に乗っているよう', '破裂しそう', '頭が真っ白', '暴走列車', 'オーバーヒート'] },
         { score: 85,  title: 'ハイと大丈夫のあいだ', words: ['エンジンが速く回っている', '浮き足立つ', '爆発寸前', '張り詰めている', 'ギリギリで回している', 'アラームが鳴り響いている', 'プッツンきそう', 'トゲトゲしている', '休むのが怖い', '常にアクセルを踏み込んでいる', '空回り', 'トゲトゲ'] },
-        { score: 65,  title: '大丈夫（高め・活気）', words: ['ワクワクする', '心地よい熱量がある', 'エンジンが心地よく回っている', '没頭している', '活気に満ちている', 'ゾーンに入っている', '風に乗っている感じ', '心地よい熱量', '弾む感じ'] },
-        { score: 50,  title: '大丈夫（まんなか・凪）', words: ['穏やか', 'フラット', '呼吸が自然に出入りしている', '地に足がついている感じ', '血が巡る感じ', '身体の輪郭がわかる', '「今、ここ」にいる', '地面を感じる', '凪（なぎ）', 'おだやか', 'マシ'] },
-        { score: 35,  title: '大丈夫（低め・休息）', words: ['ホッとする', '心地よい重だるさ', '温かい毛布にくるまるような安心感', '満ち足りた休息', 'まどろみ', 'ゆるむ', 'お腹が動く感じ', '日向ぼっこをしているよう', '充電中', 'リラックス'] },
+        { score: 65,  title: '高め・活気', words: ['ワクワクする', '心地よい熱量がある', 'エンジンが心地よく回っている', '没頭している', '活気に満ちている', 'ゾーンに入っている', '風に乗っている感じ', '心地よい熱量', '弾む感じ'] },
+        { score: 50,  title: 'まんなか・凪', words: ['穏やか', 'フラット', '呼吸が自然に出入りしている', '地に足がついている感じ', '血が巡る感じ', '身体の輪郭がわかる', '「今、ここ」にいる', '地面を感じる', '凪（なぎ）', 'おだやか', 'マシ'] },
+        { score: 35,  title: '低め・休息', words: ['ホッとする', '心地よい重だるさ', '温かい毛布にくるまるような安心感', '満ち足りた休息', 'まどろみ', 'ゆるむ', 'お腹が動く感じ', '日向ぼっこをしているよう', '充電中', 'リラックス'] },
         { score: 15,  title: 'ローと大丈夫のあいだ', words: ['バタンキュー', '遠くから眺めている感じ', '感覚が薄れていく', '岩のよう', '電源が落ちそう', '霧がかかったよう', '膜が張った感じ', 'シャッターが下りかけている', '鉛のように重い', '遠くの景色', 'おもい'] },
-        { score: 0,   title: 'すごくロー（ゾーンの外）', words: ['電源オフ', '感覚が薄い', '麻痺している', '何も感じない', '泥のよう', '自分がどこにいるかわからない', '気配を消す', '宇宙空間に浮いているよう', '深い冬眠', 'システム保護中', '自分がわからない', 'つめたい', '強制終了', '強制スリープ', '冬眠モード', '電池切れ'] }
+        { score: 0,   title: 'すごくロー', words: ['電源オフ', '感覚が薄い', '麻痺している', '何も感じない', '泥のよう', '自分がどこにいるかわからない', '気配を消す', '宇宙空間に浮いているよう', '深い冬眠', 'システム保護中', '自分がわからない', 'つめたい', '強制終了', '強制スリープ', '冬眠モード', '電池切れ'] }
     ];
 
     const COMMON_PALETTE_COLORS = ['🔴', '🟠', '🟡', '🟢', '🟤', '⚪️', '🔵', '🔘', '⚫️'];
@@ -742,6 +742,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     addPaletteItem(word, false);
                     // 内部スコアの更新
                     selectedRecordType = group.score.toString();
+                    // 段階ボタンの印も、いま記録されるスコアに合わせる（食い違いを残さない）
+                    syncSubZoneSelection(group.score);
                     
                     // モーダルを自動で閉じる（お好みで）
                     if (wordPaletteModal) {
@@ -801,8 +803,62 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // ===== 段階ボタン（C-12・2026-09-07）=====
+    // 3択を押したときだけ、対応する段階を出す。★押さなくても今までどおり記録できる。
+    // 設計の経緯と、まだ承認されていない部分は
+    // 「設計メモ_C-12_段階ボタン_20260907.md」（プロジェクト直下・Git管理外）にある。
+    const subZoneArea = document.getElementById('subZoneArea');
+    const subZoneRow = document.getElementById('subZoneRow');
+
+    // 3択だけを押したときの代表値（段階を取り消したら、ここへ戻る）
+    function zoneDefaultScore(zone) {
+        if (zone === 'high') return 100;
+        if (zone === 'low') return 0;
+        return 50;
+    }
+
+    // パレットで言葉を選んだときにも呼ぶ。段階ボタンの印を実際のスコアに合わせる
+    function syncSubZoneSelection(score) {
+        if (!subZoneRow) return;
+        subZoneRow.querySelectorAll('.sub-zone-btn').forEach(b => {
+            b.classList.toggle('selected', b.dataset.score === String(score));
+        });
+    }
+
+    function renderSubZones(zone) {
+        if (!subZoneArea || !subZoneRow) return;
+        subZoneRow.innerHTML = '';
+        getPaletteGroupsForZone(zone).forEach(group => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'sub-zone-btn';
+            btn.textContent = group.title;
+            btn.dataset.score = String(group.score);
+            btn.addEventListener('click', () => {
+                const already = btn.classList.contains('selected');
+                if (already) {
+                    // もう一度押したら外れる。3択の代表値に戻す
+                    syncSubZoneSelection(null);
+                    selectedRecordType = zoneDefaultScore(zone).toString();
+                } else {
+                    syncSubZoneSelection(group.score);
+                    selectedRecordType = group.score.toString();
+                }
+            });
+            subZoneRow.appendChild(btn);
+        });
+        subZoneArea.hidden = false;
+    }
+
+    function hideSubZones() {
+        if (!subZoneArea || !subZoneRow) return;
+        subZoneArea.hidden = true;
+        subZoneRow.innerHTML = '';
+    }
+
     // 初期は未選択
     selectedRecordType = null; 
+    hideSubZones();
 
     // ホームタブの3択ボタンを押したときの挙動
     homeStateButtons.forEach(button => {
@@ -816,9 +872,12 @@ document.addEventListener('DOMContentLoaded', () => {
             if (type === 'high') valToSet = 100;
             if (type === 'low') valToSet = 0;
             
-            // 基本のスコアをセット（パレットで言葉を選べば更に上書きされる）
+            // 基本のスコアをセット（段階ボタンやパレットの言葉で更に上書きされる）
             selectedRecordType = valToSet.toString();
-            
+
+            // 押したゾーンに対応する段階を出す（押さなくてよい）
+            renderSubZones(type);
+
             if(submitRecordBtn) submitRecordBtn.disabled = false;
         });
     });
@@ -869,6 +928,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 lastSystemInsertedWord = null;
                 
                 homeStateButtons.forEach(btn => btn.classList.remove('selected-zone'));
+                hideSubZones();
                 submitRecordBtn.disabled = true;
                 
                 // 現在時刻への再セットを確実に実行

@@ -136,6 +136,45 @@ main {
     transform: scale(0.98);
 }
 
+/* 段階ボタン（C-12・2026-09-07）
+   3択を押したときだけ出る。何も押していないときは hidden なので、
+   ★ホーム画面のぱっと見は今までと1ピクセルも変わらない。
+   目立たせないこと。押させようとしない見た目を保つ。 */
+.sub-zone-area {
+    margin-top: -10px;   /* 上の3択と、ひとまとまりに見えるよう少し詰める */
+    margin-bottom: 24px;
+}
+
+.sub-zone-note {
+    font-size: 0.72rem;
+    color: var(--text-light);
+    text-align: center;
+    margin-bottom: 8px;
+}
+
+.sub-zone-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+}
+
+.sub-zone-btn {
+    font-size: 0.9rem;
+    padding: 10px 12px;   /* 12px：375pxの画面で「大丈夫」の3つが1行に収まる幅 */
+    border: 1px solid #EAE6DB;
+    background: #FFF;
+    border-radius: 24px;
+    color: #5C5446;
+    cursor: pointer;
+    transition: box-shadow 0.2s;
+}
+
+.sub-zone-btn.selected {
+    /* 3択の選択中と同じ考え方の印。ただし細く（3px→2px）、主役にしないため */
+    box-shadow: 0 0 0 2px var(--accent);
+}
+
 .state-button .emoji {
     font-size: 1.5rem;
     margin-right: 12px;
