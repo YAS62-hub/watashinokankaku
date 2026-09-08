@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>わたしのかんかく</title>
-    <link rel="stylesheet" href="styles.css?v=20260907_tap">
+    <link rel="stylesheet" href="styles.css?v=20260908_keepword">
     <link href="https://fonts.googleapis.com/css2?family=Kosugi+Maru&family=M+PLUS+Rounded+1c:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="manifest" href="manifest.json">
     <script src="chart.umd.min.js?v=4.5.1"></script>
@@ -36,13 +36,15 @@
                     <span class="text">ロー（おもい・とおい）</span>
                 </button>
             </div>
+
+            <!-- 3択を押したときだけ出る、段階のボタン。押さなくてよい（C-12・2026-09-07） -->
+            <div id="subZoneArea" class="sub-zone-area" hidden>
+                <div class="sub-zone-note">もう少し細かく（押さなくても記録できます）</div>
+                <div id="subZoneRow" class="sub-zone-row"></div>
+            </div>
             
             <div class="daily-memo-area">
                 <div class="input-group">
-                    <label for="recordTime" class="memo-label">記録日時</label>
-                    <input type="datetime-local" id="recordTime" class="time-input">
-                </div>
-                <div class="input-group" style="margin-top: 16px;">
                     <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 4px;">
                         <label for="dailyMemo" class="memo-label" style="margin-bottom: 0;">今の一言（あれば）</label>
                         <button id="paletteToggleBtn" class="palette-toggle-ribbon">🏷 選択肢から選ぶ</button>
@@ -305,7 +307,7 @@
                 </div>
                 
                 <div style="text-align: center; margin-top: 24px; padding-top: 16px; border-top: 1px solid #E9ECEF; font-size: 0.75rem; color: #ADB5BD;">
-                    アプリについて：わたしのかんかく v11.2.1
+                    アプリについて：わたしのかんかく v12.0.0
                 </div>
 
                 <div style="text-align: center; margin-top: 16px;">
@@ -420,6 +422,7 @@
                             <button class="state-button state-mid" data-type="mid" style="font-size: 0.8rem; padding: 12px;"><span class="emoji">☕️</span></button>
                             <button class="state-button state-low" data-type="low" style="font-size: 0.8rem; padding: 12px;"><span class="emoji">❄️</span></button>
                         </div>
+                        <div id="editSubZoneRow" class="sub-zone-row" style="margin-top: 10px;"></div>
                     </div>
                     
                     <div class="input-group" style="margin-top: 16px;">
@@ -576,7 +579,7 @@
         </div>
     </div>
 
-    <script src="app.js?v=20260907_tap"></script>
+    <script src="app.js?v=20260908_keepword"></script>
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', function() {

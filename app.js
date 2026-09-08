@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('App v11.2.1 starting (20260907_tap)...');
+    console.log('App v12.0.0 starting (20260908)...');
     // === 要素の取得 ===
     const tabs = document.querySelectorAll('.tab-content');
     const navItems = document.querySelectorAll('.nav-item');
@@ -68,7 +68,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const editRecordId = document.getElementById('editRecordId');
     const saveEditBtn = document.getElementById('saveEditBtn');
     const editZoneBtns = document.querySelectorAll('.edit-zone-group .state-button');
+    const editSubZoneRow = document.getElementById('editSubZoneRow');
     let editSelectedType = null;
+    // 編集画面で選ばれている段階の「言葉そのもの」。null＝選ばれていない
+    let editSelectedSubZoneLabel = null;
     
     // 日時を、この端末の時計に合わせた文字列にする
     function toLocalDateStr(date) {          // 例: 2026-09-03
@@ -608,13 +611,13 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const PALETTE_GROUPS = [
-        { score: 100, title: 'すごくハイ（ゾーンの外）', words: ['しゅぽしゅぽと機関車のよう', '戦闘モード', '逃走モード', '頭が真っ白になる', 'カッとなる', '息が浅い', '視界が狭い', '暴走列車に乗っているよう', '破裂しそう', '頭が真っ白', '暴走列車', 'オーバーヒート'] },
+        { score: 100, title: 'すごくハイ', words: ['しゅぽしゅぽと機関車のよう', '戦闘モード', '逃走モード', '頭が真っ白になる', 'カッとなる', '息が浅い', '視界が狭い', '暴走列車に乗っているよう', '破裂しそう', '頭が真っ白', '暴走列車', 'オーバーヒート'] },
         { score: 85,  title: 'ハイと大丈夫のあいだ', words: ['エンジンが速く回っている', '浮き足立つ', '爆発寸前', '張り詰めている', 'ギリギリで回している', 'アラームが鳴り響いている', 'プッツンきそう', 'トゲトゲしている', '休むのが怖い', '常にアクセルを踏み込んでいる', '空回り', 'トゲトゲ'] },
-        { score: 65,  title: '大丈夫（高め・活気）', words: ['ワクワクする', '心地よい熱量がある', 'エンジンが心地よく回っている', '没頭している', '活気に満ちている', 'ゾーンに入っている', '風に乗っている感じ', '心地よい熱量', '弾む感じ'] },
-        { score: 50,  title: '大丈夫（まんなか・凪）', words: ['穏やか', 'フラット', '呼吸が自然に出入りしている', '地に足がついている感じ', '血が巡る感じ', '身体の輪郭がわかる', '「今、ここ」にいる', '地面を感じる', '凪（なぎ）', 'おだやか', 'マシ'] },
-        { score: 35,  title: '大丈夫（低め・休息）', words: ['ホッとする', '心地よい重だるさ', '温かい毛布にくるまるような安心感', '満ち足りた休息', 'まどろみ', 'ゆるむ', 'お腹が動く感じ', '日向ぼっこをしているよう', '充電中', 'リラックス'] },
+        { score: 65,  title: '高め・活気', words: ['ワクワクする', '心地よい熱量がある', 'エンジンが心地よく回っている', '没頭している', '活気に満ちている', 'ゾーンに入っている', '風に乗っている感じ', '心地よい熱量', '弾む感じ'] },
+        { score: 50,  title: 'まんなか・凪', words: ['穏やか', 'フラット', '呼吸が自然に出入りしている', '地に足がついている感じ', '血が巡る感じ', '身体の輪郭がわかる', '「今、ここ」にいる', '地面を感じる', '凪（なぎ）', 'おだやか', 'マシ'] },
+        { score: 35,  title: '低め・休息', words: ['ホッとする', '心地よい重だるさ', '温かい毛布にくるまるような安心感', '満ち足りた休息', 'まどろみ', 'ゆるむ', 'お腹が動く感じ', '日向ぼっこをしているよう', '充電中', 'リラックス'] },
         { score: 15,  title: 'ローと大丈夫のあいだ', words: ['バタンキュー', '遠くから眺めている感じ', '感覚が薄れていく', '岩のよう', '電源が落ちそう', '霧がかかったよう', '膜が張った感じ', 'シャッターが下りかけている', '鉛のように重い', '遠くの景色', 'おもい'] },
-        { score: 0,   title: 'すごくロー（ゾーンの外）', words: ['電源オフ', '感覚が薄い', '麻痺している', '何も感じない', '泥のよう', '自分がどこにいるかわからない', '気配を消す', '宇宙空間に浮いているよう', '深い冬眠', 'システム保護中', '自分がわからない', 'つめたい', '強制終了', '強制スリープ', '冬眠モード', '電池切れ'] }
+        { score: 0,   title: 'すごくロー', words: ['電源オフ', '感覚が薄い', '麻痺している', '何も感じない', '泥のよう', '自分がどこにいるかわからない', '気配を消す', '宇宙空間に浮いているよう', '深い冬眠', 'システム保護中', '自分がわからない', 'つめたい', '強制終了', '強制スリープ', '冬眠モード', '電池切れ'] }
     ];
 
     const COMMON_PALETTE_COLORS = ['🔴', '🟠', '🟡', '🟢', '🟤', '⚪️', '🔵', '🔘', '⚫️'];
@@ -677,17 +680,34 @@ document.addEventListener('DOMContentLoaded', () => {
     const paletteToggleBtn = document.getElementById('paletteToggleBtn');
     const homeStateButtons = document.querySelectorAll('#homeTab .state-button');
 
+    // ホームのパレットで、いま選ばれている色に印を付ける（1つだけ）
+    function syncModalColorSelection(color) {
+        if (!modalPaletteColors) return;
+        modalPaletteColors.querySelectorAll('.modal-palette-color-btn').forEach(b => {
+            b.classList.toggle('is-selected-color', !!color && b.dataset.color === color);
+        });
+    }
+
     // モーダルを描画する関数
     function renderModalPalette(zone) {
         if (!modalPaletteColors || !modalPaletteWords) return;
         
         // 色ボタンの描画（色だけは常に全色表示）
+        // ★選んだ色に印を付ける（設定画面の色選びと同じ考え方。styles.css の .is-selected-color）。
+        //   印が無いと、選んだ色は「今の一言」欄に入るだけで、その欄はこの箱の裏に隠れて見えない。
+        //   ホーム側は1色だけの入れ替え式なので、印も常に1つだけ動く（設定側の付け外し式とは別物）。
         modalPaletteColors.innerHTML = '';
         COMMON_PALETTE_COLORS.forEach(color => {
             const btn = document.createElement('button');
             btn.textContent = color;
-            btn.style.cssText = 'font-size: 1.8rem; width: 44px; height: 44px; display: flex; justify-content: center; align-items: center; border: none; background: transparent; cursor: pointer; transition: transform 0.2s;';
-            btn.onclick = (e) => { e.preventDefault(); addPaletteItem(color, true); };
+            btn.className = 'modal-palette-color-btn';
+            btn.dataset.color = color;
+            btn.style.cssText = 'font-size: 1.8rem; width: 44px; height: 44px; display: flex; justify-content: center; align-items: center; border: none; background: transparent; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;';
+            btn.onclick = (e) => {
+                e.preventDefault();
+                addPaletteItem(color, true);
+                syncModalColorSelection(color);
+            };
             modalPaletteColors.appendChild(btn);
         });
         
@@ -698,11 +718,22 @@ document.addEventListener('DOMContentLoaded', () => {
         clearColorBtn.onclick = (e) => {
             e.preventDefault();
             addPaletteItem('', true); // 選択中の色を空文字で上書き（実質消去）
+            syncModalColorSelection(null);
         };
         modalPaletteColors.appendChild(clearColorBtn);
 
-        // 対象となるグループ見出しを取得
-        const targetGroups = getPaletteGroupsForZone(zone);
+        // 開き直したときに、前に選んだ色の印を戻す
+        syncModalColorSelection(lastSystemInsertedColor);
+
+        // 対象となるグループ見出しを取得。
+        // ★段階ボタンを押している人には、その段階の言葉だけを出す（案あ・2026-09-07 永田さんの決定）。
+        //   押していない人には、今までどおりゾーンの見出しを全部出す。
+        //   理由：段階を選んだ後のパレットは「段階を選び直す場所」ではなく
+        //   「今の一言をサポートする言葉を探す場所」として受け取られるため。
+        const hasChosenSubZone = selectedSubZoneScore !== null;
+        const targetGroups = hasChosenSubZone
+            ? PALETTE_GROUPS.filter(g => g.score === selectedSubZoneScore)
+            : getPaletteGroupsForZone(zone);
 
         // 言葉を見出しグループごとに描画
         modalPaletteWords.innerHTML = '';
@@ -711,17 +742,19 @@ document.addEventListener('DOMContentLoaded', () => {
             const groupDiv = document.createElement('div');
             groupDiv.className = 'palette-group';
             
-            // 見出し用ラッパー（センタリング用）
-            const headingWrapper = document.createElement('div');
-            headingWrapper.className = 'palette-group-heading-wrapper';
-            
-            // 見出し
-            const heading = document.createElement('div');
-            heading.className = 'palette-group-heading';
-            heading.textContent = group.title;
-            
-            headingWrapper.appendChild(heading);
-            groupDiv.appendChild(headingWrapper);
+            // 見出し。★段階を押している人には出さない
+            //   （同じ段階の一覧がもう一度出ると「あれ？もう選んだはずじゃ？」と戸惑うため）
+            if (!hasChosenSubZone) {
+                const headingWrapper = document.createElement('div');
+                headingWrapper.className = 'palette-group-heading-wrapper';
+
+                const heading = document.createElement('div');
+                heading.className = 'palette-group-heading';
+                heading.textContent = group.title;
+
+                headingWrapper.appendChild(heading);
+                groupDiv.appendChild(headingWrapper);
+            }
             
             // 言葉チップのコンテナ
             const chipsDiv = document.createElement('div');
@@ -742,6 +775,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     addPaletteItem(word, false);
                     // 内部スコアの更新
                     selectedRecordType = group.score.toString();
+                    // 段階ボタンの印も、いま記録されるスコアに合わせる（食い違いを残さない）
+                    syncSubZoneSelection(group.score);
+                    // ★段階を押したのと同じ状態にする。
+                    //   印が付いているのに次に開くと全部出る、というズレを作らないため。
+                    selectedSubZoneScore = group.score;
                     
                     // モーダルを自動で閉じる（お好みで）
                     if (wordPaletteModal) {
@@ -801,8 +839,82 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // ===== 段階ボタン（C-12・2026-09-07）=====
+    // 3択を押したときだけ、対応する段階を出す。★押さなくても今までどおり記録できる。
+    // 設計の経緯と、まだ承認されていない部分は
+    // 「設計メモ_C-12_段階ボタン_20260907.md」（プロジェクト直下・Git管理外）にある。
+    const subZoneArea = document.getElementById('subZoneArea');
+    const subZoneRow = document.getElementById('subZoneRow');
+
+    // ★段階を「本人が押して選んだか」を覚えておく。null＝押していない。
+    //   selectedRecordType だけでは足りない。ハイの代表値100は「すごくハイ」のスコアと同じで、
+    //   押していないのか押したのかを見分けられないため。
+    let selectedSubZoneScore = null;
+
+    // ★本人が段階ボタンを押して選んだ「言葉そのもの」。null＝押していない。
+    //   スコア（数字）とは別に持つ。数字だけでは
+    //   「大丈夫→そのまま記録」と「大丈夫→まんなか・凪→記録」が両方50で見分けられず、
+    //   本人が使った表現が残らないため。
+    //   ★パレットで言葉を選んだときには入れない。そのときの本人の言葉は
+    //     「今の一言」に残っており、そこへアプリの側の段階名を足すと、
+    //     本人の言葉をこちらの用語に置き換えることになるため。
+    let selectedSubZoneLabel = null;
+
+    // 3択だけを押したときの代表値（段階を取り消したら、ここへ戻る）
+    function zoneDefaultScore(zone) {
+        if (zone === 'high') return 100;
+        if (zone === 'low') return 0;
+        return 50;
+    }
+
+    // パレットで言葉を選んだときにも呼ぶ。段階ボタンの印を実際のスコアに合わせる
+    function syncSubZoneSelection(score) {
+        if (!subZoneRow) return;
+        subZoneRow.querySelectorAll('.sub-zone-btn').forEach(b => {
+            b.classList.toggle('selected', b.dataset.score === String(score));
+        });
+    }
+
+    function renderSubZones(zone) {
+        if (!subZoneArea || !subZoneRow) return;
+        subZoneRow.innerHTML = '';
+        getPaletteGroupsForZone(zone).forEach(group => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'sub-zone-btn';
+            btn.textContent = group.title;
+            btn.dataset.score = String(group.score);
+            btn.addEventListener('click', () => {
+                const already = btn.classList.contains('selected');
+                if (already) {
+                    // もう一度押したら外れる。3択の代表値に戻す
+                    syncSubZoneSelection(null);
+                    selectedSubZoneScore = null;
+                    selectedSubZoneLabel = null;
+                    selectedRecordType = zoneDefaultScore(zone).toString();
+                } else {
+                    syncSubZoneSelection(group.score);
+                    selectedSubZoneScore = group.score;
+                    selectedSubZoneLabel = group.title;
+                    selectedRecordType = group.score.toString();
+                }
+            });
+            subZoneRow.appendChild(btn);
+        });
+        subZoneArea.hidden = false;
+    }
+
+    function hideSubZones() {
+        selectedSubZoneScore = null;
+        selectedSubZoneLabel = null;
+        if (!subZoneArea || !subZoneRow) return;
+        subZoneArea.hidden = true;
+        subZoneRow.innerHTML = '';
+    }
+
     // 初期は未選択
     selectedRecordType = null; 
+    hideSubZones();
 
     // ホームタブの3択ボタンを押したときの挙動
     homeStateButtons.forEach(button => {
@@ -816,9 +928,14 @@ document.addEventListener('DOMContentLoaded', () => {
             if (type === 'high') valToSet = 100;
             if (type === 'low') valToSet = 0;
             
-            // 基本のスコアをセット（パレットで言葉を選べば更に上書きされる）
+            // 基本のスコアをセット（段階ボタンやパレットの言葉で更に上書きされる）
             selectedRecordType = valToSet.toString();
-            
+
+            // 押したゾーンに対応する段階を出す（押さなくてよい）
+            selectedSubZoneScore = null;
+            selectedSubZoneLabel = null;
+            renderSubZones(type);
+
             if(submitRecordBtn) submitRecordBtn.disabled = false;
         });
     });
@@ -842,6 +959,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     memo: dailyMemo.value,
                     time: dateToSave
                 };
+                // 本人が段階ボタンで選んだ言葉があれば、そのまま残す。
+                // 押していなければ、この項目は作らない（古い記録と同じ形のまま）
+                if (selectedSubZoneLabel) record.subZone = selectedSubZoneLabel;
                 
                 let history = JSON.parse(localStorage.getItem('seAppHistory') || '[]');
                 history.push(record);
@@ -869,6 +989,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 lastSystemInsertedWord = null;
                 
                 homeStateButtons.forEach(btn => btn.classList.remove('selected-zone'));
+                hideSubZones();
                 submitRecordBtn.disabled = true;
                 
                 // 現在時刻への再セットを確実に実行
@@ -1467,7 +1588,12 @@ document.addEventListener('DOMContentLoaded', () => {
                             borderWidth: 3,
                             tension: 0.4,
                             pointBackgroundColor: '#A9BCA3',
-                            pointRadius: 4,
+                            // 点は線（borderWidth: 3）より細くしておく。点のほうが太いと
+                            // 目が「点の連なり」を先に読み、グラフのすぐ上の
+                            // 「波があるのは、神経系が…」という“流れ”の言葉とずれる。
+                            // ※消さずに小さくするのは、記録が1件のとき線が引けず
+                            //   点だけが「いつ記録したか」の手がかりになるため。
+                            pointRadius: 2.5,   // 直径5px
                             fill: true
                         }]
                     },
@@ -1621,6 +1747,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <div class="timeline-time">${timeStr}</div>
                                 <div class="timeline-content">
                                     <div class="timeline-zone">${zoneLabel}</div>
+                                    ${record.subZone ? `<div class="timeline-subzone">${escapeHtml(record.subZone)}</div>` : ''}
                                     ${record.memo ? `<div class="timeline-memo">${escapeHtml(record.memo)}</div>` : ''}
                                     <div class="timeline-actions">
                                         <button class="action-link edit-link">編集</button>
@@ -1651,13 +1778,26 @@ document.addEventListener('DOMContentLoaded', () => {
                                 
                                 editRecordTime.value = toLocalDateTimeStr(new Date(record.time));
                                 
-                                editSelectedType = record.type;
+                                const zoneOfRecord = getZone(record.type);
+                                // 古い記録には 'high' 'mid' 'low' という文字が入っていることがある。
+                                // ここで数字にそろえておく（意味は変えない。'mid' と 50 は同じ扱い）
+                                const scoreOfRecord = isNaN(parseInt(record.type))
+                                    ? zoneDefaultScore(zoneOfRecord)
+                                    : parseInt(record.type);
+                                editSelectedType = String(scoreOfRecord);
                                 editZoneBtns.forEach(b => {
                                     // record.type は '100' '85' などのスコア文字列なので、
                                     // ボタンの data-type（high/mid/low）と比べる前にゾーンへ変換する
-                                    if (b.getAttribute('data-type') === getZone(record.type)) b.classList.add('selected-zone');
+                                    if (b.getAttribute('data-type') === zoneOfRecord) b.classList.add('selected-zone');
                                     else b.classList.remove('selected-zone');
                                 });
+                                // ★印は、記録に残っている「本人が選んだ言葉」で決める。
+                                //   数字から推測しない。数字だけでは
+                                //   「大丈夫→そのまま記録」と「大丈夫→まんなか・凪→記録」が
+                                //   両方50で見分けられないため。
+                                //   subZone が無い記録（段階を押していない／この項目より前の記録）は、印なし。
+                                editSelectedSubZoneLabel = record.subZone || null;
+                                renderEditSubZones(zoneOfRecord, editSelectedSubZoneLabel);
                                 
                                 editRecordModal.classList.add('active');
                                 document.body.classList.add('modal-open');
@@ -1690,12 +1830,45 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 100);
 
     // === 編集モーダル関連ロジック ===
+    // 編集画面の段階ボタン。ホーム画面のものと同じ考え方・同じ見た目にそろえてある。
+    // ★ホームで7段階を選べるのに編集では3択しか選べない、という食い違いをなくすため。
+    function renderEditSubZones(zone, label) {
+        if (!editSubZoneRow) return;
+        editSubZoneRow.innerHTML = '';
+        getPaletteGroupsForZone(zone).forEach(group => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'sub-zone-btn';
+            btn.textContent = group.title;
+            btn.dataset.score = String(group.score);
+            if (label && group.title === label) btn.classList.add('selected');
+            btn.addEventListener('click', () => {
+                const already = btn.classList.contains('selected');
+                editSubZoneRow.querySelectorAll('.sub-zone-btn').forEach(b => b.classList.remove('selected'));
+                if (already) {
+                    // もう一度押したら外れる。ゾーンの代表値に戻す（ホームと同じ動き）
+                    editSelectedType = zoneDefaultScore(zone).toString();
+                    editSelectedSubZoneLabel = null;
+                } else {
+                    btn.classList.add('selected');
+                    editSelectedType = String(group.score);
+                    editSelectedSubZoneLabel = group.title;
+                }
+            });
+            editSubZoneRow.appendChild(btn);
+        });
+    }
+
     if (editZoneBtns) {
         editZoneBtns.forEach(btn => {
             btn.addEventListener('click', () => {
                 editZoneBtns.forEach(b => b.classList.remove('selected-zone'));
                 btn.classList.add('selected-zone');
-                editSelectedType = btn.getAttribute('data-type');
+                const zone = btn.getAttribute('data-type');
+                // ★数字で持つ。'high' などの文字を入れると、他の記録と型が食い違う
+                editSelectedType = zoneDefaultScore(zone).toString();
+                editSelectedSubZoneLabel = null;
+                renderEditSubZones(zone, null);
             });
         });
     }
@@ -1719,6 +1892,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 history[index].time = new Date(editRecordTime.value).toISOString();
                 history[index].type = editSelectedType;
                 history[index].memo = editRecordMemo.value;
+                // 段階の言葉も、選ばれたとおりに残す（選ばれていなければ項目ごと消す）
+                if (editSelectedSubZoneLabel) history[index].subZone = editSelectedSubZoneLabel;
+                else delete history[index].subZone;
                 localStorage.setItem('seAppHistory', JSON.stringify(history));
                 
                 renderReflection();
