@@ -1178,6 +1178,14 @@ input:checked + .toggle-slider::before {
     margin-bottom: 4px;
 }
 
+/* 本人が段階ボタンで選んだ言葉。ゾーンの言葉より控えめに、
+   「今の一言」より上に置く（選んだ順と同じ並びになるように） */
+.timeline-subzone {
+    font-size: 0.85rem;
+    color: var(--text-light);
+    margin-bottom: 4px;
+}
+
 .timeline-memo {
     font-size: 0.9rem;
     color: var(--text-color);

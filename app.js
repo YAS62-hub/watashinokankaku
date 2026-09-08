@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('App v11.2.1+otameshi3 starting (20260908_editsub)...');
+    console.log('App v11.2.1+otameshi4 starting (20260908_keepword)...');
     // === 要素の取得 ===
     const tabs = document.querySelectorAll('.tab-content');
     const navItems = document.querySelectorAll('.nav-item');
@@ -70,6 +70,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const editZoneBtns = document.querySelectorAll('.edit-zone-group .state-button');
     const editSubZoneRow = document.getElementById('editSubZoneRow');
     let editSelectedType = null;
+    // 編集画面で選ばれている段階の「言葉そのもの」。null＝選ばれていない
+    let editSelectedSubZoneLabel = null;
     
     // 日時を、この端末の時計に合わせた文字列にする
     function toLocalDateStr(date) {          // 例: 2026-09-03
@@ -849,6 +851,15 @@ document.addEventListener('DOMContentLoaded', () => {
     //   押していないのか押したのかを見分けられないため。
     let selectedSubZoneScore = null;
 
+    // ★本人が段階ボタンを押して選んだ「言葉そのもの」。null＝押していない。
+    //   スコア（数字）とは別に持つ。数字だけでは
+    //   「大丈夫→そのまま記録」と「大丈夫→まんなか・凪→記録」が両方50で見分けられず、
+    //   本人が使った表現が残らないため。
+    //   ★パレットで言葉を選んだときには入れない。そのときの本人の言葉は
+    //     「今の一言」に残っており、そこへアプリの側の段階名を足すと、
+    //     本人の言葉をこちらの用語に置き換えることになるため。
+    let selectedSubZoneLabel = null;
+
     // 3択だけを押したときの代表値（段階を取り消したら、ここへ戻る）
     function zoneDefaultScore(zone) {
         if (zone === 'high') return 100;
@@ -879,10 +890,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     // もう一度押したら外れる。3択の代表値に戻す
                     syncSubZoneSelection(null);
                     selectedSubZoneScore = null;
+                    selectedSubZoneLabel = null;
                     selectedRecordType = zoneDefaultScore(zone).toString();
                 } else {
                     syncSubZoneSelection(group.score);
                     selectedSubZoneScore = group.score;
+                    selectedSubZoneLabel = group.title;
                     selectedRecordType = group.score.toString();
                 }
             });
@@ -893,6 +906,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function hideSubZones() {
         selectedSubZoneScore = null;
+        selectedSubZoneLabel = null;
         if (!subZoneArea || !subZoneRow) return;
         subZoneArea.hidden = true;
         subZoneRow.innerHTML = '';
@@ -919,6 +933,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // 押したゾーンに対応する段階を出す（押さなくてよい）
             selectedSubZoneScore = null;
+            selectedSubZoneLabel = null;
             renderSubZones(type);
 
             if(submitRecordBtn) submitRecordBtn.disabled = false;
@@ -944,6 +959,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     memo: dailyMemo.value,
                     time: dateToSave
                 };
+                // 本人が段階ボタンで選んだ言葉があれば、そのまま残す。
+                // 押していなければ、この項目は作らない（古い記録と同じ形のまま）
+                if (selectedSubZoneLabel) record.subZone = selectedSubZoneLabel;
                 
                 let history = JSON.parse(localStorage.getItem('seAppHistory') || '[]');
                 history.push(record);
@@ -1724,6 +1742,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <div class="timeline-time">${timeStr}</div>
                                 <div class="timeline-content">
                                     <div class="timeline-zone">${zoneLabel}</div>
+                                    ${record.subZone ? `<div class="timeline-subzone">${escapeHtml(record.subZone)}</div>` : ''}
                                     ${record.memo ? `<div class="timeline-memo">${escapeHtml(record.memo)}</div>` : ''}
                                     <div class="timeline-actions">
                                         <button class="action-link edit-link">編集</button>
@@ -1767,15 +1786,13 @@ document.addEventListener('DOMContentLoaded', () => {
                                     if (b.getAttribute('data-type') === zoneOfRecord) b.classList.add('selected-zone');
                                     else b.classList.remove('selected-zone');
                                 });
-                                // ★「3択だけを押した記録」と「代表値と同じ段階を押した記録」は、
-                                //   保存された数字が同じで見分けられない
-                                //   （ハイ=100=すごくハイ／大丈夫=50=まんなか・凪／ロー=0=すごくロー）。
-                                //   どちらか分からないので、段階の印は付けない。
-                                //   本人が選んだと言っていないことを、印で言ってしまわないため。
-                                const markScore = (scoreOfRecord === zoneDefaultScore(zoneOfRecord))
-                                    ? null
-                                    : scoreOfRecord;
-                                renderEditSubZones(zoneOfRecord, markScore);
+                                // ★印は、記録に残っている「本人が選んだ言葉」で決める。
+                                //   数字から推測しない。数字だけでは
+                                //   「大丈夫→そのまま記録」と「大丈夫→まんなか・凪→記録」が
+                                //   両方50で見分けられないため。
+                                //   subZone が無い記録（段階を押していない／この項目より前の記録）は、印なし。
+                                editSelectedSubZoneLabel = record.subZone || null;
+                                renderEditSubZones(zoneOfRecord, editSelectedSubZoneLabel);
                                 
                                 editRecordModal.classList.add('active');
                                 document.body.classList.add('modal-open');
@@ -1810,7 +1827,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // === 編集モーダル関連ロジック ===
     // 編集画面の段階ボタン。ホーム画面のものと同じ考え方・同じ見た目にそろえてある。
     // ★ホームで7段階を選べるのに編集では3択しか選べない、という食い違いをなくすため。
-    function renderEditSubZones(zone, score) {
+    function renderEditSubZones(zone, label) {
         if (!editSubZoneRow) return;
         editSubZoneRow.innerHTML = '';
         getPaletteGroupsForZone(zone).forEach(group => {
@@ -1819,16 +1836,18 @@ document.addEventListener('DOMContentLoaded', () => {
             btn.className = 'sub-zone-btn';
             btn.textContent = group.title;
             btn.dataset.score = String(group.score);
-            if (String(group.score) === String(score)) btn.classList.add('selected');
+            if (label && group.title === label) btn.classList.add('selected');
             btn.addEventListener('click', () => {
                 const already = btn.classList.contains('selected');
                 editSubZoneRow.querySelectorAll('.sub-zone-btn').forEach(b => b.classList.remove('selected'));
                 if (already) {
                     // もう一度押したら外れる。ゾーンの代表値に戻す（ホームと同じ動き）
                     editSelectedType = zoneDefaultScore(zone).toString();
+                    editSelectedSubZoneLabel = null;
                 } else {
                     btn.classList.add('selected');
                     editSelectedType = String(group.score);
+                    editSelectedSubZoneLabel = group.title;
                 }
             });
             editSubZoneRow.appendChild(btn);
@@ -1843,6 +1862,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const zone = btn.getAttribute('data-type');
                 // ★数字で持つ。'high' などの文字を入れると、他の記録と型が食い違う
                 editSelectedType = zoneDefaultScore(zone).toString();
+                editSelectedSubZoneLabel = null;
                 renderEditSubZones(zone, null);
             });
         });
@@ -1867,6 +1887,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 history[index].time = new Date(editRecordTime.value).toISOString();
                 history[index].type = editSelectedType;
                 history[index].memo = editRecordMemo.value;
+                // 段階の言葉も、選ばれたとおりに残す（選ばれていなければ項目ごと消す）
+                if (editSelectedSubZoneLabel) history[index].subZone = editSelectedSubZoneLabel;
+                else delete history[index].subZone;
                 localStorage.setItem('seAppHistory', JSON.stringify(history));
                 
                 renderReflection();
