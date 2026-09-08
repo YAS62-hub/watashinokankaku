@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('App v11.2.1+otameshi starting (20260907_subzone2)...');
+    console.log('App v11.2.1+otameshi2 starting (20260908_notime)...');
     // === 要素の取得 ===
     const tabs = document.querySelectorAll('.tab-content');
     const navItems = document.querySelectorAll('.nav-item');
