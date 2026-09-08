@@ -1588,7 +1588,12 @@ document.addEventListener('DOMContentLoaded', () => {
                             borderWidth: 3,
                             tension: 0.4,
                             pointBackgroundColor: '#A9BCA3',
-                            pointRadius: 4,
+                            // 点は線（borderWidth: 3）より細くしておく。点のほうが太いと
+                            // 目が「点の連なり」を先に読み、グラフのすぐ上の
+                            // 「波があるのは、神経系が…」という“流れ”の言葉とずれる。
+                            // ※消さずに小さくするのは、記録が1件のとき線が引けず
+                            //   点だけが「いつ記録したか」の手がかりになるため。
+                            pointRadius: 2.5,   // 直径5px
                             fill: true
                         }]
                     },
