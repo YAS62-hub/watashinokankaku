@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('App v11.2.1+otameshi2 starting (20260908_notime)...');
+    console.log('App v11.2.1+otameshi3 starting (20260908_editsub)...');
     // === 要素の取得 ===
     const tabs = document.querySelectorAll('.tab-content');
     const navItems = document.querySelectorAll('.nav-item');
@@ -68,6 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const editRecordId = document.getElementById('editRecordId');
     const saveEditBtn = document.getElementById('saveEditBtn');
     const editZoneBtns = document.querySelectorAll('.edit-zone-group .state-button');
+    const editSubZoneRow = document.getElementById('editSubZoneRow');
     let editSelectedType = null;
     
     // 日時を、この端末の時計に合わせた文字列にする
@@ -1753,13 +1754,28 @@ document.addEventListener('DOMContentLoaded', () => {
                                 
                                 editRecordTime.value = toLocalDateTimeStr(new Date(record.time));
                                 
-                                editSelectedType = record.type;
+                                const zoneOfRecord = getZone(record.type);
+                                // 古い記録には 'high' 'mid' 'low' という文字が入っていることがある。
+                                // ここで数字にそろえておく（意味は変えない。'mid' と 50 は同じ扱い）
+                                const scoreOfRecord = isNaN(parseInt(record.type))
+                                    ? zoneDefaultScore(zoneOfRecord)
+                                    : parseInt(record.type);
+                                editSelectedType = String(scoreOfRecord);
                                 editZoneBtns.forEach(b => {
                                     // record.type は '100' '85' などのスコア文字列なので、
                                     // ボタンの data-type（high/mid/low）と比べる前にゾーンへ変換する
-                                    if (b.getAttribute('data-type') === getZone(record.type)) b.classList.add('selected-zone');
+                                    if (b.getAttribute('data-type') === zoneOfRecord) b.classList.add('selected-zone');
                                     else b.classList.remove('selected-zone');
                                 });
+                                // ★「3択だけを押した記録」と「代表値と同じ段階を押した記録」は、
+                                //   保存された数字が同じで見分けられない
+                                //   （ハイ=100=すごくハイ／大丈夫=50=まんなか・凪／ロー=0=すごくロー）。
+                                //   どちらか分からないので、段階の印は付けない。
+                                //   本人が選んだと言っていないことを、印で言ってしまわないため。
+                                const markScore = (scoreOfRecord === zoneDefaultScore(zoneOfRecord))
+                                    ? null
+                                    : scoreOfRecord;
+                                renderEditSubZones(zoneOfRecord, markScore);
                                 
                                 editRecordModal.classList.add('active');
                                 document.body.classList.add('modal-open');
@@ -1792,12 +1808,42 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 100);
 
     // === 編集モーダル関連ロジック ===
+    // 編集画面の段階ボタン。ホーム画面のものと同じ考え方・同じ見た目にそろえてある。
+    // ★ホームで7段階を選べるのに編集では3択しか選べない、という食い違いをなくすため。
+    function renderEditSubZones(zone, score) {
+        if (!editSubZoneRow) return;
+        editSubZoneRow.innerHTML = '';
+        getPaletteGroupsForZone(zone).forEach(group => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'sub-zone-btn';
+            btn.textContent = group.title;
+            btn.dataset.score = String(group.score);
+            if (String(group.score) === String(score)) btn.classList.add('selected');
+            btn.addEventListener('click', () => {
+                const already = btn.classList.contains('selected');
+                editSubZoneRow.querySelectorAll('.sub-zone-btn').forEach(b => b.classList.remove('selected'));
+                if (already) {
+                    // もう一度押したら外れる。ゾーンの代表値に戻す（ホームと同じ動き）
+                    editSelectedType = zoneDefaultScore(zone).toString();
+                } else {
+                    btn.classList.add('selected');
+                    editSelectedType = String(group.score);
+                }
+            });
+            editSubZoneRow.appendChild(btn);
+        });
+    }
+
     if (editZoneBtns) {
         editZoneBtns.forEach(btn => {
             btn.addEventListener('click', () => {
                 editZoneBtns.forEach(b => b.classList.remove('selected-zone'));
                 btn.classList.add('selected-zone');
-                editSelectedType = btn.getAttribute('data-type');
+                const zone = btn.getAttribute('data-type');
+                // ★数字で持つ。'high' などの文字を入れると、他の記録と型が食い違う
+                editSelectedType = zoneDefaultScore(zone).toString();
+                renderEditSubZones(zone, null);
             });
         });
     }
