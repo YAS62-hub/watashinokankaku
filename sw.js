@@ -79,21 +79,15 @@ self.addEventListener('push', function(event) {
 // === 通知がタップされた時の処理 ===
 self.addEventListener('notificationclick', function(event) {
     event.notification.close();
-    // アプリ（このサイト）を開く、または既に開かれていればフォーカスする
+    // 通知をタップしたら、いつでも必ずアプリを開く。
+    //
+    // 2026-08-26 に「すでに開いている窓があれば、それを前に出す（focus）」処理を
+    // 先に試す形へ変えた（B-3）。狙いは「タップのたびに窓が増える」のを防ぐこと。
+    // しかし利用者は全員 iPhone のホーム画面アプリで、窓は1つしか存在しないため、
+    // 「窓が増える」問題はそもそも起きない。一方で、前に出せなかったときに
+    // 何も起きない道だけが残っていた。
+    // 2026-09-10、永田さんのご判断で、単純に必ず開く形へ戻した。
     event.waitUntil(
-        // includeUncontrolled: まだこのSWの管理下に入っていないタブも探索対象に含める
-        clients.matchAll({ type: 'window', includeUncontrolled: true }).then(windowClients => {
-            for (var i = 0; i < windowClients.length; i++) {
-                var client = windowClients[i];
-                // client.url は 'https://example.pages.dev/' のような絶対URL。
-                // 以前は '/' と直接比較していたため一致せず、常に新しい窓が開いていた。
-                if (new URL(client.url).origin === self.location.origin && 'focus' in client) {
-                    return client.focus();
-                }
-            }
-            if (clients.openWindow) {
-                return clients.openWindow('/');
-            }
-        })
+        clients.openWindow('/')
     );
 });
