@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('App v12.0.1 starting (20260908)...');
+    console.log('App v12.0.2 starting (20260912)...');
     // === 要素の取得 ===
     const tabs = document.querySelectorAll('.tab-content');
     const navItems = document.querySelectorAll('.nav-item');
@@ -164,6 +164,17 @@ document.addEventListener('DOMContentLoaded', () => {
         if (textHighEls) textHighEls.forEach(el => el.textContent = labels.high);
         if (textMidEls) textMidEls.forEach(el => el.textContent = labels.mid);
         if (textLowEls) textLowEls.forEach(el => el.textContent = labels.low);
+
+        // 2026-09-12: 編集画面のゾーンボタンは絵文字だけで、上の .text を持たない。
+        // 読み上げ用の名前をここで付ける。カスタマイズされた言葉とそのまま揃う。
+        const zoneAriaTargets = [
+            ['.edit-zone-group .state-high', labels.high],
+            ['.edit-zone-group .state-mid', labels.mid],
+            ['.edit-zone-group .state-low', labels.low]
+        ];
+        zoneAriaTargets.forEach(([selector, label]) => {
+            document.querySelectorAll(selector).forEach(el => el.setAttribute('aria-label', label));
+        });
         
         // 設定フォームに適用
         if (customHigh) customHigh.value = labels.high;
@@ -621,6 +632,11 @@ document.addEventListener('DOMContentLoaded', () => {
     ];
 
     const COMMON_PALETTE_COLORS = ['🔴', '🟠', '🟡', '🟢', '🟤', '⚪️', '🔵', '🔘', '⚫️'];
+    // 2026-09-12: 色は絵文字だけなので、読み上げソフト向けの名前を用意する（画面の見た目は変わらない）
+    const COLOR_NAMES = {
+        '🔴': '赤', '🟠': 'オレンジ', '🟡': '黄色', '🟢': '緑', '🟤': '茶色',
+        '⚪️': '白', '🔵': '青', '🔘': 'グレー', '⚫️': '黒'
+    };
 
     // ゾーン（ハイ／大丈夫／ロー）ごとに、どのサブゾーンの言葉を出すか。
     // ホーム画面のパレットと設定画面のパレットの両方から使う（同じ対応表を2箇所に持たないため）
@@ -702,6 +718,7 @@ document.addEventListener('DOMContentLoaded', () => {
             btn.textContent = color;
             btn.className = 'modal-palette-color-btn';
             btn.dataset.color = color;
+            btn.setAttribute('aria-label', COLOR_NAMES[color] || color);
             btn.style.cssText = 'font-size: 1.8rem; width: 44px; height: 44px; display: flex; justify-content: center; align-items: center; border: none; background: transparent; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;';
             btn.onclick = (e) => {
                 e.preventDefault();
@@ -714,6 +731,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // 色を消す（✖️）ボタン
         const clearColorBtn = document.createElement('button');
         clearColorBtn.innerHTML = '✖️';
+        clearColorBtn.setAttribute('aria-label', '色を選ばない');
         clearColorBtn.style.cssText = 'font-size: 1.2rem; width: 44px; height: 44px; display: flex; justify-content: center; align-items: center; border: none; background: transparent; cursor: pointer; opacity: 0.6;';
         clearColorBtn.onclick = (e) => {
             e.preventDefault();
@@ -2649,6 +2667,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 btn.textContent = color;
                 btn.className = 'palette-color-btn';
                 btn.dataset.color = color;
+                btn.setAttribute('aria-label', COLOR_NAMES[color] || color);
                 btn.onclick = () => toggleColor(color);
                 paletteColors.appendChild(btn);
             });
