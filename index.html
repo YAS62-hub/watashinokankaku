@@ -4,10 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>わたしのかんかく</title>
-    <link rel="stylesheet" href="styles.css?v=20260908_keepword">
-    <link href="https://fonts.googleapis.com/css2?family=Kosugi+Maru&family=M+PLUS+Rounded+1c:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css?v=20260912_mienai">
+    <!-- フォントの取り寄せ先へ、先に接続の準備をしておく（表示は変わらない・待ち時間だけ短くなる） -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- 2026-09-12: Kosugi Maru を外した。アプリで使う786文字を突き合わせた結果、
+         M PLUS Rounded 1c に無い36文字（絵文字）は Kosugi Maru にも無く、一度も使われていなかった。 -->
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="manifest" href="manifest.json">
-    <script src="chart.umd.min.js?v=4.5.1"></script>
+    <!-- 2026-09-12: defer を付けた。app.js は全体が DOMContentLoaded で包まれており、
+         defer のスクリプトは必ずその前に実行し終わるため、グラフの描画には影響しない。 -->
+    <script src="chart.umd.min.js?v=4.5.1" defer></script>
 </head>
 <body>
     <!-- ヘッダー / 設定ボタン -->
@@ -90,7 +97,7 @@
                 <!-- JSで言葉のカードが追加されます -->
             </div>
             
-            <button id="addResourceFab" class="fab">+</button>
+            <button id="addResourceFab" class="fab" aria-label="新しく追加する">+</button>
         </section>
 
         <!-- 振り返り画面 -->
@@ -106,9 +113,9 @@
                 <h3 class="gentle-question" style="font-size: 1.2rem; margin-bottom: 16px;">カレンダー</h3>
                 <div class="calendar-wrapper">
                     <div class="calendar-header">
-                        <button id="prevMonth" class="icon-button">◀</button>
+                        <button id="prevMonth" class="icon-button" aria-label="前の月">◀</button>
                         <span id="currentMonthLabel"></span>
-                        <button id="nextMonth" class="icon-button">▶</button>
+                        <button id="nextMonth" class="icon-button" aria-label="次の月">▶</button>
                     </div>
                     <div class="calendar-days-header">
                         <span>日</span><span>月</span><span>火</span><span>水</span><span>木</span><span>金</span><span>土</span>
@@ -128,7 +135,7 @@
         <!-- 設定モーダル -->
         <div id="settingsModal" class="modal">
             <div class="modal-content">
-                <button class="close-button" id="closeSettings">×</button>
+                <button class="close-button" id="closeSettings" aria-label="設定を閉じる">×</button>
                 <h3>設定</h3>
                 
                 <div class="setting-card">
@@ -405,7 +412,7 @@
         <!-- 編集モーダル -->
         <div id="editRecordModal" class="modal">
             <div class="modal-content">
-                <button class="close-button" id="closeEditModal">×</button>
+                <button class="close-button" id="closeEditModal" aria-label="記録の編集を閉じる">×</button>
                 <h3>記録の編集</h3>
                 
                 <input type="hidden" id="editRecordId">
@@ -445,11 +452,11 @@
         <!-- 写真拡大モーダル -->
         <div id="photoViewModal" class="modal">
             <div class="modal-content photo-view-content" style="position: relative; background: #FFF; padding: 20px;">
-                <button class="close-button" id="closePhotoViewModal" style="position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.6); border: none; color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; cursor: pointer; z-index: 10; margin: 0; padding: 0; line-height: 1; text-shadow: 0 0 8px rgba(255,255,255,0.8);">×</button>
-                <button id="deletePhotoBtn" style="position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.6); border: none; color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; cursor: pointer; z-index: 10; margin: 0; padding: 0; text-shadow: 0 0 8px rgba(255,255,255,0.8);">🗑</button>
+                <button class="close-button" id="closePhotoViewModal" aria-label="写真を閉じる" style="position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.6); border: none; color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; cursor: pointer; z-index: 10; margin: 0; padding: 0; line-height: 1; text-shadow: 0 0 8px rgba(255,255,255,0.8);">×</button>
+                <button id="deletePhotoBtn" aria-label="この写真を削除する" style="position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.6); border: none; color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; cursor: pointer; z-index: 10; margin: 0; padding: 0; text-shadow: 0 0 8px rgba(255,255,255,0.8);">🗑</button>
                 <div class="photo-view-area" style="position: relative; margin-top: 10px;">
-                    <button id="prevPhotoBtn" style="position: absolute; left: -10px; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.6); color: white; border: none; width: 40px; height: 40px; border-radius: 50%; font-size: 1.5rem; display: none; align-items: center; justify-content: center; z-index: 10; text-shadow: 0 0 8px rgba(255,255,255,0.8);">&lt;</button>
-                    <button id="nextPhotoBtn" style="position: absolute; right: -10px; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.6); color: white; border: none; width: 40px; height: 40px; border-radius: 50%; font-size: 1.5rem; display: none; align-items: center; justify-content: center; z-index: 10; text-shadow: 0 0 8px rgba(255,255,255,0.8);">&gt;</button>
+                    <button id="prevPhotoBtn" aria-label="前の写真" style="position: absolute; left: -10px; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.6); color: white; border: none; width: 40px; height: 40px; border-radius: 50%; font-size: 1.5rem; display: none; align-items: center; justify-content: center; z-index: 10; text-shadow: 0 0 8px rgba(255,255,255,0.8);">&lt;</button>
+                    <button id="nextPhotoBtn" aria-label="次の写真" style="position: absolute; right: -10px; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.6); color: white; border: none; width: 40px; height: 40px; border-radius: 50%; font-size: 1.5rem; display: none; align-items: center; justify-content: center; z-index: 10; text-shadow: 0 0 8px rgba(255,255,255,0.8);">&gt;</button>
                     <img id="photoViewImg" src="" style="width: 100%; border-radius: 12px; object-fit: contain; max-height: 70vh;">
                     <p id="photoViewText" style="margin-top: 12px; font-size: 0.95rem;"></p>
                 </div>
@@ -471,7 +478,7 @@
         <!-- 感覚パレットモーダル -->
         <div id="paletteModal" class="modal">
             <div class="modal-content" style="padding: 20px;">
-                <button class="close-button" id="closePaletteModal">×</button>
+                <button class="close-button" id="closePaletteModal" aria-label="「ボタンの言葉を選ぶ」を閉じる">×</button>
                 <h3 style="margin-bottom: 16px; font-size: 1.1rem; color: #5C5446;">ボタンの言葉を選ぶ</h3>
                 <div class="label-preview" id="palettePreview">
                     <p class="label-preview-caption">いまの見え方</p>
@@ -491,7 +498,7 @@
         <!-- 新しく追加する -->
         <div id="addResourceModal" class="modal">
             <div class="modal-content">
-                <button class="close-button" id="closeAddResourceModal">×</button>
+                <button class="close-button" id="closeAddResourceModal" aria-label="「新しく追加する」を閉じる">×</button>
                 <h3>新しく追加する</h3>
                 
                 <div class="setting-item">
@@ -523,7 +530,7 @@
 
     <!-- ポップアップメッセージ -->
     <div id="toastMessage" class="toast hidden">
-        <p id="toastText"></p>
+        <p id="toastText" role="status" aria-live="polite" aria-atomic="true"></p>
         <div class="toast-actions">
             <button id="saveMessageBtn" class="toast-btn primary-btn">🔖 この言葉をリソース箱に入れる</button>
             <button id="toastClose" class="toast-btn secondary-btn">とじる</button>
@@ -552,7 +559,7 @@
             <!-- Modal header with Close btn -->
             <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
                 <h3 style="font-size: 1.1rem; color: #5C5446; margin: 0;">今の感覚を選ぶ</h3>
-                <button class="modal-close" id="closeWordPaletteModal" style="border: none; background: transparent; font-size: 1.6rem; color: #8A8172; cursor: pointer;">✕</button>
+                <button class="modal-close" id="closeWordPaletteModal" aria-label="「今の感覚を選ぶ」を閉じる" style="border: none; background: transparent; font-size: 1.6rem; color: #8A8172; cursor: pointer;">✕</button>
             </div>
             
             <!-- Colors section -->
@@ -579,7 +586,7 @@
         </div>
     </div>
 
-    <script src="app.js?v=20260908_keepword"></script>
+    <script src="app.js?v=20260912_mienai"></script>
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', function() {
