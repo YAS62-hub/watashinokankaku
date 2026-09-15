@@ -2,9 +2,9 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>わたしのかんかく</title>
-    <link rel="stylesheet" href="styles.css?v=20260912_mienai">
+    <link rel="stylesheet" href="styles.css?v=20260914_mienai2">
     <!-- フォントの取り寄せ先へ、先に接続の準備をしておく（表示は変わらない・待ち時間だけ短くなる） -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -314,7 +314,7 @@
                 </div>
                 
                 <div style="text-align: center; margin-top: 24px; padding-top: 16px; border-top: 1px solid #E9ECEF; font-size: 0.75rem; color: #ADB5BD;">
-                    アプリについて：わたしのかんかく v12.0.2
+                    アプリについて：わたしのかんかく v12.0.3
                 </div>
 
                 <div style="text-align: center; margin-top: 16px;">
@@ -457,7 +457,7 @@
                 <div class="photo-view-area" style="position: relative; margin-top: 10px;">
                     <button id="prevPhotoBtn" aria-label="前の写真" style="position: absolute; left: -10px; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.6); color: white; border: none; width: 40px; height: 40px; border-radius: 50%; font-size: 1.5rem; display: none; align-items: center; justify-content: center; z-index: 10; text-shadow: 0 0 8px rgba(255,255,255,0.8);">&lt;</button>
                     <button id="nextPhotoBtn" aria-label="次の写真" style="position: absolute; right: -10px; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.6); color: white; border: none; width: 40px; height: 40px; border-radius: 50%; font-size: 1.5rem; display: none; align-items: center; justify-content: center; z-index: 10; text-shadow: 0 0 8px rgba(255,255,255,0.8);">&gt;</button>
-                    <img id="photoViewImg" src="" style="width: 100%; border-radius: 12px; object-fit: contain; max-height: 70vh;">
+                    <img id="photoViewImg" src="" alt="お気に入りの写真" style="width: 100%; border-radius: 12px; object-fit: contain; max-height: 70vh;">
                     <p id="photoViewText" style="margin-top: 12px; font-size: 0.95rem;"></p>
                 </div>
                 <input type="hidden" id="photoViewResourceId">
@@ -586,7 +586,7 @@
         </div>
     </div>
 
-    <script src="app.js?v=20260912_mienai"></script>
+    <script src="app.js?v=20260914_mienai2"></script>
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', function() {

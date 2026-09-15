@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('App v12.0.2 starting (20260912)...');
+    console.log('App v12.0.3 starting (20260914)...');
     // === 要素の取得 ===
     const tabs = document.querySelectorAll('.tab-content');
     const navItems = document.querySelectorAll('.nav-item');
@@ -2153,7 +2153,7 @@ document.addEventListener('DOMContentLoaded', () => {
             let html = '';
             const randomPhoto = getPhotoStr(randomRes);
             if (randomPhoto) {
-                html += `<img src="${randomPhoto}">`;
+                html += `<img src="${randomPhoto}" alt="お気に入りの写真">`;
             } else if (randomRes.text && randomRes.text.trim() !== '') {
                 html += `<p style="font-size: 1.1rem; text-align: center;">${randomRes.text.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</p>`;
             }
@@ -3137,6 +3137,57 @@ document.addEventListener('DOMContentLoaded', () => {
     }).catch(err => {
         console.warn('写真の新しい保存場所は使えませんでした。古い場所のまま動きます。', err);
         return 0;
+    });
+
+    // === Escキーで、いま開いている箱（モーダル）を閉じる ===
+    // ★新しい閉じ方は作らない。その箱の「閉じる」ボタンを押したことにするだけ。
+    //   保存・取り消し・確認の筋道は、これまでどおりボタン側の処理がそのまま担う。
+    // ★閉じ方が決まっていない箱は、何もしない（表に無い id は素通り）。
+    const ESC_CLOSE_BUTTON = {
+        unsavedLabelsModal: 'unsavedBackBtn',       // 「もどる」＝何も起こらない側
+        photoViewModal:     'closePhotoViewModal',
+        wordPaletteModal:   'closeWordPaletteModal',
+        paletteModal:       'closePaletteModal',
+        addResourceModal:   'closeAddResourceModal',
+        editRecordModal:    'closeEditModal',
+        tutorialModal:      'closeTutorial',        // 「あとで見る」
+        settingsModal:      'closeSettings'
+    };
+
+    // 箱が重なって開いているときは、いちばん手前の1つだけを閉じる。
+    // 手前かどうかは、重なりの指定（z-index）→ 同じならHTMLで後にある方、の順で決める。
+    function findFrontMostModal() {
+        const openModals = Array.from(document.querySelectorAll('.modal.active'));
+        let front = null;
+        let frontRank = -Infinity;
+        openModals.forEach((el, i) => {
+            const z = parseInt(window.getComputedStyle(el).zIndex, 10);
+            const rank = (isNaN(z) ? 0 : z) * 1000 + i;
+            if (rank > frontRank) { frontRank = rank; front = el; }
+        });
+        return front;
+    }
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key !== 'Escape') return;
+        const modal = findFrontMostModal();
+        if (!modal) return;
+
+        // お知らせ・確認の箱は「キャンセル」と同じ扱いにする。
+        // ★背景に触れたときの動き（closeNotice(false)）と合わせている。
+        //   キャンセルが出ていないとき（お知らせだけのとき）は OK を押したことにする。
+        if (modal.id === 'noticeModal') {
+            const cancelBtn = document.getElementById('noticeCancelBtn');
+            const okBtn = document.getElementById('noticeOkBtn');
+            const target = (cancelBtn && cancelBtn.style.display !== 'none') ? cancelBtn : okBtn;
+            if (target) { e.preventDefault(); target.click(); }
+            return;
+        }
+
+        const btnId = ESC_CLOSE_BUTTON[modal.id];
+        if (!btnId) return;
+        const btn = document.getElementById(btnId);
+        if (btn) { e.preventDefault(); btn.click(); }
     });
 
     // 工事プラン 段階4：古い場所に残っている写真を、少しずつ新しい場所へ引っ越す。

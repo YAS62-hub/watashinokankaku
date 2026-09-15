@@ -54,6 +54,11 @@ header {
     cursor: pointer;
     color: inherit;
     transition: transform 0.2s;
+    /* 指で押せる範囲を44x44px以上に広げる（実測 24x36px → 44x44px）。
+       見た目（位置・大きさ）は変えないので、広げた分だけ margin で打ち消している。
+       ★歯車ボタン #settingsBtn は下で個別に指定していて、そちらが優先される。 */
+    padding: 4px 10px;
+    margin: -4px -10px;
 }
 
 .icon-button:active {
@@ -556,6 +561,12 @@ body.modal-open {
     line-height: 1;
     color: var(--text-light);
     cursor: pointer;
+    /* 指で押せる範囲を44x44px以上に広げる（実測 18x32px → 44x44px）。
+       見た目（× の位置・大きさ）は変えないので、広げた分だけ margin で打ち消している。
+       ★写真を大きく見る画面の × だけは、HTML側で直接 padding:0 / margin:0 を
+         指定しているため、ここは効かない（あちらは元から40x40px）。 */
+    padding: 6px 13px;
+    margin: -6px -13px;
 }
 
 .modal-content h3 {
