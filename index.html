@@ -295,15 +295,17 @@
                 <div class="setting-card" style="margin-bottom: 0;">
                     <h4 class="setting-subtitle" style="margin-bottom: 8px;">データのバックアップと復元</h4>
                     <p class="setting-desc" style="font-size: 0.85rem; margin-bottom: 12px; line-height: 1.4;">
-                        現在の記録をファイル（.json）として端末内に保存します。機種変更時などは、そのファイルを読み込むことで復元できます。
+                        いまの記録を、ファイル1つにまとめます。機種変更のときなどは、そのファイルを読み込めば元に戻せます。
                     </p>
                     
                     <div class="settings-actions">
+                        <!-- ★端末ごとの場合分けをやめ、「どこに置くか」だけを書いている。
+                             ボタンを押したあとの画面は端末によって違うが、置き場所の話は共通のため。 -->
                         <div class="setting-note setting-note-block">
-                            <strong class="setting-note-title">💡 バックアップの作り方</strong>
+                            <strong class="setting-note-title">💡 どこに置いておくか</strong>
                             <ul>
-                                <li><strong>iPhoneの方</strong><br>「バックアップを作る」を押した後、共有メニューから<strong>「"ファイル"に保存」</strong>を選択してください。</li>
-                                <li><strong>Androidの方</strong><br>「バックアップを作る」を押すと、通常は<strong>「ダウンロード」フォルダ</strong>に保存されます。</li>
+                                <li>iCloudやGoogleドライブなど、<strong>ふだんご自分が見る場所</strong>に置いておくと、あとで探しやすくなります。ご自分宛てにLINEで送っておく、という置き方もあります。</li>
+                                <li>端末そのものが壊れたり、失くしたりすることもあります。<strong>端末の中だけでなく、外にも1つ</strong>あると戻せます。</li>
                             </ul>
                         </div>
                         <button type="button" id="exportDataBtn" class="secondary-btn">バックアップを作る</button>
@@ -384,7 +386,8 @@
                     </div>
                     <div class="tutorial-slide" data-slide="5">
                         <p class="tutorial-text">
-                            現在の記録をファイル（.json）として端末内に保存できます。機種変更時などは、そのファイルを読み込むことで復元できます。<br><br>
+                            いまの記録を、ファイル1つにまとめられます。機種変更のときなどは、そのファイルを読み込めば元に戻せます。<br><br>
+                            iCloudやGoogleドライブなど、ふだんご自分が見る場所に置いておくと、あとで探しやすくなります。<br><br>
                             大切な記録を守るために、時々「バックアップを作る」を押しておくのがおすすめです。
                         </p>
                         <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 12px;">

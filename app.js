@@ -2478,21 +2478,41 @@ document.addEventListener('DOMContentLoaded', () => {
                     { type: 'application/json' }
                 );
 
-                const url = URL.createObjectURL(blob);
-                
                 const now = new Date();
                 const yyyy = now.getFullYear();
                 const mm = String(now.getMonth() + 1).padStart(2, '0');
                 const dd = String(now.getDate()).padStart(2, '0');
                 const filename = `kankaku_backup_${yyyy}${mm}${dd}.json`;
-                
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = filename;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
+
+                // 置き場所を選べる道（共有シート）。iCloud・Googleドライブ・ご自分宛てのLINEなど、
+                // 「端末の外」に置けるようにするためのもの。
+                // ★この道が使えない端末では、下の「今までどおりの道」へ静かに進む。
+                //   ★動いているものを置き換えない。あくまで先に1本足すだけ。
+                let sharedByUser = false;
+                try {
+                    const file = new File([blob], filename, { type: 'application/json' });
+                    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                        await navigator.share({ files: [file] });
+                        sharedByUser = true;
+                    }
+                } catch (err) {
+                    // ★ご本人が「やめる」を押されたときは、何も保存せずに終わる。
+                    //   ここでファイルを落とすと、やめたはずのものが残ってしまう。
+                    if (err && err.name === 'AbortError') return;
+                    // それ以外（この端末では使えない等）は、今までどおりの道へ進む
+                }
+
+                // 今までどおりの道：ファイルとして書き出す
+                if (!sharedByUser) {
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = filename;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                }
 
                 // 控えの文を出す。★お願いはしない（読まなくても、使わなくてもよい）
                 showBackupNote(filename, now);
