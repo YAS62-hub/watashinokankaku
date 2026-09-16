@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('App v12.0.3 starting (20260914)...');
+    console.log('App v12.0.4 starting (20260916)...');
     // === 要素の取得 ===
     const tabs = document.querySelectorAll('.tab-content');
     const navItems = document.querySelectorAll('.nav-item');
@@ -2431,6 +2431,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const exportDataBtn = document.getElementById('exportDataBtn');
     const importDataBtn = document.getElementById('importDataBtn');
     const importFileInput = document.getElementById('importFileInput');
+    const backupNoteArea = document.getElementById('backupNoteArea');
+    const backupNoteText = document.getElementById('backupNoteText');
+    const copyBackupNoteBtn = document.getElementById('copyBackupNoteBtn');
 
     // バックアップファイルの形の名前と番号。
     // 復元するとき、これが入っていれば新しい形式、入っていなければ8月までの古い形式と判断する。
@@ -2490,9 +2493,45 @@ document.addEventListener('DOMContentLoaded', () => {
                 a.click();
                 document.body.removeChild(a);
                 URL.revokeObjectURL(url);
+
+                // 控えの文を出す。★お願いはしない（読まなくても、使わなくてもよい）
+                showBackupNote(filename, now);
             } catch (e) {
                 console.error(e);
                 appAlert('バックアップを作れませんでした。');
+            }
+        });
+    }
+
+    // バックアップを作ったあとに出す「控えの文」。
+    // ★アプリは、ご本人がどこへ保存したかを知ることができない（ブラウザが教えない仕様）。
+    //   そこだけは空欄にして、ご自分で書き足していただく。
+    // ★書いていただいた内容は保存しない。記録と同じ場所（localStorage）に入れてしまうと、
+    //   記録が消えるときに控えも一緒に消えてしまい、控えの意味が無くなるため。
+    function showBackupNote(filename, madeAt) {
+        if (!backupNoteArea || !backupNoteText) return;
+        const y = madeAt.getFullYear();
+        const m = madeAt.getMonth() + 1;
+        const d = madeAt.getDate();
+        backupNoteText.value =
+            'あなたのバックアップ\n' +
+            '　ファイル名：' + filename + '\n' +
+            '　作った日　：' + y + '年' + m + '月' + d + '日\n' +
+            '　保存した場所：（　　　　　　　）← ご自分で書き足してください';
+        backupNoteArea.style.display = '';
+    }
+
+    if (copyBackupNoteBtn && backupNoteText) {
+        copyBackupNoteBtn.addEventListener('click', async () => {
+            try {
+                await navigator.clipboard.writeText(backupNoteText.value);
+                showToast('控えの文をコピーしました');
+            } catch (e) {
+                // コピーの機能が使えない端末もある。そのときは選択した状態にして、
+                // ご自分で長押し→コピーしていただけるようにする（行き止まりにしない）
+                backupNoteText.focus();
+                backupNoteText.select();
+                showToast('文を選びました。長押しして「コピー」を選んでください');
             }
         });
     }

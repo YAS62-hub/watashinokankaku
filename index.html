@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>わたしのかんかく</title>
-    <link rel="stylesheet" href="styles.css?v=20260914_mienai2">
+    <link rel="stylesheet" href="styles.css?v=20260916_hikae">
     <!-- フォントの取り寄せ先へ、先に接続の準備をしておく（表示は変わらない・待ち時間だけ短くなる） -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -308,13 +308,25 @@
                         </div>
                         <button type="button" id="exportDataBtn" class="secondary-btn">バックアップを作る</button>
 
+                        <!-- バックアップを作ったあとに出てくる「控えの文」。ふだんは隠れている。
+                             ★アプリは保存先を知ることができない（ブラウザが教えてくれない）ので、
+                               そこだけはご本人に書き足していただく形にしている。
+                             ★書いていただいた内容はアプリに保存しない。記録と一緒に消えては
+                               控えの意味が無いため、外（メモ帳など）に置いていただく。 -->
+                        <div id="backupNoteArea" class="setting-note setting-note-block" style="display: none; margin-top: 12px;">
+                            <strong class="setting-note-title">📋 保存した場所の控え</strong>
+                            <p style="margin: 0 0 8px 0;">よろしければ、この文をコピーして、いつでも見返せるところに残しておいてください。</p>
+                            <textarea id="backupNoteText" class="custom-input" rows="5" aria-label="保存した場所の控えの文" style="width: 100%; font-size: 0.8rem; line-height: 1.6; resize: vertical;"></textarea>
+                            <button type="button" id="copyBackupNoteBtn" class="secondary-btn" style="margin-top: 8px;">この文をコピーする</button>
+                        </div>
+
                         <input type="file" id="importFileInput" accept=".json" class="custom-input file-input" style="margin-top: 10px;">
                         <button type="button" id="importDataBtn" class="primary-btn">復元する</button>
                     </div>
                 </div>
                 
                 <div style="text-align: center; margin-top: 24px; padding-top: 16px; border-top: 1px solid #E9ECEF; font-size: 0.75rem; color: #ADB5BD;">
-                    アプリについて：わたしのかんかく v12.0.3
+                    アプリについて：わたしのかんかく v12.0.4
                 </div>
 
                 <div style="text-align: center; margin-top: 16px;">
@@ -586,7 +598,7 @@
         </div>
     </div>
 
-    <script src="app.js?v=20260914_mienai2"></script>
+    <script src="app.js?v=20260916_hikae"></script>
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', function() {
