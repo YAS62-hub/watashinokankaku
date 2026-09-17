@@ -3275,6 +3275,7 @@ document.addEventListener('DOMContentLoaded', () => {
         //     「利用者が押した」という扱いが切れ、iPhone が再生を止めることがある。だから先に読む
         let loadState = 'idle'; // idle → loading → ready / failed
         let dragging = false;    // つまみを指で動かしているあいだは、再生位置で上書きしない
+        let dragValue = 0;       // 動かしているあいだの位置（秒）。指を離したときにそこへ飛ぶ
 
         function formatTime(sec) {
             if (!isFinite(sec) || sec < 0) return '--:--';
@@ -3307,19 +3308,23 @@ document.addEventListener('DOMContentLoaded', () => {
         function renderPosition() {
             const dur = audio.duration;
             const ok = isFinite(dur) && dur > 0;
-            if (ok && Number(seek.max) !== Math.floor(dur)) seek.max = Math.floor(dur);
-            if (!dragging) seek.value = Math.floor(audio.currentTime);
-            const pct = ok ? (Number(seek.value) / Math.floor(dur)) * 100 : 0;
+            const value = dragging ? dragValue : audio.currentTime;
+            const pct = ok ? Math.min(100, Math.max(0, (value / dur) * 100)) : 0;
             seek.style.setProperty('--skill-progress', pct + '%');
-            timeNow.textContent = formatTime(Number(seek.value));
+            timeNow.textContent = formatTime(value);
             timeTotal.textContent = ok ? formatTime(dur) : '--:--';
+            seek.setAttribute('aria-valuemax', ok ? Math.floor(dur) : 0);
+            seek.setAttribute('aria-valuenow', Math.floor(value));
+            seek.setAttribute('aria-valuetext', formatTime(value));
         }
 
         function render() {
             const ready = loadState === 'ready';
             const playing = ready && !audio.paused && !audio.ended;
             playBtn.disabled = loadState === 'loading' || loadState === 'idle';
-            backBtn.disabled = forwardBtn.disabled = seek.disabled = !ready;
+            backBtn.disabled = forwardBtn.disabled = !ready;
+            seek.classList.toggle('is-disabled', !ready);
+            seek.setAttribute('aria-disabled', String(!ready));
             playBtn.textContent = playing ? '⏸' : '▶︎';
             playBtn.classList.toggle('is-playing', playing);
             playBtn.setAttribute('aria-label',
@@ -3370,15 +3375,41 @@ document.addEventListener('DOMContentLoaded', () => {
         backBtn.addEventListener('click', () => skip(-15));
         forwardBtn.addEventListener('click', () => skip(15));
 
-        // つまみ：動かしているあいだは表示だけ変え、指を離したところへ飛ぶ
-        seek.addEventListener('input', () => {
+        // つまみ：線の近くのどこを押しても、そこへつまみが来る。
+        // 動かしているあいだは表示だけ変え、指を離したところへ飛ぶ
+        function valueFromPointer(clientX) {
+            const rect = seek.getBoundingClientRect();
+            const ratio = Math.min(1, Math.max(0, (clientX - rect.left) / rect.width));
+            return ratio * (isFinite(audio.duration) ? audio.duration : 0);
+        }
+        seek.addEventListener('pointerdown', (e) => {
+            if (loadState !== 'ready') return;
+            e.preventDefault();
+            try { seek.setPointerCapture(e.pointerId); } catch (err) { /* 取れなくても動く */ }
             dragging = true;
+            dragValue = valueFromPointer(e.clientX);
+            seek.classList.add('is-dragging');
             renderPosition();
         });
-        seek.addEventListener('change', () => {
-            audio.currentTime = Number(seek.value);
-            dragging = false;
+        seek.addEventListener('pointermove', (e) => {
+            if (!dragging) return;
+            dragValue = valueFromPointer(e.clientX);
             renderPosition();
+        });
+        function endDrag(commit) {
+            if (!dragging) return;
+            if (commit) audio.currentTime = dragValue;
+            dragging = false;
+            seek.classList.remove('is-dragging');
+            renderPosition();
+        }
+        seek.addEventListener('pointerup', () => endDrag(true));
+        seek.addEventListener('pointercancel', () => endDrag(false));
+        // キーボードでも動かせるように（←→で15秒）
+        seek.addEventListener('keydown', (e) => {
+            if (loadState !== 'ready') return;
+            if (e.key === 'ArrowLeft') { e.preventDefault(); skip(-15); }
+            if (e.key === 'ArrowRight') { e.preventDefault(); skip(15); }
         });
 
         ['play', 'pause', 'ended', 'seeked', 'loadedmetadata', 'durationchange'].forEach(ev => audio.addEventListener(ev, render));

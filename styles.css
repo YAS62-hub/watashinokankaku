@@ -1635,48 +1635,58 @@ input:checked + .toggle-slider::before {
     padding: 4px 4px 0;
 }
 
-/* 位置のつまみ（アースカラーに合わせる） */
+/* 位置のつまみ（アースカラーに合わせる）
+   ★触れる範囲は高さ44px。見えている線は4pxだけ */
 .skill-seek {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 100%;
-    height: 28px; /* 指で触れる高さ。見えている線は下で細くしている */
-    background: transparent;
-    margin: 0;
+    position: relative;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    touch-action: none;                 /* 指で横に動かしても、画面ごと動かないように */
+    -webkit-tap-highlight-color: transparent; /* 押しただけで出る灰色の影を消す */
+    -webkit-user-select: none;
+    user-select: none;
     --skill-progress: 0%;
 }
-.skill-seek::-webkit-slider-runnable-track {
-    height: 4px;
-    border-radius: 2px;
-    background: linear-gradient(to right, var(--accent) var(--skill-progress), #E4DFD6 var(--skill-progress));
-}
-.skill-seek::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    background: #FFFFFF;
-    border: 2px solid var(--accent);
-    margin-top: -6px;
-}
-.skill-seek::-moz-range-track {
+.skill-seek:focus { outline: none; }
+.skill-seek:focus-visible .skill-seek-track { box-shadow: 0 0 0 3px rgba(169,188,163,0.4); }
+.skill-seek.is-disabled { opacity: 0.5; cursor: default; }
+
+.skill-seek-track {
+    position: relative;
+    width: 100%;
     height: 4px;
     border-radius: 2px;
     background: #E4DFD6;
 }
-.skill-seek::-moz-range-progress {
-    height: 4px;
+.skill-seek-fill {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: var(--skill-progress);
     border-radius: 2px;
     background: var(--accent);
 }
-.skill-seek::-moz-range-thumb {
-    width: 14px;
-    height: 14px;
+.skill-seek-thumb {
+    position: absolute;
+    top: 50%;
+    left: var(--skill-progress);
+    width: 18px;
+    height: 18px;
     border-radius: 50%;
     background: #FFFFFF;
     border: 2px solid var(--accent);
+    transform: translate(-50%, -50%);
+    transition: width 0.15s, height 0.15s, box-shadow 0.15s;
+    box-sizing: border-box;
 }
-.skill-seek:disabled { opacity: 0.5; }
+/* 本当につかめているあいだだけ、つまみが大きくなる */
+.skill-seek.is-dragging .skill-seek-thumb {
+    width: 26px;
+    height: 26px;
+    background: var(--accent);
+    box-shadow: 0 0 0 6px rgba(169,188,163,0.25);
+}
 
 .skill-time {
     display: flex;
