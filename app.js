@@ -3262,7 +3262,45 @@ document.addEventListener('DOMContentLoaded', () => {
         const backBtn = document.getElementById('skillBackBtn');
         if (!modal || !openBtn || !audio) return;
 
+        // ★Cloudflare Pages は「途中から少しずつ取る」取り方（Range）に応じず、毎回まるごと返す
+        //   （2026-09-17 に curl で確認）。iPhone はこの取り方ができないと再生を拒むことがあるため、
+        //   画面を開いたときに丸ごと読み込み、端末の中のデータ（blob）として再生する。
+        //   ★再生ボタンを押した瞬間に読み込むと、読み込みを待つあいだに
+        //     「利用者が押した」という扱いが切れ、iPhone が再生を止めることがある。だから先に読む
+        let loadState = 'idle'; // idle → loading → ready / failed
+
+        function loadAudio() {
+            if (loadState === 'loading' || loadState === 'ready') return;
+            loadState = 'loading';
+            renderPlayState();
+            fetch(audio.dataset.src)
+                .then(res => {
+                    if (!res.ok) throw new Error('HTTP ' + res.status);
+                    return res.blob();
+                })
+                .then(blob => {
+                    audio.src = URL.createObjectURL(blob);
+                    audio.load();
+                    loadState = 'ready';
+                    renderPlayState();
+                })
+                .catch(err => {
+                    console.warn('声の案内を読み込めませんでした。', err);
+                    loadState = 'failed';
+                    renderPlayState();
+                });
+        }
+
         function renderPlayState() {
+            if (loadState !== 'ready') {
+                playBtn.disabled = loadState === 'loading';
+                playBtn.textContent = loadState === 'failed'
+                    ? 'もう一度読み込む'
+                    : '声の案内を準備しています…';
+                backBtn.hidden = true;
+                return;
+            }
+            playBtn.disabled = false;
             const playing = !audio.paused && !audio.ended;
             playBtn.textContent = playing ? '⏸ いったん止める'
                 : (audio.currentTime > 0 && !audio.ended ? '▶︎ つづきから聴く' : '▶︎ 声の案内をはじめる');
@@ -3273,6 +3311,7 @@ document.addEventListener('DOMContentLoaded', () => {
             modal.classList.add('active');
             document.body.classList.add('modal-open');
             renderPlayState();
+            loadAudio();
         });
 
         // 閉じたら声も止める（閉じたのに声だけ続くと、止め方が分からなくなる）
@@ -3287,6 +3326,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         playBtn.addEventListener('click', () => {
+            if (loadState === 'failed') { loadAudio(); return; }
+            if (loadState !== 'ready') return;
             if (audio.paused || audio.ended) {
                 if (audio.ended) audio.currentTime = 0;
                 audio.play().catch(err => console.warn('声の案内を再生できませんでした。', err));
