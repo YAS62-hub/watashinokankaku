@@ -600,7 +600,7 @@
          ★お約束は各練習の画面には置かず、ここに置く。練習へは必ずこの一覧を通るので、4行が毎回目に入る
            （★一覧を通らずに練習を直接開く道を作るときは、4行を見ないまま始まることになる。そのとき考え直す）
          ★「詳しく見る」は中身が未決定なので、まだ置かない
-         ★いまは録音が載っている「気になる木になる」だけを並べている -->
+         ★並べているのは、手を入れずにそのまま使える録音だけ（2026-09-17 永田さん「実装するだけでいけるものから」） -->
     <div id="skillListModal" class="modal">
         <div class="modal-content skill-practice-content">
             <button type="button" class="close-button" id="closeSkillList" aria-label="一覧を閉じる">×</button>
@@ -617,9 +617,16 @@
                 </div>
             </section>
 
+            <!-- 健康法の番号は、録音の声と同じ（第1回＝健康法１、第2回＝健康法３） -->
             <section class="skill-list-section">
-                <h3 class="skill-list-head">健康法２　グラウンディング</h3>
-                <button type="button" class="skill-list-item" data-open-practice>気になる木になる<wbr>グラウンディング</button>
+                <h3 class="skill-list-head">健康法１　トラッキング</h3>
+                <button type="button" class="skill-list-item" data-open-practice="1-3">手を合わせる</button>
+            </section>
+
+            <section class="skill-list-section">
+                <h3 class="skill-list-head">健康法３　グラウンディング</h3>
+                <button type="button" class="skill-list-item" data-open-practice="2-1">グラウンディングの説明</button>
+                <button type="button" class="skill-list-item" data-open-practice="2-4">気になる木になる<wbr>グラウンディング</button>
             </section>
         </div>
     </div>
@@ -632,7 +639,7 @@
         <div class="modal-content skill-practice-content">
             <button type="button" class="close-button" id="closeSkillPractice" aria-label="練習の画面を閉じる">×</button>
             <!-- ★試作専用：見本の切りかえ。永田さんに見比べていただくためだけのもの。本番には出さない -->
-            <div class="skill-proto-bar" aria-label="見本の切りかえ（試作）">
+            <div class="skill-proto-bar" id="skillProtoBar" aria-label="見本の切りかえ（試作）">
                 <span class="skill-proto-label">見本</span>
                 <button type="button" class="skill-proto-chip" data-pattern="A">A</button>
                 <button type="button" class="skill-proto-chip" data-pattern="B">B</button>
@@ -640,13 +647,45 @@
                 <button type="button" class="skill-proto-chip is-on" data-pattern="D">D</button>
             </div>
 
-            <p class="skill-kicker">声の案内で練習する</p>
-            <h3 id="skillPracticeTitle" class="skill-title">気になる木になる<wbr>グラウンディング</h3>
+            <p class="skill-kicker" id="skillPracticeKicker"></p>
+            <h3 id="skillPracticeTitle" class="skill-title"></h3>
 
+            <!-- 「知る」の欄。一覧で押したものに合わせて、下の template の中身をここへ写す -->
+            <div id="skillBody"></div>
+
+            <!-- ===== 録音ごとの中身。★文はすべてスライドの原文のまま。AIは言葉を足していない =====
+                 data-kicker＝健康法の名前（録音の声と同じ番号）／data-title＝題名／data-audio＝録音 -->
+
+            <!-- 第2回① グラウンディングの説明（slide25）。練習の流れが無いので「続きを読む」も無い -->
+            <template id="skillTpl-2-1" data-kicker="健康法３　グラウンディング" data-title="グラウンディングの説明" data-audio="audio/2-1_grounding_setsumei.m4a">
+                <div class="skill-know">
+                    <div class="skill-illust" aria-hidden="true">
+                        <!-- 椅子と床の絵：AI（Claude）が描いた図形。木の絵と同じ描き方・同じ色 -->
+                        <svg viewBox="0 0 240 150" xmlns="http://www.w3.org/2000/svg">
+                            <ellipse cx="120" cy="136" rx="92" ry="9" fill="#E6E0D3"/>
+                            <rect x="86" y="30" width="12" height="104" rx="6" fill="#9C7F60"/>
+                            <rect x="86" y="30" width="44" height="12" rx="6" fill="#A48A6C"/>
+                            <rect x="86" y="80" width="72" height="16" rx="8" fill="#A9BCA3"/>
+                            <rect x="146" y="88" width="12" height="46" rx="6" fill="#9C7F60"/>
+                            <rect x="100" y="94" width="10" height="40" rx="5" fill="#A48A6C"/>
+                            <circle cx="60" cy="112" r="16" fill="#B7C8B1"/>
+                            <circle cx="182" cy="116" r="12" fill="#C3D2BD"/>
+                        </svg>
+                    </div>
+                    <div class="skill-intro">
+                        <p class="skill-lead">接点に気づく</p>
+                        <p>身体の支えとなるものに身体全体、もしくは一部を触れ、そこに注意を向けることです。</p>
+                        <p>支えられている、つながっている「今ここ」の感覚に気づくことを目的とします。</p>
+                        <p class="skill-example">例：椅子に座る、立つ、壁を押す・触れる、歩く、手で机などに触れる</p>
+                    </div>
+                </div>
+            </template>
+
+            <template id="skillTpl-2-4" data-kicker="健康法３　グラウンディング" data-title="気になる木になる&lt;wbr&gt;グラウンディング" data-audio="audio/2-4_kininaruki.m4a">
             <!-- 「知る」の欄。★文はすべてスライド（第2回リバランスグループ slide29〜31）の原文のまま。AIは言葉を足していない
                  ★見本A：slide29の3行だけ／B：練習の流れ1〜6も全部出す／C：流れはたたんでおき、見たい人だけ開く
                  ★見本D（2026-09-17 永田さん選択）を最初から出す -->
-            <div class="skill-know" id="skillKnow" data-pattern="D">
+            <div class="skill-know" data-pattern="D">
                 <div class="skill-illust" aria-hidden="true">
                     <!-- 木の絵：AI（Claude）が描いた図形。素材サイトの絵ではないので、利用条件の確認は要らない -->
                     <svg viewBox="0 0 240 150" xmlns="http://www.w3.org/2000/svg">
@@ -669,7 +708,7 @@
                     <p>これも、人によって合う合わないがあります。</p>
                 </div>
 
-                <details class="skill-steps" id="skillSteps" open>
+                <details class="skill-steps" open>
                     <summary>練習の流れを見る</summary>
                     <p class="skill-steps-head">練習の流れ</p>
                     <!-- 見本D：最初の数行だけ見せて、下は薄く消す。「続きを読む」で全文（Web記事の形） -->
@@ -681,9 +720,36 @@
                         <li>全身に意識を向け、内側で起こっていることを意識しながら、好きなように動いてみましょう。感覚を意識します。</li>
                         <li>心地よい感覚や悪くない、マシな感じ、ニュートラルな感覚は身体のどこかで気づきますか。もしよければそこに好奇心を寄せましょう。そうしていると、次に何が起こるか、気づいていきます。</li>
                     </ol>
-                    <button type="button" class="skill-more-btn" id="skillMoreBtn" aria-expanded="false">続きを読む</button>
+                    <button type="button" class="skill-more-btn" aria-expanded="false">続きを読む</button>
                 </details>
             </div>
+            </template>
+
+            <!-- 第1回③ 手を合わせる（slide28「トラッキングエクササイズ１」）。短いので、流れは最初から全部出す -->
+            <template id="skillTpl-1-3" data-kicker="健康法１　トラッキング" data-title="手を合わせる" data-audio="audio/1-3_te_wo_awaseru.m4a">
+                <div class="skill-know">
+                    <div class="skill-illust" aria-hidden="true">
+                        <!-- 合わせた両手の絵：AI（Claude）が描いた図形。木の絵と同じ描き方・同じ色 -->
+                        <svg viewBox="0 0 240 150" xmlns="http://www.w3.org/2000/svg">
+                            <ellipse cx="120" cy="136" rx="72" ry="9" fill="#E6E0D3"/>
+                            <path d="M118 128 C 100 128, 92 112, 94 92 C 96 70, 104 44, 110 30 C 114 22, 118 24, 118 32 Z" fill="#E9D3BC"/>
+                            <path d="M122 128 C 140 128, 148 112, 146 92 C 144 70, 136 44, 130 30 C 126 22, 122 24, 122 32 Z" fill="#DFC5AA"/>
+                            <rect x="96" y="120" width="48" height="16" rx="8" fill="#A9BCA3"/>
+                            <circle cx="62" cy="58" r="10" fill="#C3D2BD"/>
+                            <circle cx="178" cy="50" r="7" fill="#B7C8B1"/>
+                            <circle cx="186" cy="74" r="5" fill="#C3D2BD"/>
+                        </svg>
+                    </div>
+                    <div class="skill-intro">
+                        <p>両掌をくっつけてみるのはいかがでしょうか。</p>
+                        <p>そうすると、どんなことに気がつきますか？</p>
+                        <p>もしよかったら、ゆっくり手をこすってみませんか。</p>
+                        <p>スピードを変えるとどうでしょうか。</p>
+                        <p>止めると、いかがですか。</p>
+                        <p>手以外の身体の部位には、どんなことに気がつきますか？</p>
+                    </div>
+                </div>
+            </template>
 
             <!-- 再生のところ。今どこか／全部で何分か が分かるようにする（2026-09-17 永田さんのご依頼） -->
             <div class="skill-player">
@@ -719,7 +785,7 @@
                  ★©は付けない（こちらの編集物に元の著作権表示を付けると、誰の作か誤解させるため） -->
             <p class="skill-credit">この練習は、コレモ（CRM）の資料（Trauma Resource Institute／Center for HEART）を参考に、アプリの作成者がまとめたものです。</p>
 
-            <audio id="skillAudio" preload="none" data-src="audio/2-4_kininaruki.m4a"></audio>
+            <audio id="skillAudio" preload="none"></audio>
         </div>
     </div>
 

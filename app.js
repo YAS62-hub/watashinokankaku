@@ -3284,9 +3284,11 @@ document.addEventListener('DOMContentLoaded', () => {
             return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
         }
 
+        let loadToken = 0;       // 読み込み中に別の録音へ切りかえたとき、前の読み込み結果を捨てるための印
         function loadAudio() {
             if (loadState === 'loading' || loadState === 'ready') return;
             loadState = 'loading';
+            const token = ++loadToken;
             render();
             fetch(audio.dataset.src)
                 .then(res => {
@@ -3294,12 +3296,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     return res.blob();
                 })
                 .then(blob => {
+                    if (token !== loadToken) return;
                     audio.src = URL.createObjectURL(blob);
                     audio.load();
                     loadState = 'ready';
                     render();
                 })
                 .catch(err => {
+                    if (token !== loadToken) return;
                     console.warn('声の案内を読み込めませんでした。', err);
                     loadState = 'failed';
                     render();
@@ -3356,8 +3360,38 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // 一覧から練習を開くときは、一覧を隠して入れ替える（箱を重ねると、ぼかしが二重になるため）
+        // 押したものの template（index.html の skillTpl-…）を、練習の画面へ写す
+        const body = document.getElementById('skillBody');
+        const kicker = document.getElementById('skillPracticeKicker');
+        const title = document.getElementById('skillPracticeTitle');
+        const protoBar = document.getElementById('skillProtoBar');
+        let currentSkill = null;
+        function showSkill(id) {
+            const tpl = document.getElementById('skillTpl-' + id);
+            if (!tpl) return false;
+            if (currentSkill !== id) {
+                // 別の録音に切りかえるときは、前の声を止めて、読み込みからやり直す
+                audio.pause();
+                loadToken++;
+                if (audio.src) URL.revokeObjectURL(audio.src);
+                audio.removeAttribute('src');
+                audio.load();
+                loadState = 'idle';
+                audio.dataset.src = tpl.dataset.audio;
+                kicker.textContent = tpl.dataset.kicker;
+                title.innerHTML = tpl.dataset.title; // 自分で書いた固定の文だけ（<wbr> を効かせるため）
+                body.replaceChildren(tpl.content.cloneNode(true));
+                // ★試作専用の見本の切りかえは、練習の流れがある画面でだけ出す
+                protoBar.hidden = !body.querySelector('.skill-steps');
+                modal.querySelectorAll('.skill-proto-chip[data-pattern]').forEach(c => c.classList.toggle('is-on', c.dataset.pattern === 'D'));
+                currentSkill = id;
+            }
+            return true;
+        }
+
         listModal.querySelectorAll('[data-open-practice]').forEach(item => {
             item.addEventListener('click', () => {
+                if (!showSkill(item.dataset.openPractice)) return;
                 listModal.classList.remove('active');
                 modal.classList.add('active');
                 modal.querySelector('.modal-content').scrollTop = 0;
@@ -3437,12 +3471,13 @@ document.addEventListener('DOMContentLoaded', () => {
         ['play', 'pause', 'ended', 'seeked', 'loadedmetadata', 'durationchange'].forEach(ev => audio.addEventListener(ev, render));
         audio.addEventListener('timeupdate', renderPosition);
 
-        // ★試作専用：見本A/B/C と 脚注1/2/3 の切りかえ
-        const know = document.getElementById('skillKnow');
-        const steps = document.getElementById('skillSteps');
-        const moreBtn = document.getElementById('skillMoreBtn');
+        // ★試作専用：見本A/B/C/D の切りかえ（練習の流れがある画面だけ）
         modal.querySelectorAll('.skill-proto-chip[data-pattern]').forEach(chip => {
             chip.addEventListener('click', () => {
+                const know = body.querySelector('.skill-know');
+                const steps = body.querySelector('.skill-steps');
+                const moreBtn = body.querySelector('.skill-more-btn');
+                if (!know || !steps || !moreBtn) return;
                 know.dataset.pattern = chip.dataset.pattern;
                 steps.open = chip.dataset.pattern === 'B' || chip.dataset.pattern === 'D';
                 know.classList.remove('is-expanded');
@@ -3451,7 +3486,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 modal.querySelectorAll('.skill-proto-chip[data-pattern]').forEach(c => c.classList.toggle('is-on', c === chip));
             });
         });
-        moreBtn.addEventListener('click', () => {
+        body.addEventListener('click', (e) => {
+            const moreBtn = e.target.closest('.skill-more-btn');
+            if (!moreBtn) return;
+            const know = body.querySelector('.skill-know');
             const expanded = know.classList.toggle('is-expanded');
             moreBtn.textContent = expanded ? 'とじる' : '続きを読む';
             moreBtn.setAttribute('aria-expanded', String(expanded));

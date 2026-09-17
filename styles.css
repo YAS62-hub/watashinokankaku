@@ -1636,6 +1636,7 @@ input:checked + .toggle-slider::before {
     font-size: 0.7rem;
     color: var(--text-light);
 }
+.skill-proto-bar[hidden] { display: none; }
 .skill-proto-label { margin: 0 2px 0 6px; }
 .skill-proto-label:first-child { margin-left: 0; }
 .skill-proto-chip {
@@ -1674,6 +1675,7 @@ input:checked + .toggle-slider::before {
 /* 【試作・skill-test ブランチ】スキルの一覧（お約束 → 健康法） */
 .skill-list-section { margin-bottom: 22px; }
 .skill-list-section:last-child { margin-bottom: 0; }
+.skill-list-item + .skill-list-item { margin-top: 10px; }
 .modal-content h3.skill-list-head {
     font-size: 1rem;
     text-align: left;
@@ -1713,6 +1715,17 @@ input:checked + .toggle-slider::before {
     color: var(--text-color);
 }
 
+/* 説明の画面：スライドの見出し（「接点に気づく」）と、例の行 */
+.skill-intro p.skill-lead {
+    font-weight: 500;
+    color: var(--btn-low-text);
+    margin-bottom: 4px;
+}
+.skill-intro p.skill-example {
+    margin-top: 10px;
+    font-size: 0.85rem;
+    color: var(--text-light);
+}
 .skill-intro p {
     font-size: 0.9rem;
     line-height: 1.8;
