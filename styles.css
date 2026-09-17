@@ -1958,3 +1958,43 @@ input:checked + .toggle-slider::before {
     padding: 0 4px;
 }
 
+
+/* 説明の画面：声の中身を、スライドの見出しごとにたたんで並べる（目次のように。2026-09-17夜 永田さん）
+   ★ぱっと見の威圧感を減らすため、最初はすべて閉じている */
+.skill-topics {
+    margin-top: 14px;
+    border-top: 1px solid #EFEBE4;
+}
+.skill-topic {
+    border-bottom: 1px solid #EFEBE4;
+}
+.skill-topic summary {
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    min-height: 44px;
+    padding: 6px 2px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-color);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+.skill-topic summary::-webkit-details-marker { display: none; }
+.skill-topic summary::after {
+    content: '▼';
+    font-size: 0.7rem;
+    color: var(--btn-low-text);
+    margin-left: 8px;
+}
+.skill-topic[open] summary::after { content: '▲'; }
+.skill-topic p {
+    font-size: 0.85rem;
+    line-height: 1.8;
+    color: var(--text-color);
+    word-break: keep-all;
+    overflow-wrap: anywhere;
+}
+.skill-topic p + p { margin-top: 6px; }
+.skill-topic p:last-child { margin-bottom: 14px; }
