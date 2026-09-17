@@ -609,11 +609,6 @@
                 <button type="button" class="skill-proto-chip" data-pattern="B">B</button>
                 <button type="button" class="skill-proto-chip" data-pattern="C">C</button>
                 <button type="button" class="skill-proto-chip" data-pattern="D">D</button>
-                <span class="skill-proto-label">脚注</span>
-                <button type="button" class="skill-proto-chip is-on" data-credit="1">1</button>
-                <button type="button" class="skill-proto-chip" data-credit="2">2</button>
-                <button type="button" class="skill-proto-chip" data-credit="3">3</button>
-                <button type="button" class="skill-proto-chip" data-credit="4">4</button>
             </div>
 
             <p class="skill-kicker">声の案内で練習する</p>
@@ -644,22 +639,11 @@
                     <p>これも、人によって合う合わないがあります。</p>
                 </div>
 
-                <!-- 見本D：流れの「見通し」だけ最初から出す。★各手順の最初の1文を、スライドの原文のまま抜き出したもの（言葉は足していない） -->
-                <div class="skill-outline">
-                    <p class="skill-outline-head">練習の流れ</p>
-                    <ol>
-                        <li>お気に入りの木になったつもりで立ってみます。</li>
-                        <li>足元に意識を向け、根が大地に伸びている様子を想像します。</li>
-                        <li>腕を動かしながら、木の枝を想像してみます。</li>
-                        <li>お気に入りの木になってみて、その木は内側でどんな感じがしているのかも想像してみましょう。</li>
-                        <li>全身に意識を向け、内側で起こっていることを意識しながら、好きなように動いてみましょう。</li>
-                        <li>心地よい感覚や悪くない、マシな感じ、ニュートラルな感覚は身体のどこかで気づきますか。</li>
-                    </ol>
-                </div>
-
                 <details class="skill-steps" id="skillSteps">
-                    <summary><span class="skill-summary-default">練習の流れを見る</span><span class="skill-summary-d">くわしく見る</span></summary>
-                    <ol>
+                    <summary>練習の流れを見る</summary>
+                    <p class="skill-steps-head">練習の流れ</p>
+                    <!-- 見本D：最初の数行だけ見せて、下は薄く消す。「続きを読む」で全文（Web記事の形） -->
+                    <ol class="skill-steps-list">
                         <li>お気に入りの木になったつもりで立ってみます。木の幹をイメージしてください。好きな感じで立ちながら、胴体に意識を向けてみてください。どんな感覚がしてくるか、気づきます。</li>
                         <li>足元に意識を向け、根が大地に伸びている様子を想像します。根がどのように大地に伸びていくか注意を向けます。どんな感覚がするか、気づきます。</li>
                         <li>腕を動かしながら、木の枝を想像してみます。どんな感覚がするか、気づきます。</li>
@@ -667,6 +651,7 @@
                         <li>全身に意識を向け、内側で起こっていることを意識しながら、好きなように動いてみましょう。感覚を意識します。</li>
                         <li>心地よい感覚や悪くない、マシな感じ、ニュートラルな感覚は身体のどこかで気づきますか。もしよければそこに好奇心を寄せましょう。そうしていると、次に何が起こるか、気づいていきます。</li>
                     </ol>
+                    <button type="button" class="skill-more-btn" id="skillMoreBtn" aria-expanded="false">続きを読む</button>
                 </details>
             </div>
 
@@ -698,14 +683,11 @@
                 <p id="skillStatus" class="skill-status" aria-live="polite"></p>
             </div>
 
-            <!-- 脚注。★どれも文言の「例」で、未決定。条件は「引用元として Trauma Resource Institute と Center for HEART を明記」
-                 （Center for HEART「コレモ概要資料」4ページ目） -->
-            <div class="skill-credit" id="skillCredit" data-credit="1">
-                <p data-credit-text="1">この練習は、Trauma Resource Institute と Center for HEART のコレモ（CRM）資料をもとに、アプリ作成者が編集したものです。</p>
-                <p data-credit-text="2">Trauma Resource Institute の資料を Center for HEART が翻訳・作成したもの（©Center for HEART）をもとに、アプリ作成者が編集</p>
-                <p data-credit-text="4">この練習は、コレモ（CRM）の資料（Trauma Resource Institute／Center for HEART）を参考に、アプリの作成者がまとめたものです。</p>
-                <p data-credit-text="3">引用元：Trauma Resource Institute／Center for HEART<br>アプリ作成者が、声の案内とあわせて編集しています。</p>
-            </div>
+            <!-- 脚注。2026-09-17 永田さん確定。珠美さん・Center for HEART から書き方のご指定があれば直す
+                 条件は「引用元として Trauma Resource Institute と Center for HEART を明記」
+                 ★「参考に」：本家の練習をほぼそのまま使った部分、言い換えた部分、デザインを変えた部分が混ざっているため
+                 ★©は付けない（こちらの編集物に元の著作権表示を付けると、誰の作か誤解させるため） -->
+            <p class="skill-credit">この練習は、コレモ（CRM）の資料（Trauma Resource Institute／Center for HEART）を参考に、アプリの作成者がまとめたものです。</p>
 
             <audio id="skillAudio" preload="none" data-src="audio/2-4_kininaruki.m4a"></audio>
         </div>

@@ -3418,20 +3418,21 @@ document.addEventListener('DOMContentLoaded', () => {
         // ★試作専用：見本A/B/C と 脚注1/2/3 の切りかえ
         const know = document.getElementById('skillKnow');
         const steps = document.getElementById('skillSteps');
-        const credit = document.getElementById('skillCredit');
-        modal.querySelectorAll('[data-pattern]').forEach(chip => {
-            if (chip === know) return;
+        const moreBtn = document.getElementById('skillMoreBtn');
+        modal.querySelectorAll('.skill-proto-chip[data-pattern]').forEach(chip => {
             chip.addEventListener('click', () => {
                 know.dataset.pattern = chip.dataset.pattern;
-                steps.open = chip.dataset.pattern === 'B';
+                steps.open = chip.dataset.pattern === 'B' || chip.dataset.pattern === 'D';
+                know.classList.remove('is-expanded');
+                moreBtn.textContent = '続きを読む';
+                moreBtn.setAttribute('aria-expanded', 'false');
                 modal.querySelectorAll('.skill-proto-chip[data-pattern]').forEach(c => c.classList.toggle('is-on', c === chip));
             });
         });
-        modal.querySelectorAll('.skill-proto-chip[data-credit]').forEach(chip => {
-            chip.addEventListener('click', () => {
-                credit.dataset.credit = chip.dataset.credit;
-                modal.querySelectorAll('.skill-proto-chip[data-credit]').forEach(c => c.classList.toggle('is-on', c === chip));
-            });
+        moreBtn.addEventListener('click', () => {
+            const expanded = know.classList.toggle('is-expanded');
+            moreBtn.textContent = expanded ? 'とじる' : '続きを読む';
+            moreBtn.setAttribute('aria-expanded', String(expanded));
         });
 
         // 画面を消したとき（ロック画面）にも、何が流れているか分かるように
