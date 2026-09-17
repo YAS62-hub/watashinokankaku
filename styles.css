@@ -1603,9 +1603,24 @@ input:checked + .toggle-slider::before {
     cursor: pointer;
 }
 
-.skill-practice-content h3 {
-    padding-right: 32px; /* × と題名が重ならないように */
+.skill-kicker {
+    text-align: center;
+    font-size: 0.75rem;
+    color: var(--text-light);
+    letter-spacing: 0.05em;
+    margin: 0 32px 6px;
+}
+
+/* 題名。★文字の途中では折り返さない（word-break: keep-all）。
+   折り返すときは HTML の <wbr> の位置（「気になる木になる／グラウンディング」）でだけ切れる */
+.modal-content h3.skill-title {
+    text-align: center;
+    font-size: 1.15rem;
     line-height: 1.5;
+    margin: 0 28px 20px;
+    word-break: keep-all;
+    overflow-wrap: anywhere;
+    text-wrap: balance;
 }
 
 .skill-placeholder {
@@ -1616,16 +1631,117 @@ input:checked + .toggle-slider::before {
 }
 
 .skill-player {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
     margin-top: 8px;
+    padding: 4px 4px 0;
 }
 
-.skill-play-btn,
-.skill-back-btn {
+/* 位置のつまみ（アースカラーに合わせる） */
+.skill-seek {
+    -webkit-appearance: none;
+    appearance: none;
     width: 100%;
+    height: 28px; /* 指で触れる高さ。見えている線は下で細くしている */
+    background: transparent;
+    margin: 0;
+    --skill-progress: 0%;
+}
+.skill-seek::-webkit-slider-runnable-track {
+    height: 4px;
+    border-radius: 2px;
+    background: linear-gradient(to right, var(--accent) var(--skill-progress), #E4DFD6 var(--skill-progress));
+}
+.skill-seek::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #FFFFFF;
+    border: 2px solid var(--accent);
+    margin-top: -6px;
+}
+.skill-seek::-moz-range-track {
+    height: 4px;
+    border-radius: 2px;
+    background: #E4DFD6;
+}
+.skill-seek::-moz-range-progress {
+    height: 4px;
+    border-radius: 2px;
+    background: var(--accent);
+}
+.skill-seek::-moz-range-thumb {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #FFFFFF;
+    border: 2px solid var(--accent);
+}
+.skill-seek:disabled { opacity: 0.5; }
+
+.skill-time {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    color: var(--text-light);
+    font-variant-numeric: tabular-nums;
+    margin-top: 2px;
+}
+
+.skill-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 28px;
+    margin-top: 12px;
+}
+
+.skill-play-btn {
+    width: 68px;
+    height: 68px;
+    border-radius: 50%;
+    border: none;
+    background-color: var(--accent);
+    color: #FFFFFF;
+    font-size: 1.6rem;
+    line-height: 1;
+    padding: 0 0 0 4px; /* ▶︎ は見た目の重心が左に寄るので、少し右へ */
+    cursor: pointer;
+    transition: transform 0.2s;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+}
+.skill-play-btn.is-playing { padding-left: 0; }
+.skill-play-btn:active { transform: scale(0.96); }
+
+.skill-skip-btn {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    border: 1px solid #DCD6CD;
+    background: transparent;
+    color: var(--text-light);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
     font-family: inherit;
+    padding: 0;
+}
+.skill-skip-arrow { font-size: 1.1rem; line-height: 1; }
+.skill-skip-label { font-size: 0.6rem; line-height: 1.2; margin-top: 1px; }
+
+.skill-play-btn:disabled,
+.skill-skip-btn:disabled {
+    opacity: 0.45;
+    cursor: default;
+}
+
+.skill-status {
+    min-height: 1.2em;
+    margin-top: 10px;
+    text-align: center;
+    font-size: 0.8rem;
+    color: var(--text-light);
 }
 
 .skill-credit {

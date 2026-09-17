@@ -3251,8 +3251,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // 【試作・skill-test ブランチ】スキルの実践（声の案内）
-    // ★「再生中に画面に何を出すか」は未決定。いまは ▶︎/⏸ と「15秒もどる」だけ
-    //   （経過時間・残り時間は出さない。時間の目安をアプリが持つかは未決定＝実装予定.md C11）
+    // ★「再生中に画面に何を出すか」は未決定。いまは位置のつまみ・時間・▶︎/⏸・15秒もどる/すすむ
+    //   （全部の時間と今の位置は 2026-09-17 永田さんのご依頼で出している。
+    //    録音で時間を言わないと決めた理由も「音源の時間を見たら明白なので」だった）
     (function setupSkillPractice() {
         const modal = document.getElementById('skillPracticeModal');
         const openBtn = document.getElementById('openSkillPracticeBtn');
@@ -3260,6 +3261,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const audio = document.getElementById('skillAudio');
         const playBtn = document.getElementById('skillPlayBtn');
         const backBtn = document.getElementById('skillBackBtn');
+        const forwardBtn = document.getElementById('skillForwardBtn');
+        const seek = document.getElementById('skillSeek');
+        const timeNow = document.getElementById('skillTimeNow');
+        const timeTotal = document.getElementById('skillTimeTotal');
+        const status = document.getElementById('skillStatus');
         if (!modal || !openBtn || !audio) return;
 
         // ★Cloudflare Pages は「途中から少しずつ取る」取り方（Range）に応じず、毎回まるごと返す
@@ -3268,11 +3274,18 @@ document.addEventListener('DOMContentLoaded', () => {
         //   ★再生ボタンを押した瞬間に読み込むと、読み込みを待つあいだに
         //     「利用者が押した」という扱いが切れ、iPhone が再生を止めることがある。だから先に読む
         let loadState = 'idle'; // idle → loading → ready / failed
+        let dragging = false;    // つまみを指で動かしているあいだは、再生位置で上書きしない
+
+        function formatTime(sec) {
+            if (!isFinite(sec) || sec < 0) return '--:--';
+            const s = Math.floor(sec);
+            return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+        }
 
         function loadAudio() {
             if (loadState === 'loading' || loadState === 'ready') return;
             loadState = 'loading';
-            renderPlayState();
+            render();
             fetch(audio.dataset.src)
                 .then(res => {
                     if (!res.ok) throw new Error('HTTP ' + res.status);
@@ -3282,35 +3295,48 @@ document.addEventListener('DOMContentLoaded', () => {
                     audio.src = URL.createObjectURL(blob);
                     audio.load();
                     loadState = 'ready';
-                    renderPlayState();
+                    render();
                 })
                 .catch(err => {
                     console.warn('声の案内を読み込めませんでした。', err);
                     loadState = 'failed';
-                    renderPlayState();
+                    render();
                 });
         }
 
-        function renderPlayState() {
-            if (loadState !== 'ready') {
-                playBtn.disabled = loadState === 'loading';
-                playBtn.textContent = loadState === 'failed'
-                    ? 'もう一度読み込む'
-                    : '声の案内を準備しています…';
-                backBtn.hidden = true;
-                return;
-            }
-            playBtn.disabled = false;
-            const playing = !audio.paused && !audio.ended;
-            playBtn.textContent = playing ? '⏸ いったん止める'
-                : (audio.currentTime > 0 && !audio.ended ? '▶︎ つづきから聴く' : '▶︎ 声の案内をはじめる');
-            backBtn.hidden = !(playing || (audio.currentTime > 0 && !audio.ended));
+        function renderPosition() {
+            const dur = audio.duration;
+            const ok = isFinite(dur) && dur > 0;
+            if (ok && Number(seek.max) !== Math.floor(dur)) seek.max = Math.floor(dur);
+            if (!dragging) seek.value = Math.floor(audio.currentTime);
+            const pct = ok ? (Number(seek.value) / Math.floor(dur)) * 100 : 0;
+            seek.style.setProperty('--skill-progress', pct + '%');
+            timeNow.textContent = formatTime(Number(seek.value));
+            timeTotal.textContent = ok ? formatTime(dur) : '--:--';
+        }
+
+        function render() {
+            const ready = loadState === 'ready';
+            const playing = ready && !audio.paused && !audio.ended;
+            playBtn.disabled = loadState === 'loading' || loadState === 'idle';
+            backBtn.disabled = forwardBtn.disabled = seek.disabled = !ready;
+            playBtn.textContent = playing ? '⏸' : '▶︎';
+            playBtn.classList.toggle('is-playing', playing);
+            playBtn.setAttribute('aria-label',
+                loadState === 'failed' ? 'もう一度読み込む'
+                : playing ? 'いったん止める'
+                : (audio.currentTime > 0 && !audio.ended ? 'つづきから聴く' : '声の案内をはじめる'));
+            status.textContent =
+                loadState === 'loading' ? '声の案内を準備しています…'
+                : loadState === 'failed' ? '読み込めませんでした。▶︎ を押すと、もう一度読み込みます'
+                : '';
+            renderPosition();
         }
 
         openBtn.addEventListener('click', () => {
             modal.classList.add('active');
             document.body.classList.add('modal-open');
-            renderPlayState();
+            render();
             loadAudio();
         });
 
@@ -3335,11 +3361,28 @@ document.addEventListener('DOMContentLoaded', () => {
                 audio.pause();
             }
         });
-        backBtn.addEventListener('click', () => {
-            audio.currentTime = Math.max(0, audio.currentTime - 15);
+
+        function skip(sec) {
+            const dur = isFinite(audio.duration) ? audio.duration : Infinity;
+            audio.currentTime = Math.min(Math.max(0, audio.currentTime + sec), dur);
+            renderPosition();
+        }
+        backBtn.addEventListener('click', () => skip(-15));
+        forwardBtn.addEventListener('click', () => skip(15));
+
+        // つまみ：動かしているあいだは表示だけ変え、指を離したところへ飛ぶ
+        seek.addEventListener('input', () => {
+            dragging = true;
+            renderPosition();
+        });
+        seek.addEventListener('change', () => {
+            audio.currentTime = Number(seek.value);
+            dragging = false;
+            renderPosition();
         });
 
-        ['play', 'pause', 'ended', 'seeked'].forEach(ev => audio.addEventListener(ev, renderPlayState));
+        ['play', 'pause', 'ended', 'seeked', 'loadedmetadata', 'durationchange'].forEach(ev => audio.addEventListener(ev, render));
+        audio.addEventListener('timeupdate', renderPosition);
 
         // 画面を消したとき（ロック画面）にも、何が流れているか分かるように
         if ('mediaSession' in navigator) {

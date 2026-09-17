@@ -602,15 +602,30 @@
     <div id="skillPracticeModal" class="modal">
         <div class="modal-content skill-practice-content">
             <button type="button" class="close-button" id="closeSkillPractice" aria-label="練習の画面を閉じる">×</button>
-            <h3 id="skillPracticeTitle">気になる木になるグラウンディング</h3>
+            <p class="skill-kicker">声の案内で練習する</p>
+            <h3 id="skillPracticeTitle" class="skill-title">気になる木になる<wbr>グラウンディング</h3>
 
             <div class="setting-card skill-know">
                 <p class="skill-placeholder">（ここに、どんな練習かが分かる説明が入ります。<br>スライドの文字か、読み上げの全文かは未決定）</p>
             </div>
 
+            <!-- 再生のところ。今どこか／全部で何分か が分かるようにする（2026-09-17 永田さんのご依頼） -->
             <div class="skill-player">
-                <button type="button" id="skillPlayBtn" class="primary-btn skill-play-btn">▶︎ 声の案内をはじめる</button>
-                <button type="button" id="skillBackBtn" class="secondary-btn skill-back-btn" hidden>15秒もどる</button>
+                <input type="range" id="skillSeek" class="skill-seek" min="0" max="0" step="1" value="0" disabled aria-label="再生している位置">
+                <div class="skill-time">
+                    <span id="skillTimeNow">0:00</span>
+                    <span id="skillTimeTotal">--:--</span>
+                </div>
+                <div class="skill-controls">
+                    <button type="button" id="skillBackBtn" class="skill-skip-btn" aria-label="15秒もどる" disabled>
+                        <span class="skill-skip-arrow">↺</span><span class="skill-skip-label">15秒</span>
+                    </button>
+                    <button type="button" id="skillPlayBtn" class="skill-play-btn" aria-label="声の案内をはじめる" disabled>▶︎</button>
+                    <button type="button" id="skillForwardBtn" class="skill-skip-btn" aria-label="15秒すすむ" disabled>
+                        <span class="skill-skip-arrow">↻</span><span class="skill-skip-label">15秒</span>
+                    </button>
+                </div>
+                <p id="skillStatus" class="skill-status" aria-live="polite"></p>
             </div>
 
             <p class="skill-credit">（出典の表示が入ります・文言は未決定）</p>
