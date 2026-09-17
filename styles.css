@@ -1707,6 +1707,33 @@ input:checked + .toggle-slider::before {
     box-shadow: 0 4px 6px rgba(0,0,0,0.02);
     border: 1px solid rgba(0,0,0,0.03);
 }
+/* 「詳しく見る」を開いたとき：4行がそれぞれ見出しになり、その下に説明 */
+.skill-promise-block + .skill-promise-block { margin-top: 18px; }
+.skill-promise-head {
+    font-size: 0.9rem;
+    font-weight: 500;
+    line-height: 1.7;
+    color: var(--text-color);
+    border-left: 3px solid var(--accent);
+    padding-left: 10px;
+    margin-bottom: 6px;
+    word-break: keep-all;
+    overflow-wrap: anywhere;
+}
+.skill-promise .skill-promise-detail p { font-size: 0.85rem; }
+.skill-promise p.skill-promise-closing { margin-top: 20px; }
+.skill-promise-toggle {
+    display: block;
+    margin: 8px 0 -4px auto;
+    padding: 8px 0;
+    background: none;
+    border: none;
+    font-family: inherit;
+    font-size: 0.85rem;
+    color: var(--btn-low-text);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
 .skill-promise p {
     word-break: keep-all;   /* 「休憩するこ／と」のような途中の折り返しを避け、読点の位置で折り返す */
     overflow-wrap: anywhere;

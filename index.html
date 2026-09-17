@@ -606,14 +606,54 @@
             <button type="button" class="close-button" id="closeSkillList" aria-label="一覧を閉じる">×</button>
             <p class="skill-kicker">声の案内で練習する</p>
 
-            <!-- お約束の4行（実装予定.md A12。2026-09-17 永田さん確定の文・この順）。読まないと進めない形にはしない -->
-            <section class="skill-list-section">
-                <h3 class="skill-list-head">お約束</h3>
+            <!-- お約束・大切なこと（実装予定.md A12／言葉づくり/実装スレッドへの申し送り.md 項目15「詳しく見る」全文。2026-09-17 永田さん確定）
+                 ★押す前は4行＋「詳しく見る」。押すと、4行がそのまま見出しになり、その下に説明が開く
+                 ★4行を上に残したまま説明を足す形にはしない（同じ文が3回出てしまうため）
+                 ★「NO！」は全角のまま（研修スライドと同じ書き方）。読まないと進めない形にはしない -->
+            <section class="skill-list-section" id="skillPromiseSection">
+                <h3 class="skill-list-head">お約束・大切なこと</h3>
                 <div class="skill-promise">
-                    <p>不快になったら、そっと手放して、休憩することも大切です。</p>
-                    <p>いつでもやめられます。やらないことも、選べます。</p>
-                    <p>ガイドのとおりでなくて、かまいません。</p>
-                    <p>気づかない時は、それも大切な気づきです。</p>
+                    <div class="skill-promise-short">
+                        <p>不快になったら、そっと手放して、休憩することも大切です。</p>
+                        <p>いつでもやめられます。やらないことも、選べます。</p>
+                        <p>ガイドのとおりでなくて、かまいません。</p>
+                        <p>気づかない時は、それも大切な気づきです。</p>
+                    </div>
+                    <div class="skill-promise-detail" hidden>
+                    <section class="skill-promise-block">
+                        <h4 class="skill-promise-head">不快になったら、そっと手放して、休憩することも大切です。</h4>
+                        <p>今のあなたに合う健康法も、合わない健康法もあるかもしれません。</p>
+                        <p>かえって不快になる。</p>
+                        <p>いいなぁと感じるけれど、やりすぎるとしんどい。</p>
+                        <p>そんなときは、そっと手放して、休憩することも大切です。</p>
+                        <p>途中で休憩したくなったら、そのまま休憩なさってください。</p>
+                    </section>
+                    <section class="skill-promise-block">
+                        <h4 class="skill-promise-head">いつでもやめられます。やらないことも、選べます。</h4>
+                        <p>いつでもやめられます。</p>
+                        <p>やらないことを、選択できます。</p>
+                        <p>NO！が言えます。</p>
+                        <p>NO！を選択できます。</p>
+                        <p>こちらも、大切な選択肢です。</p>
+                        <p>聴いているだけ、ということも選べます。</p>
+                    </section>
+                    <section class="skill-promise-block">
+                        <h4 class="skill-promise-head">ガイドのとおりでなくて、かまいません。</h4>
+                        <p>この音声ガイドのとおりでなくても、かまいません。</p>
+                        <p>例えば、足ではなく手でやってみた。</p>
+                        <p>例えば、何か嫌な感じがしたので、休憩を選択できた。</p>
+                        <p>そういう、ガイドどおりでない体験も、OKです。</p>
+                        <p>あなたの体験、選択は、歓迎されます。</p>
+                    </section>
+                    <section class="skill-promise-block">
+                        <h4 class="skill-promise-head">気づかない時は、それも大切な気づきです。</h4>
+                        <p>紹介する健康法を試して、必ず良い感覚にならなければならない、というわけではありません。</p>
+                        <p>特に何も感じなくても、OKです。</p>
+                        <p>気づかない時は、それも大切な気づきです。</p>
+                    </section>
+                        <p class="skill-promise-closing">あなたの過ごしやすい方法で、お過ごしください。</p>
+                    </div>
+                    <button type="button" class="skill-promise-toggle" id="skillPromiseToggle" aria-expanded="false">詳しく見る ▼</button>
                 </div>
             </section>
 

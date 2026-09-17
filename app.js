@@ -3346,7 +3346,28 @@ document.addEventListener('DOMContentLoaded', () => {
         // 入口を押すと、まず一覧（お約束＋健康法）が開く。練習へは必ずこの一覧を通る
         const listModal = document.getElementById('skillListModal');
         const closeListBtn = document.getElementById('closeSkillList');
+        // お約束の「詳しく見る」。開くと4行（短い形）をしまい、同じ4行を見出しにした説明を出す
+        const promiseSection = document.getElementById('skillPromiseSection');
+        const promiseToggle = document.getElementById('skillPromiseToggle');
+        const promiseShort = promiseSection.querySelector('.skill-promise-short');
+        const promiseDetail = promiseSection.querySelector('.skill-promise-detail');
+        function setPromiseOpen(open) {
+            promiseShort.hidden = open;
+            promiseDetail.hidden = !open;
+            promiseToggle.textContent = open ? 'とじる ▲' : '詳しく見る ▼';
+            promiseToggle.setAttribute('aria-expanded', String(open));
+        }
+        promiseToggle.addEventListener('click', () => {
+            const open = promiseDetail.hidden;
+            setPromiseOpen(open);
+            // とじたときは、下の方に取り残されないよう、お約束の見出しまで戻す
+            if (!open) promiseSection.scrollIntoView({ block: 'start' });
+        });
+
         openBtn.addEventListener('click', () => {
+            // 一覧を開くたびに、いつもの4行の形から始める（4行が毎回目に入るように）
+            setPromiseOpen(false);
+            listModal.querySelector('.modal-content').scrollTop = 0;
             listModal.classList.add('active');
             document.body.classList.add('modal-open');
         });
