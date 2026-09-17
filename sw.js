@@ -26,6 +26,14 @@ self.addEventListener('fetch', (e) => {
         return;
     }
 
+    // 声の案内（audio/ の下）も素通しにする。
+    // ★音声は「途中から少しずつ取る」取り方（Range）で読まれる。SWを挟むと、
+    //   iPhone では再生できない・途中に飛べないことがあるため、ブラウザに任せる。
+    //   ★そのぶん、声の案内はオフラインでは聴けない（キャッシュに入らない）
+    if (new URL(e.request.url).pathname.includes('/audio/')) {
+        return;
+    }
+
     // ネットワーク・ファースト戦略（常に最新を取りに行き、オフライン時のみキャッシュを使う）
     e.respondWith(
         fetch(e.request)

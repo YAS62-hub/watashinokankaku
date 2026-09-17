@@ -1586,3 +1586,52 @@ input:checked + .toggle-slider::before {
 .photo-gallery-selecting .photo-grid-item.selected img {
     opacity: 0.55;
 }
+
+/* 【試作・skill-test ブランチ】スキルの実践（声の案内） */
+.skill-entry-btn {
+    display: block;
+    width: 100%;
+    margin-bottom: 24px;
+    padding: 16px 20px;
+    background-color: #F8F7F4;
+    border: 1px solid rgba(0,0,0,0.03);
+    border-radius: 20px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+    color: var(--text-color);
+    font-family: inherit;
+    font-size: 0.95rem;
+    cursor: pointer;
+}
+
+.skill-practice-content h3 {
+    padding-right: 32px; /* × と題名が重ならないように */
+    line-height: 1.5;
+}
+
+.skill-placeholder {
+    font-size: 0.85rem;
+    color: var(--text-light);
+    line-height: 1.7;
+    text-align: center;
+}
+
+.skill-player {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+.skill-play-btn,
+.skill-back-btn {
+    width: 100%;
+    font-family: inherit;
+}
+
+.skill-credit {
+    margin-top: 20px;
+    font-size: 0.75rem;
+    color: var(--text-light);
+    text-align: center;
+    line-height: 1.5;
+}

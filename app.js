@@ -3209,6 +3209,7 @@ document.addEventListener('DOMContentLoaded', () => {
         paletteModal:       'closePaletteModal',
         addResourceModal:   'closeAddResourceModal',
         editRecordModal:    'closeEditModal',
+        skillPracticeModal: 'closeSkillPractice',
         tutorialModal:      'closeTutorial',        // 「あとで見る」
         settingsModal:      'closeSettings'
     };
@@ -3248,6 +3249,67 @@ document.addEventListener('DOMContentLoaded', () => {
         const btn = document.getElementById(btnId);
         if (btn) { e.preventDefault(); btn.click(); }
     });
+
+    // 【試作・skill-test ブランチ】スキルの実践（声の案内）
+    // ★「再生中に画面に何を出すか」は未決定。いまは ▶︎/⏸ と「15秒もどる」だけ
+    //   （経過時間・残り時間は出さない。時間の目安をアプリが持つかは未決定＝実装予定.md C11）
+    (function setupSkillPractice() {
+        const modal = document.getElementById('skillPracticeModal');
+        const openBtn = document.getElementById('openSkillPracticeBtn');
+        const closeBtn = document.getElementById('closeSkillPractice');
+        const audio = document.getElementById('skillAudio');
+        const playBtn = document.getElementById('skillPlayBtn');
+        const backBtn = document.getElementById('skillBackBtn');
+        if (!modal || !openBtn || !audio) return;
+
+        function renderPlayState() {
+            const playing = !audio.paused && !audio.ended;
+            playBtn.textContent = playing ? '⏸ いったん止める'
+                : (audio.currentTime > 0 && !audio.ended ? '▶︎ つづきから聴く' : '▶︎ 声の案内をはじめる');
+            backBtn.hidden = !(playing || (audio.currentTime > 0 && !audio.ended));
+        }
+
+        openBtn.addEventListener('click', () => {
+            modal.classList.add('active');
+            document.body.classList.add('modal-open');
+            renderPlayState();
+        });
+
+        // 閉じたら声も止める（閉じたのに声だけ続くと、止め方が分からなくなる）
+        function closeSkillPractice() {
+            audio.pause();
+            modal.classList.remove('active');
+            document.body.classList.remove('modal-open');
+        }
+        closeBtn.addEventListener('click', closeSkillPractice);
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) closeSkillPractice();
+        });
+
+        playBtn.addEventListener('click', () => {
+            if (audio.paused || audio.ended) {
+                if (audio.ended) audio.currentTime = 0;
+                audio.play().catch(err => console.warn('声の案内を再生できませんでした。', err));
+            } else {
+                audio.pause();
+            }
+        });
+        backBtn.addEventListener('click', () => {
+            audio.currentTime = Math.max(0, audio.currentTime - 15);
+        });
+
+        ['play', 'pause', 'ended', 'seeked'].forEach(ev => audio.addEventListener(ev, renderPlayState));
+
+        // 画面を消したとき（ロック画面）にも、何が流れているか分かるように
+        if ('mediaSession' in navigator) {
+            audio.addEventListener('play', () => {
+                navigator.mediaSession.metadata = new MediaMetadata({
+                    title: document.getElementById('skillPracticeTitle').textContent,
+                    artist: 'わたしのかんかく'
+                });
+            });
+        }
+    })();
 
     // 工事プラン 段階4：古い場所に残っている写真を、少しずつ新しい場所へ引っ越す。
     // ★起動してすぐには始めない。開いた直後は、画面を出すことを優先する。

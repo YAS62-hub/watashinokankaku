@@ -74,6 +74,10 @@
                 </div>
             </div>
             
+            <!-- 【試作・skill-test ブランチ】スキルの実践（声の案内）への入口。
+                 ★置き場所は未決定（永田さんに伺う）。仮にリソース箱に置いている -->
+            <button type="button" id="openSkillPracticeBtn" class="skill-entry-btn">🎧 声の案内で練習する</button>
+
             <!-- 内部タブ -->
             <div class="inner-tabs">
                 <button class="inner-tab-btn active" data-in-target="photoGalleryTab">📷 写真</button>
@@ -591,6 +595,30 @@
         </div>
     </div>
     
+    <!-- 【試作・skill-test ブランチ】スキルの実践（声の案内）
+         ①知る（見る）→ ②やる（聴く）の2段。2026-09-11 永田さんの構想（申し送り項目14）
+         ★「知る」に出す文章／再生中に画面に出すもの は、どちらも未決定（臨床判断・永田さんに伺う）
+         ★出典の表示（実装予定.md C8）の文言も未決定。場所だけ用意している -->
+    <div id="skillPracticeModal" class="modal">
+        <div class="modal-content skill-practice-content">
+            <button type="button" class="close-button" id="closeSkillPractice" aria-label="練習の画面を閉じる">×</button>
+            <h3 id="skillPracticeTitle">気になる木になるグラウンディング</h3>
+
+            <div class="setting-card skill-know">
+                <p class="skill-placeholder">（ここに、どんな練習かが分かる説明が入ります。<br>スライドの文字か、読み上げの全文かは未決定）</p>
+            </div>
+
+            <div class="skill-player">
+                <button type="button" id="skillPlayBtn" class="primary-btn skill-play-btn">▶︎ 声の案内をはじめる</button>
+                <button type="button" id="skillBackBtn" class="secondary-btn skill-back-btn" hidden>15秒もどる</button>
+            </div>
+
+            <p class="skill-credit">（出典の表示が入ります・文言は未決定）</p>
+
+            <audio id="skillAudio" preload="none" src="audio/2-4_kininaruki.m4a"></audio>
+        </div>
+    </div>
+
     <!-- 設定画面を閉じようとしたとき、ボタンの言葉が未保存なら確認する -->
     <div id="unsavedLabelsModal" class="modal" style="z-index: 1100;">
         <div class="modal-content" style="max-width: 90%; width: 320px; padding: 24px 20px; border-radius: 24px;">
