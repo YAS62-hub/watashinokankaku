@@ -1706,6 +1706,31 @@ input:checked + .toggle-slider::before {
 
 /* 見本A：流れは出さない ／ 見本B：流れを最初から全部出す（開閉の見出しは隠す） ／ 見本C：たたんでおく */
 .skill-know[data-pattern="A"] .skill-steps { display: none; }
+/* 見本D：見通し（各手順の最初の1文）は最初から出す。全文はたたんでおく */
+.skill-outline { display: none; }
+.skill-know[data-pattern="D"] .skill-outline {
+    display: block;
+    margin-top: 14px;
+    border-top: 1px solid #EFEBE4;
+    padding-top: 12px;
+}
+.skill-outline-head {
+    font-size: 0.8rem;
+    color: var(--text-light);
+    margin-bottom: 4px;
+}
+.skill-outline ol { margin: 0; padding-left: 1.4em; }
+.skill-outline li {
+    font-size: 0.85rem;
+    line-height: 1.7;
+    color: var(--text-color);
+    margin-bottom: 4px;
+}
+.skill-outline li::marker { color: var(--text-light); }
+.skill-summary-d { display: none; }
+.skill-know[data-pattern="D"] .skill-summary-default { display: none; }
+.skill-know[data-pattern="D"] .skill-summary-d { display: inline; }
+.skill-know[data-pattern="D"] .skill-steps { border-top: none; margin-top: 4px; padding-top: 0; }
 .skill-know[data-pattern="B"] .skill-steps summary { display: none; }
 
 /* 再生のところは、説明が長くても画面の下に貼りついて、いつでも押せるようにする */
@@ -1848,4 +1873,5 @@ input:checked + .toggle-slider::before {
 .skill-credit [data-credit-text] { display: none; }
 .skill-credit[data-credit="1"] [data-credit-text="1"],
 .skill-credit[data-credit="2"] [data-credit-text="2"],
-.skill-credit[data-credit="3"] [data-credit-text="3"] { display: block; }
+.skill-credit[data-credit="3"] [data-credit-text="3"],
+.skill-credit[data-credit="4"] [data-credit-text="4"] { display: block; }
