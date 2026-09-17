@@ -1672,6 +1672,10 @@ input:checked + .toggle-slider::before {
     height: auto;
     margin: 0 auto 10px;
 }
+/* 絵を横に3つ並べるとき（グラウンディングの説明）。小さくなりすぎないよう幅を広げる */
+.skill-illust--wide svg {
+    max-width: 320px;
+}
 /* 【試作・skill-test ブランチ】スキルの一覧（お約束 → 健康法） */
 .skill-list-section { margin-bottom: 22px; }
 .skill-list-section:last-child { margin-bottom: 0; }
