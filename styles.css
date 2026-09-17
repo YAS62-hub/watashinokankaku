@@ -1623,16 +1623,99 @@ input:checked + .toggle-slider::before {
     text-wrap: balance;
 }
 
-.skill-placeholder {
-    font-size: 0.85rem;
+/* 試作専用：見本の切りかえ */
+.skill-proto-bar {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 3px;
+    margin: -12px 34px 14px 0;
+    padding: 6px 8px;
+    border: 1px dashed #DCD6CD;
+    border-radius: 12px;
+    font-size: 0.7rem;
     color: var(--text-light);
-    line-height: 1.7;
-    text-align: center;
+}
+.skill-proto-label { margin: 0 2px 0 6px; }
+.skill-proto-label:first-child { margin-left: 0; }
+.skill-proto-chip {
+    min-width: 26px;
+    height: 26px;
+    border-radius: 13px;
+    padding: 0;
+    border: 1px solid #DCD6CD;
+    background: transparent;
+    color: var(--text-light);
+    font-family: inherit;
+    font-size: 0.75rem;
+    cursor: pointer;
+}
+.skill-proto-chip.is-on {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #FFFFFF;
 }
 
+/* 「知る」の欄 */
+.skill-know {
+    background-color: #FFFFFF;
+    border-radius: 20px;
+    padding: 16px 20px 18px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+    border: 1px solid rgba(0,0,0,0.03);
+}
+.skill-illust svg {
+    display: block;
+    width: 100%;
+    max-width: 220px;
+    height: auto;
+    margin: 0 auto 10px;
+}
+.skill-intro p {
+    font-size: 0.9rem;
+    line-height: 1.8;
+    color: var(--text-color);
+}
+.skill-steps {
+    margin-top: 14px;
+    border-top: 1px solid #EFEBE4;
+    padding-top: 12px;
+}
+.skill-steps summary {
+    font-size: 0.85rem;
+    color: var(--btn-low-text);
+    cursor: pointer;
+    list-style: none;
+    padding: 8px 0;
+    -webkit-tap-highlight-color: transparent;
+}
+.skill-steps summary::-webkit-details-marker { display: none; }
+.skill-steps summary::before { content: '＋ '; }
+.skill-steps[open] summary::before { content: '− '; }
+.skill-steps ol {
+    margin: 6px 0 0;
+    padding-left: 1.4em;
+}
+.skill-steps li {
+    font-size: 0.85rem;
+    line-height: 1.8;
+    color: var(--text-color);
+    margin-bottom: 10px;
+}
+.skill-steps li::marker { color: var(--text-light); }
+
+/* 見本A：流れは出さない ／ 見本B：流れを最初から全部出す（開閉の見出しは隠す） ／ 見本C：たたんでおく */
+.skill-know[data-pattern="A"] .skill-steps { display: none; }
+.skill-know[data-pattern="B"] .skill-steps summary { display: none; }
+
+/* 再生のところは、説明が長くても画面の下に貼りついて、いつでも押せるようにする */
 .skill-player {
-    margin-top: 8px;
-    padding: 4px 4px 0;
+    position: sticky;
+    bottom: -30px; /* .modal-content の下の余白ぶん */
+    margin: 12px -20px 0;
+    padding: 10px 24px 14px;
+    background: linear-gradient(to bottom, rgba(248,247,244,0) 0, #F8F7F4 12px);
+    z-index: 1;
 }
 
 /* 位置のつまみ（アースカラーに合わせる）
@@ -1755,9 +1838,14 @@ input:checked + .toggle-slider::before {
 }
 
 .skill-credit {
-    margin-top: 20px;
-    font-size: 0.75rem;
+    margin-top: 4px;
+    font-size: 0.7rem;
     color: var(--text-light);
-    text-align: center;
-    line-height: 1.5;
+    text-align: left;
+    line-height: 1.6;
+    padding: 0 4px;
 }
+.skill-credit [data-credit-text] { display: none; }
+.skill-credit[data-credit="1"] [data-credit-text="1"],
+.skill-credit[data-credit="2"] [data-credit-text="2"],
+.skill-credit[data-credit="3"] [data-credit-text="3"] { display: block; }

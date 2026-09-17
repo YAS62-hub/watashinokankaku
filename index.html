@@ -602,11 +602,57 @@
     <div id="skillPracticeModal" class="modal">
         <div class="modal-content skill-practice-content">
             <button type="button" class="close-button" id="closeSkillPractice" aria-label="練習の画面を閉じる">×</button>
+            <!-- ★試作専用：見本の切りかえ。永田さんに見比べていただくためだけのもの。本番には出さない -->
+            <div class="skill-proto-bar" aria-label="見本の切りかえ（試作）">
+                <span class="skill-proto-label">見本</span>
+                <button type="button" class="skill-proto-chip is-on" data-pattern="A">A</button>
+                <button type="button" class="skill-proto-chip" data-pattern="B">B</button>
+                <button type="button" class="skill-proto-chip" data-pattern="C">C</button>
+                <span class="skill-proto-label">脚注</span>
+                <button type="button" class="skill-proto-chip is-on" data-credit="1">1</button>
+                <button type="button" class="skill-proto-chip" data-credit="2">2</button>
+                <button type="button" class="skill-proto-chip" data-credit="3">3</button>
+            </div>
+
             <p class="skill-kicker">声の案内で練習する</p>
             <h3 id="skillPracticeTitle" class="skill-title">気になる木になる<wbr>グラウンディング</h3>
 
-            <div class="setting-card skill-know">
-                <p class="skill-placeholder">（ここに、どんな練習かが分かる説明が入ります。<br>スライドの文字か、読み上げの全文かは未決定）</p>
+            <!-- 「知る」の欄。★文はすべてスライド（第2回リバランスグループ slide29〜31）の原文のまま。AIは言葉を足していない
+                 ★見本A：slide29の3行だけ／B：練習の流れ1〜6も全部出す／C：流れはたたんでおき、見たい人だけ開く -->
+            <div class="skill-know" id="skillKnow" data-pattern="A">
+                <div class="skill-illust" aria-hidden="true">
+                    <!-- 木の絵：AI（Claude）が描いた図形。素材サイトの絵ではないので、利用条件の確認は要らない -->
+                    <svg viewBox="0 0 240 150" xmlns="http://www.w3.org/2000/svg">
+                        <ellipse cx="120" cy="136" rx="92" ry="9" fill="#E6E0D3"/>
+                        <path d="M120 134 C 104 136, 92 138, 80 140 M120 134 C 136 136, 150 138, 164 141 M118 134 C 112 139, 104 143, 98 146 M122 134 C 130 139, 138 143, 146 146" stroke="#A48A6C" stroke-width="3" fill="none" stroke-linecap="round"/>
+                        <path d="M112 136 C 114 116, 113 100, 108 84 L 132 84 C 127 100, 126 116, 128 136 Z" fill="#9C7F60"/>
+                        <path d="M114 96 C 104 88, 96 84, 86 80 M126 94 C 136 86, 146 82, 156 78" stroke="#9C7F60" stroke-width="5" fill="none" stroke-linecap="round"/>
+                        <circle cx="120" cy="56" r="38" fill="#A9BCA3"/>
+                        <circle cx="84" cy="70" r="28" fill="#B7C8B1"/>
+                        <circle cx="158" cy="68" r="30" fill="#9FB499"/>
+                        <circle cx="100" cy="40" r="24" fill="#B7C8B1"/>
+                        <circle cx="142" cy="38" r="24" fill="#A9BCA3"/>
+                        <circle cx="120" cy="24" r="18" fill="#C3D2BD"/>
+                    </svg>
+                </div>
+
+                <div class="skill-intro">
+                    <p>例えばこういうグラウンディングもあります。</p>
+                    <p>もしよかったら好奇心を寄せて、試してみてください。</p>
+                    <p>これも、人によって合う合わないがあります。</p>
+                </div>
+
+                <details class="skill-steps" id="skillSteps">
+                    <summary>練習の流れを見る</summary>
+                    <ol>
+                        <li>お気に入りの木になったつもりで立ってみます。木の幹をイメージしてください。好きな感じで立ちながら、胴体に意識を向けてみてください。どんな感覚がしてくるか、気づきます。</li>
+                        <li>足元に意識を向け、根が大地に伸びている様子を想像します。根がどのように大地に伸びていくか注意を向けます。どんな感覚がするか、気づきます。</li>
+                        <li>腕を動かしながら、木の枝を想像してみます。どんな感覚がするか、気づきます。</li>
+                        <li>お気に入りの木になってみて、その木は内側でどんな感じがしているのかも想像してみましょう。どんな感覚がしてくるか、気づきます。</li>
+                        <li>全身に意識を向け、内側で起こっていることを意識しながら、好きなように動いてみましょう。感覚を意識します。</li>
+                        <li>心地よい感覚や悪くない、マシな感じ、ニュートラルな感覚は身体のどこかで気づきますか。もしよければそこに好奇心を寄せましょう。そうしていると、次に何が起こるか、気づいていきます。</li>
+                    </ol>
+                </details>
             </div>
 
             <!-- 再生のところ。今どこか／全部で何分か が分かるようにする（2026-09-17 永田さんのご依頼） -->
@@ -637,7 +683,13 @@
                 <p id="skillStatus" class="skill-status" aria-live="polite"></p>
             </div>
 
-            <p class="skill-credit">（出典の表示が入ります・文言は未決定）</p>
+            <!-- 脚注。★どれも文言の「例」で、未決定。条件は「引用元として Trauma Resource Institute と Center for HEART を明記」
+                 （Center for HEART「コレモ概要資料」4ページ目） -->
+            <div class="skill-credit" id="skillCredit" data-credit="1">
+                <p data-credit-text="1">この練習は、Trauma Resource Institute と Center for HEART のコレモ（CRM）資料をもとに、アプリ作成者が編集したものです。</p>
+                <p data-credit-text="2">Trauma Resource Institute の資料を Center for HEART が翻訳・作成したもの（©Center for HEART）をもとに、アプリ作成者が編集</p>
+                <p data-credit-text="3">引用元：Trauma Resource Institute／Center for HEART<br>アプリ作成者が、声の案内とあわせて編集しています。</p>
+            </div>
 
             <audio id="skillAudio" preload="none" data-src="audio/2-4_kininaruki.m4a"></audio>
         </div>

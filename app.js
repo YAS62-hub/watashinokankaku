@@ -3415,6 +3415,25 @@ document.addEventListener('DOMContentLoaded', () => {
         ['play', 'pause', 'ended', 'seeked', 'loadedmetadata', 'durationchange'].forEach(ev => audio.addEventListener(ev, render));
         audio.addEventListener('timeupdate', renderPosition);
 
+        // ★試作専用：見本A/B/C と 脚注1/2/3 の切りかえ
+        const know = document.getElementById('skillKnow');
+        const steps = document.getElementById('skillSteps');
+        const credit = document.getElementById('skillCredit');
+        modal.querySelectorAll('[data-pattern]').forEach(chip => {
+            if (chip === know) return;
+            chip.addEventListener('click', () => {
+                know.dataset.pattern = chip.dataset.pattern;
+                steps.open = chip.dataset.pattern === 'B';
+                modal.querySelectorAll('.skill-proto-chip[data-pattern]').forEach(c => c.classList.toggle('is-on', c === chip));
+            });
+        });
+        modal.querySelectorAll('.skill-proto-chip[data-credit]').forEach(chip => {
+            chip.addEventListener('click', () => {
+                credit.dataset.credit = chip.dataset.credit;
+                modal.querySelectorAll('.skill-proto-chip[data-credit]').forEach(c => c.classList.toggle('is-on', c === chip));
+            });
+        });
+
         // 画面を消したとき（ロック画面）にも、何が流れているか分かるように
         if ('mediaSession' in navigator) {
             audio.addEventListener('play', () => {
