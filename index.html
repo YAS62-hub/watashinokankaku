@@ -662,6 +662,7 @@
                 <h3 class="skill-list-head">健康法１　トラッキング</h3>
                 <button type="button" class="skill-list-item" data-open-practice="1-0">トラッキングの説明</button>
                 <button type="button" class="skill-list-item" data-open-practice="1-3">手を合わせる</button>
+                <button type="button" class="skill-list-item" data-open-practice="1-4">気になるものに触れる</button>
             </section>
 
             <section class="skill-list-section">
@@ -717,8 +718,9 @@
             <!-- ===== 録音ごとの中身。★文はすべてスライドの原文のまま。AIは言葉を足していない =====
                  data-kicker＝健康法の名前（録音の声と同じ番号）／data-title＝題名／data-audio＝録音 -->
 
-            <!-- 健康法１の説明（第4回 slide22）。★声（第1回②）は、切り落とす行を永田さんに確かめていただいてから載せる。いまは文だけ -->
-            <template id="skillTpl-1-0" data-kicker="健康法１　トラッキング" data-title="トラッキングの説明">
+            <!-- 健康法１の説明（第4回 slide22）。声は第1回②から「このグループで…基本です。」「周りの人と伝え合えたり、」の2行を切ったもの（2026-09-17夜 永田さん聞き比べてOK）
+                 ★画面の文の「このグループでお伝えする」は、まだスライドのまま（扱いは永田さんに伺い中） -->
+            <template id="skillTpl-1-0" data-kicker="健康法１　トラッキング" data-title="トラッキングの説明" data-audio="audio/1-2_tracking_setsumei.m4a">
                 <div class="skill-know">
                     <div class="skill-illust" aria-hidden="true">
                         <!-- 虫めがねと葉っぱの絵：AI（Claude）が描いた図形。スライドの絵の「イメージ」だけを借り、木の絵と同じ描き方・同じ色にした -->
@@ -919,6 +921,37 @@
                         <p>スピードを変えるとどうでしょうか。</p>
                         <p>止めると、いかがですか。</p>
                         <p>手以外の身体の部位には、どんなことに気がつきますか？</p>
+                    </div>
+                </div>
+            </template>
+
+            <!-- 第1回④ 気になるものに触れる（slide29「トラッキングエクササイズ２」）。文はスライドの原文のまま
+                 声は第1回④から「お部屋の中にあるもの。」「どなたかの持ち物、」を切ったもの（2026-09-17夜 永田さん聞き比べてOK） -->
+            <template id="skillTpl-1-4" data-kicker="健康法１　トラッキング" data-title="気になるものに触れる" data-audio="audio/1-4_kininarumono.m4a">
+                <div class="skill-know">
+                    <div class="skill-illust" aria-hidden="true">
+                        <!-- 花の枝に触れる指の絵：AI（Claude）が描いた図形。スライドの写真の「イメージ」だけを借り、木の絵と同じ描き方・同じ色 -->
+                        <svg viewBox="0 0 240 150" xmlns="http://www.w3.org/2000/svg">
+                            <ellipse cx="120" cy="136" rx="80" ry="9" fill="#E6E0D3"/>
+                            <path d="M40 120 C 90 100, 150 64, 204 22" stroke="#9C7F60" stroke-width="6" fill="none" stroke-linecap="round"/>
+                            <path d="M120 80 C 128 64, 140 58, 152 56" stroke="#A48A6C" stroke-width="4" fill="none" stroke-linecap="round"/>
+                            <path d="M84 104 C 80 88, 70 80, 58 76" stroke="#A48A6C" stroke-width="4" fill="none" stroke-linecap="round"/>
+                            <circle cx="154" cy="54" r="9" fill="#F3EFE7" stroke="#C3D2BD" stroke-width="3"/>
+                            <circle cx="56" cy="74" r="8" fill="#F3EFE7" stroke="#C3D2BD" stroke-width="3"/>
+                            <circle cx="198" cy="28" r="7" fill="#F3EFE7" stroke="#C3D2BD" stroke-width="3"/>
+                            <path d="M176 118 L 158 70" stroke="#E9D3BC" stroke-width="13" stroke-linecap="round"/>
+                            <ellipse cx="184" cy="124" rx="22" ry="17" fill="#E9D3BC" transform="rotate(-25 184 124)"/>
+                            <path d="M166 124 L 154 110" stroke="#DFC5AA" stroke-width="11" stroke-linecap="round"/>
+                            <path d="M184 108 C 194 106, 200 112, 198 120 M190 122 C 198 122, 202 128, 198 134" stroke="#DFC5AA" stroke-width="3" fill="none" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <div class="skill-intro">
+                        <p>今、あなたの周りにある、何か関心があるものに触れてみてください。</p>
+                        <p>そうすると、どんなことに気がつきますか。</p>
+                        <p>硬い？柔らかい？</p>
+                        <p>冷たい？温かい？</p>
+                        <p>あなたにはどんなことが起こっていますか。</p>
+                        <p>良い感じ？マシ？悪くない？嫌な感じ？どちらでもない？</p>
                     </div>
                 </div>
             </template>
