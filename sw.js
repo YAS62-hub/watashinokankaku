@@ -79,15 +79,40 @@ self.addEventListener('push', function(event) {
 // === 通知がタップされた時の処理 ===
 self.addEventListener('notificationclick', function(event) {
     event.notification.close();
-    // 通知をタップしたら、いつでも必ずアプリを開く。
+
+    // 狙いは 2026-09-10 のご判断のまま「通知をタップしたら、いつでも必ずアプリを開く」。
+    // 変えたのは、その狙いに届くまでの道を2本にしたこと。
     //
-    // 2026-08-26 に「すでに開いている窓があれば、それを前に出す（focus）」処理を
-    // 先に試す形へ変えた（B-3）。狙いは「タップのたびに窓が増える」のを防ぐこと。
-    // しかし利用者は全員 iPhone のホーム画面アプリで、窓は1つしか存在しないため、
-    // 「窓が増える」問題はそもそも起きない。一方で、前に出せなかったときに
-    // 何も起きない道だけが残っていた。
-    // 2026-09-10、永田さんのご判断で、単純に必ず開く形へ戻した。
-    event.waitUntil(
-        clients.openWindow('/')
-    );
+    //   〜2026-08-26   前に出す（focus）だけ  … 前に出せないと、行き先が無い
+    //   2026-09-10〜   新しく開く（openWindow）だけ … 失敗すると、行き先が無い
+    //   2026-09-16〜   前に出す → だめなら新しく開く … 行き止まりを両方ふさぐ
+    //
+    // ★iPhone では、アプリが後ろで動いたままのとき openWindow が失敗することがあり、
+    //   逆にアプリを終了させたあとは、前に出す相手（窓）が無い。
+    //   どちらの場面でも、どこかへ必ずたどり着くようにしている。
+    const targetUrl = (event.notification.data && event.notification.data.url) || '/';
+
+    event.waitUntil((async () => {
+        // 道その1：すでに開いている窓があれば、それを前に出す
+        try {
+            const windows = await clients.matchAll({ type: 'window', includeUncontrolled: true });
+            for (const client of windows) {
+                if ('focus' in client) {
+                    const focused = await client.focus();
+                    if (focused) return focused;
+                }
+            }
+        } catch (e) {
+            // 前に出せなかった。下の「道その2」へ進む（ここで終わらせない）
+        }
+
+        // 道その2：窓が無い／前に出せなかったときは、新しく開く
+        if (clients.openWindow) {
+            try {
+                return await clients.openWindow(targetUrl);
+            } catch (e) {
+                // ここまで来たら、これ以上できることは無い
+            }
+        }
+    })());
 });
