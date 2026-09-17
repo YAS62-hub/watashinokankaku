@@ -617,16 +617,37 @@
                 </div>
             </section>
 
-            <!-- 健康法の番号は、録音の声と同じ（第1回＝健康法１、第2回＝健康法３） -->
+            <!-- 6つの健康法（第1回 slide21／第4回 slide19 の順と名前）。録音が無いものも、説明だけは並べる（2026-09-17 永田さん） -->
             <section class="skill-list-section">
                 <h3 class="skill-list-head">健康法１　トラッキング</h3>
+                <button type="button" class="skill-list-item" data-open-practice="1-0">トラッキングの説明</button>
                 <button type="button" class="skill-list-item" data-open-practice="1-3">手を合わせる</button>
+            </section>
+
+            <section class="skill-list-section">
+                <h3 class="skill-list-head">健康法２　リソーシング</h3>
+                <button type="button" class="skill-list-item" data-open-practice="2-0">リソーシングの説明</button>
             </section>
 
             <section class="skill-list-section">
                 <h3 class="skill-list-head">健康法３　グラウンディング</h3>
                 <button type="button" class="skill-list-item" data-open-practice="2-1">グラウンディングの説明</button>
                 <button type="button" class="skill-list-item" data-open-practice="2-4">気になる木になる<wbr>グラウンディング</button>
+            </section>
+
+            <section class="skill-list-section">
+                <h3 class="skill-list-head">健康法４　ジェスチャリング</h3>
+                <button type="button" class="skill-list-item" data-open-practice="4-0">ジェスチャリングの説明</button>
+            </section>
+
+            <section class="skill-list-section">
+                <h3 class="skill-list-head">健康法５　ヘルプナウ！</h3>
+                <button type="button" class="skill-list-item" data-open-practice="5-0">ヘルプナウ！の説明</button>
+            </section>
+
+            <section class="skill-list-section">
+                <h3 class="skill-list-head">健康法６　シフト&amp;ステイ</h3>
+                <button type="button" class="skill-list-item" data-open-practice="6-0">シフト&amp;ステイの説明</button>
             </section>
         </div>
     </div>
@@ -655,6 +676,117 @@
 
             <!-- ===== 録音ごとの中身。★文はすべてスライドの原文のまま。AIは言葉を足していない =====
                  data-kicker＝健康法の名前（録音の声と同じ番号）／data-title＝題名／data-audio＝録音 -->
+
+            <!-- 健康法１の説明（第4回 slide22）。★声（第1回②）は、切り落とす行を永田さんに確かめていただいてから載せる。いまは文だけ -->
+            <template id="skillTpl-1-0" data-kicker="健康法１　トラッキング" data-title="トラッキングの説明">
+                <div class="skill-know">
+                    <div class="skill-illust" aria-hidden="true">
+                        <!-- 虫めがねと葉っぱの絵：AI（Claude）が描いた図形。スライドの絵の「イメージ」だけを借り、木の絵と同じ描き方・同じ色にした -->
+                        <svg viewBox="0 0 240 150" xmlns="http://www.w3.org/2000/svg">
+                            <ellipse cx="120" cy="136" rx="80" ry="9" fill="#E6E0D3"/>
+                            <path d="M146 98 L 178 128" stroke="#A48A6C" stroke-width="12" stroke-linecap="round"/>
+                            <circle cx="118" cy="70" r="38" fill="#F3EFE7" stroke="#9C7F60" stroke-width="8"/>
+                            <path d="M104 84 C 100 66, 112 54, 132 52 C 134 72, 122 86, 104 84 Z" fill="#A9BCA3"/>
+                            <path d="M106 82 L 124 62" stroke="#8FA588" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <div class="skill-intro">
+                        <p class="skill-lead">身体に気づく</p>
+                        <p>トラッキングは、このグループでお伝えする健康法の基本です。</p>
+                        <p>今ここのからだの感覚を観察し、あなたの神経系の状態に気づくことです。</p>
+                    </div>
+                </div>
+            </template>
+            <!-- 健康法２の説明（第4回 slide23）。録音なし -->
+            <template id="skillTpl-2-0" data-kicker="健康法２　リソーシング" data-title="リソーシングの説明">
+                <div class="skill-know">
+                    <div class="skill-illust" aria-hidden="true">
+                        <!-- 2つのハートの絵：AI（Claude）が描いた図形。スライドの絵の「イメージ」だけを借り、木の絵と同じ描き方・同じ色にした -->
+                        <svg viewBox="0 0 240 150" xmlns="http://www.w3.org/2000/svg">
+                            <ellipse cx="120" cy="136" rx="80" ry="9" fill="#E6E0D3"/>
+                            <path d="M104 124 C 62 96, 52 62, 76 48 C 92 40, 102 50, 104 58 C 106 50, 116 40, 132 48 C 156 62, 146 96, 104 124 Z" fill="#E8C9BA"/>
+                            <path d="M166 118 C 144 104, 138 86, 151 78 C 159 74, 165 79, 166 83 C 167 79, 173 74, 181 78 C 194 86, 188 104, 166 118 Z" fill="#EFD8CC"/>
+                            <circle cx="52" cy="40" r="4" fill="#C3D2BD"/>
+                            <circle cx="196" cy="58" r="5" fill="#C3D2BD"/>
+                        </svg>
+                    </div>
+                    <div class="skill-intro">
+                        <p class="skill-lead">リソース（宝、資源）に気づく。</p>
+                        <p>あなたの気分が良くなるもの、励ましになるもの、安らぎになるもの、力を与えてくれるもの、困難を乗り越えるのを助けてくれるもの、好きなもの、なんでも構いません。</p>
+                        <p>思い出、物、人、動物、無機物、場所、あなたの気持ち、取り組んでいること、なんでも構いません。</p>
+                    </div>
+                </div>
+            </template>
+            <!-- 健康法４の説明（第4回 slide25）。録音なし -->
+            <template id="skillTpl-4-0" data-kicker="健康法４　ジェスチャリング" data-title="ジェスチャリングの説明">
+                <div class="skill-know">
+                    <div class="skill-illust" aria-hidden="true">
+                        <!-- 自分を抱きしめるしぐさの絵：AI（Claude）が描いた図形。スライドの絵の「イメージ」だけを借り、木の絵と同じ描き方・同じ色にした -->
+                        <svg viewBox="0 0 240 150" xmlns="http://www.w3.org/2000/svg">
+                            <ellipse cx="120" cy="136" rx="72" ry="9" fill="#E6E0D3"/>
+                            <path d="M84 134 C 84 96, 96 74, 120 74 C 144 74, 156 96, 156 134 Z" fill="#A9BCA3"/>
+                            <circle cx="120" cy="46" r="24" fill="#E9D3BC"/>
+                            <path d="M108 48 Q 112 52, 116 48 M124 48 Q 128 52, 132 48" stroke="#9C7F60" stroke-width="2" fill="none" stroke-linecap="round"/>
+                            <path d="M92 92 C 108 100, 130 108, 146 112 M148 92 C 132 100, 110 108, 94 112" stroke="#DFC5AA" stroke-width="11" fill="none" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <div class="skill-intro">
+                        <p class="skill-lead">しぐさに気づく</p>
+                        <p>心の状態と、身体の動き、姿勢、しぐさは関連します。</p>
+                        <p>あなたが大丈夫ゾーンに戻るのに役立つしぐさは、どんなものがあるでしょうか。</p>
+                        <p>気持ちが落ち着くしぐさ、気持ちが焦るしぐさ、緊張につながるしぐさ、自信につながるしぐさ、喜びと関連するしぐさ…。</p>
+                    </div>
+                </div>
+            </template>
+            <!-- 健康法５の説明（第4回 slide26）。録音なし -->
+            <template id="skillTpl-5-0" data-kicker="健康法５　ヘルプナウ！" data-title="ヘルプナウ！の説明">
+                <div class="skill-know">
+                    <div class="skill-illust" aria-hidden="true">
+                        <!-- 救急箱の絵：AI（Claude）が描いた図形。スライドの絵の「イメージ」だけを借り、木の絵と同じ描き方・同じ色にした -->
+                        <svg viewBox="0 0 240 150" xmlns="http://www.w3.org/2000/svg">
+                            <ellipse cx="120" cy="136" rx="80" ry="9" fill="#E6E0D3"/>
+                            <rect x="96" y="54" width="48" height="16" rx="8" fill="none" stroke="#A48A6C" stroke-width="6"/>
+                            <rect x="72" y="66" width="96" height="66" rx="16" fill="#F3EFE7" stroke="#A48A6C" stroke-width="6"/>
+                            <path d="M120 84 L 120 114 M105 99 L 135 99" stroke="#A9BCA3" stroke-width="12" stroke-linecap="round"/>
+                            <circle cx="50" cy="52" r="5" fill="#C3D2BD"/>
+                            <circle cx="192" cy="46" r="4" fill="#B7C8B1"/>
+                        </svg>
+                    </div>
+                    <div class="skill-intro">
+                        <p class="skill-lead">困った時の緊急お助け術</p>
+                        <p>大丈夫ゾーンから飛び出た時に、「今ここ」「大丈夫ゾーン」に戻ってくるための応急処置です。</p>
+                        <p>効果が感じられるもの、合う、合わないは人それぞれ。ご紹介するもの以外にもオリジナルのアイディア等湧くかもしれません。</p>
+                        <p>これまでの健康法そのものが、緊急お助け術になることも。</p>
+                    </div>
+                </div>
+            </template>
+            <!-- 健康法６の説明（第4回 slide28）。録音なし -->
+            <template id="skillTpl-6-0" data-kicker="健康法６　シフト&amp;ステイ" data-title="シフト&amp;ステイの説明">
+                <div class="skill-know">
+                    <div class="skill-illust" aria-hidden="true">
+                        <!-- しんどい顔から、ほっとした顔への絵：AI（Claude）が描いた図形。スライドの絵の「イメージ」だけを借り、木の絵と同じ描き方・同じ色にした -->
+                        <svg viewBox="0 0 240 150" xmlns="http://www.w3.org/2000/svg">
+                            <ellipse cx="120" cy="136" rx="92" ry="9" fill="#E6E0D3"/>
+                            <circle cx="62" cy="84" r="28" fill="#DCD6CD"/>
+                            <path d="M50 78 L 58 78 M66 78 L 74 78 M48 96 Q 53 91, 58 96 Q 63 101, 68 96 Q 73 91, 78 96" stroke="#8E8578" stroke-width="3" fill="none" stroke-linecap="round"/>
+                            <path d="M96 64 C 110 46, 130 46, 144 64" stroke="#A48A6C" stroke-width="5" fill="none" stroke-linecap="round"/>
+                            <path d="M136 60 L 145 66 L 146 55" stroke="#A48A6C" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                            <circle cx="178" cy="84" r="28" fill="#EAD9A8"/>
+                            <circle cx="168" cy="80" r="3" fill="#8E8578"/>
+                            <circle cx="188" cy="80" r="3" fill="#8E8578"/>
+                            <path d="M166 92 Q 178 104, 190 92" stroke="#8E8578" stroke-width="3" fill="none" stroke-linecap="round"/>
+                            <circle cx="160" cy="94" r="5" fill="#E8C9BA"/>
+                            <circle cx="196" cy="94" r="5" fill="#E8C9BA"/>
+                        </svg>
+                    </div>
+                    <div class="skill-intro">
+                        <p class="skill-lead">「マシ」に気づいてとどまる</p>
+                        <p>心地よくない感覚に気づいたら、「心地よい感覚」「普通の感覚」「マシ」な感覚に注意を切り替えて、そこにとどまってみること。</p>
+                        <p>人は「不快」の感覚の方に気づきやすいものとされます。</p>
+                        <p>ここまでご紹介した健康法などを使って、意図的に「マシ」にとどまりましょう。</p>
+                    </div>
+                </div>
+            </template>
 
             <!-- 第2回① グラウンディングの説明（slide25）。練習の流れが無いので「続きを読む」も無い -->
             <template id="skillTpl-2-1" data-kicker="健康法３　グラウンディング" data-title="グラウンディングの説明" data-audio="audio/2-1_grounding_setsumei.m4a">

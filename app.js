@@ -3365,6 +3365,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const kicker = document.getElementById('skillPracticeKicker');
         const title = document.getElementById('skillPracticeTitle');
         const protoBar = document.getElementById('skillProtoBar');
+        const player = modal.querySelector('.skill-player');
         let currentSkill = null;
         function showSkill(id) {
             const tpl = document.getElementById('skillTpl-' + id);
@@ -3377,7 +3378,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 audio.removeAttribute('src');
                 audio.load();
                 loadState = 'idle';
-                audio.dataset.src = tpl.dataset.audio;
+                audio.dataset.src = tpl.dataset.audio || '';
+                // 録音がまだ無い説明は、再生のところを出さない
+                player.hidden = !tpl.dataset.audio;
                 kicker.textContent = tpl.dataset.kicker;
                 title.innerHTML = tpl.dataset.title; // 自分で書いた固定の文だけ（<wbr> を効かせるため）
                 body.replaceChildren(tpl.content.cloneNode(true));
@@ -3395,8 +3398,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 listModal.classList.remove('active');
                 modal.classList.add('active');
                 modal.querySelector('.modal-content').scrollTop = 0;
-                render();
-                loadAudio();
+                if (audio.dataset.src) {
+                    render();
+                    loadAudio();
+                }
             });
         });
 
