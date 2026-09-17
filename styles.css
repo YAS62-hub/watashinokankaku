@@ -1671,26 +1671,47 @@ input:checked + .toggle-slider::before {
     height: auto;
     margin: 0 auto 10px;
 }
-/* 見本Dでは木の絵を小さくし、開いた直後の画面に「お約束＋手順1＋続きを読む」が入るようにする */
-.skill-know[data-pattern="D"] .skill-illust svg { max-width: 120px; margin-bottom: 6px; }
-/* 置き場所2（木の絵の代わり）のときは、絵を出さない */
-.skill-know.is-promise-inside .skill-illust { display: none; }
+/* 【試作・skill-test ブランチ】スキルの一覧（お約束 → 健康法） */
+.skill-list-section { margin-bottom: 22px; }
+.skill-list-section:last-child { margin-bottom: 0; }
+.modal-content h3.skill-list-head {
+    font-size: 1rem;
+    text-align: left;
+    margin: 0 4px 10px;
+}
+.skill-list-item {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 16px 20px;
+    background-color: #FFFFFF;
+    border: 1px solid rgba(0,0,0,0.03);
+    border-radius: 20px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+    color: var(--text-color);
+    font-family: inherit;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    word-break: keep-all;
+    overflow-wrap: anywhere;
+    cursor: pointer;
+}
 
-/* お約束の4行。★読まなくても目に入るくらいの、静かな置き方。見出しは付けない（言葉を足さない） */
+/* お約束の4行。★読まなくても目に入るくらいの、静かな置き方 */
 .skill-promise {
-    border-left: 3px solid var(--accent);
-    padding: 2px 0 2px 12px;
-    margin: 0 4px 16px;
+    background-color: #FFFFFF;
+    border-radius: 20px;
+    padding: 14px 18px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+    border: 1px solid rgba(0,0,0,0.03);
 }
 .skill-promise p {
     word-break: keep-all;   /* 「休憩するこ／と」のような途中の折り返しを避け、読点の位置で折り返す */
     overflow-wrap: anywhere;
-    font-size: 0.8rem;
-    line-height: 1.7;
-    color: var(--text-light);
+    font-size: 0.9rem;
+    line-height: 1.8;
+    color: var(--text-color);
 }
-.skill-know .skill-promise { margin: 0 0 14px; }
-.skill-promise[data-place="3"] { margin: 16px 4px 0; }
 
 .skill-intro p {
     font-size: 0.9rem;

@@ -3210,6 +3210,7 @@ document.addEventListener('DOMContentLoaded', () => {
         addResourceModal:   'closeAddResourceModal',
         editRecordModal:    'closeEditModal',
         skillPracticeModal: 'closeSkillPractice',
+        skillListModal:     'closeSkillList',
         tutorialModal:      'closeTutorial',        // 「あとで見る」
         settingsModal:      'closeSettings'
     };
@@ -3338,18 +3339,39 @@ document.addEventListener('DOMContentLoaded', () => {
             renderPosition();
         }
 
+        // 入口を押すと、まず一覧（お約束＋健康法）が開く。練習へは必ずこの一覧を通る
+        const listModal = document.getElementById('skillListModal');
+        const closeListBtn = document.getElementById('closeSkillList');
         openBtn.addEventListener('click', () => {
-            modal.classList.add('active');
+            listModal.classList.add('active');
             document.body.classList.add('modal-open');
-            render();
-            loadAudio();
+        });
+        function closeSkillList() {
+            listModal.classList.remove('active');
+            document.body.classList.remove('modal-open');
+        }
+        closeListBtn.addEventListener('click', closeSkillList);
+        listModal.addEventListener('click', (e) => {
+            if (e.target === listModal) closeSkillList();
+        });
+
+        // 一覧から練習を開くときは、一覧を隠して入れ替える（箱を重ねると、ぼかしが二重になるため）
+        listModal.querySelectorAll('[data-open-practice]').forEach(item => {
+            item.addEventListener('click', () => {
+                listModal.classList.remove('active');
+                modal.classList.add('active');
+                modal.querySelector('.modal-content').scrollTop = 0;
+                render();
+                loadAudio();
+            });
         });
 
         // 閉じたら声も止める（閉じたのに声だけ続くと、止め方が分からなくなる）
+        // 練習を閉じると、一覧にもどる（一覧を閉じるとリソース箱にもどる）
         function closeSkillPractice() {
             audio.pause();
             modal.classList.remove('active');
-            document.body.classList.remove('modal-open');
+            listModal.classList.add('active');
         }
         closeBtn.addEventListener('click', closeSkillPractice);
         modal.addEventListener('click', (e) => {
@@ -3429,30 +3451,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 modal.querySelectorAll('.skill-proto-chip[data-pattern]').forEach(c => c.classList.toggle('is-on', c === chip));
             });
         });
-        // ★試作専用：お約束の4行の置き場所 1/2/3 の切りかえ（同じ要素を動かすだけ。文は変えない）
-        const promise = document.getElementById('skillPromise');
-        const title = document.getElementById('skillPracticeTitle');
-        const illust = know.querySelector('.skill-illust');
-        const player = modal.querySelector('.skill-player');
-        function placePromise(pos) {
-            if (pos === '2') {
-                know.insertBefore(promise, illust);
-            } else if (pos === '3') {
-                player.parentNode.insertBefore(promise, player);
-            } else {
-                title.after(promise);
-            }
-            promise.dataset.place = pos;
-            know.classList.toggle('is-promise-inside', pos === '2');
-        }
-        modal.querySelectorAll('.skill-proto-chip[data-promise]').forEach(chip => {
-            chip.addEventListener('click', () => {
-                placePromise(chip.dataset.promise);
-                modal.querySelectorAll('.skill-proto-chip[data-promise]').forEach(c => c.classList.toggle('is-on', c === chip));
-            });
-        });
-        placePromise('1');
-
         moreBtn.addEventListener('click', () => {
             const expanded = know.classList.toggle('is-expanded');
             moreBtn.textContent = expanded ? 'とじる' : '続きを読む';

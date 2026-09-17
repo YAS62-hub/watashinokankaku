@@ -595,6 +595,35 @@
         </div>
     </div>
     
+    <!-- 【試作・skill-test ブランチ】スキルの一覧（入口を押すと、まずここが開く）
+         ★組み立ては永田さんのイメージ（2026-09-17）：お約束 → 健康法１ → 健康法２ …（録音・講座と同じ順）
+         ★お約束は各練習の画面には置かず、ここに置く。練習へは必ずこの一覧を通るので、4行が毎回目に入る
+           （★一覧を通らずに練習を直接開く道を作るときは、4行を見ないまま始まることになる。そのとき考え直す）
+         ★「詳しく見る」は中身が未決定なので、まだ置かない
+         ★いまは録音が載っている「気になる木になる」だけを並べている -->
+    <div id="skillListModal" class="modal">
+        <div class="modal-content skill-practice-content">
+            <button type="button" class="close-button" id="closeSkillList" aria-label="一覧を閉じる">×</button>
+            <p class="skill-kicker">声の案内で練習する</p>
+
+            <!-- お約束の4行（実装予定.md A12。2026-09-17 永田さん確定の文・この順）。読まないと進めない形にはしない -->
+            <section class="skill-list-section">
+                <h3 class="skill-list-head">お約束</h3>
+                <div class="skill-promise">
+                    <p>不快になったら、そっと手放して、休憩することも大切です。</p>
+                    <p>いつでもやめられます。やらないことも、選べます。</p>
+                    <p>ガイドのとおりでなくて、かまいません。</p>
+                    <p>気づかない時は、それも大切な気づきです。</p>
+                </div>
+            </section>
+
+            <section class="skill-list-section">
+                <h3 class="skill-list-head">健康法２　グラウンディング</h3>
+                <button type="button" class="skill-list-item" data-open-practice>気になる木になる<wbr>グラウンディング</button>
+            </section>
+        </div>
+    </div>
+
     <!-- 【試作・skill-test ブランチ】スキルの実践（声の案内）
          ①知る（見る）→ ②やる（聴く）の2段。2026-09-11 永田さんの構想（申し送り項目14）
          ★「知る」に出す文章／再生中に画面に出すもの は、どちらも未決定（臨床判断・永田さんに伺う）
@@ -609,25 +638,10 @@
                 <button type="button" class="skill-proto-chip" data-pattern="B">B</button>
                 <button type="button" class="skill-proto-chip" data-pattern="C">C</button>
                 <button type="button" class="skill-proto-chip is-on" data-pattern="D">D</button>
-                <span class="skill-proto-label">お約束</span>
-                <button type="button" class="skill-proto-chip is-on" data-promise="1">1</button>
-                <button type="button" class="skill-proto-chip" data-promise="2">2</button>
-                <button type="button" class="skill-proto-chip" data-promise="3">3</button>
             </div>
 
             <p class="skill-kicker">声の案内で練習する</p>
             <h3 id="skillPracticeTitle" class="skill-title">気になる木になる<wbr>グラウンディング</h3>
-
-            <!-- お約束の4行（実装予定.md A12。2026-09-17 永田さん確定の文・この順）。
-                 ★読まないと進めない形にはしない。「詳しく見る」の中身は未決定なので、まだ置かない
-                 ★試作：置き場所を見比べる。1＝題名のすぐ下／2＝木の絵の代わり／3＝再生のところのすぐ上
-                   （切りかえは app.js の setupSkillPractice でこの要素を動かしている） -->
-            <div class="skill-promise" id="skillPromise">
-                <p>不快になったら、そっと手放して、休憩することも大切です。</p>
-                <p>いつでもやめられます。やらないことも、選べます。</p>
-                <p>ガイドのとおりでなくて、かまいません。</p>
-                <p>気づかない時は、それも大切な気づきです。</p>
-            </div>
 
             <!-- 「知る」の欄。★文はすべてスライド（第2回リバランスグループ slide29〜31）の原文のまま。AIは言葉を足していない
                  ★見本A：slide29の3行だけ／B：練習の流れ1〜6も全部出す／C：流れはたたんでおき、見たい人だけ開く
