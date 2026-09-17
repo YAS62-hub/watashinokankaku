@@ -3429,6 +3429,30 @@ document.addEventListener('DOMContentLoaded', () => {
                 modal.querySelectorAll('.skill-proto-chip[data-pattern]').forEach(c => c.classList.toggle('is-on', c === chip));
             });
         });
+        // ★試作専用：お約束の4行の置き場所 1/2/3 の切りかえ（同じ要素を動かすだけ。文は変えない）
+        const promise = document.getElementById('skillPromise');
+        const title = document.getElementById('skillPracticeTitle');
+        const illust = know.querySelector('.skill-illust');
+        const player = modal.querySelector('.skill-player');
+        function placePromise(pos) {
+            if (pos === '2') {
+                know.insertBefore(promise, illust);
+            } else if (pos === '3') {
+                player.parentNode.insertBefore(promise, player);
+            } else {
+                title.after(promise);
+            }
+            promise.dataset.place = pos;
+            know.classList.toggle('is-promise-inside', pos === '2');
+        }
+        modal.querySelectorAll('.skill-proto-chip[data-promise]').forEach(chip => {
+            chip.addEventListener('click', () => {
+                placePromise(chip.dataset.promise);
+                modal.querySelectorAll('.skill-proto-chip[data-promise]').forEach(c => c.classList.toggle('is-on', c === chip));
+            });
+        });
+        placePromise('1');
+
         moreBtn.addEventListener('click', () => {
             const expanded = know.classList.toggle('is-expanded');
             moreBtn.textContent = expanded ? 'とじる' : '続きを読む';

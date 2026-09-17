@@ -1628,9 +1628,9 @@ input:checked + .toggle-slider::before {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
-    gap: 3px;
+    gap: 2px;
     margin: -12px 34px 14px 0;
-    padding: 6px 8px;
+    padding: 4px 6px;
     border: 1px dashed #DCD6CD;
     border-radius: 12px;
     font-size: 0.7rem;
@@ -1639,9 +1639,9 @@ input:checked + .toggle-slider::before {
 .skill-proto-label { margin: 0 2px 0 6px; }
 .skill-proto-label:first-child { margin-left: 0; }
 .skill-proto-chip {
-    min-width: 26px;
-    height: 26px;
-    border-radius: 13px;
+    min-width: 24px;
+    height: 24px;
+    border-radius: 12px;
     padding: 0;
     border: 1px solid #DCD6CD;
     background: transparent;
@@ -1671,6 +1671,27 @@ input:checked + .toggle-slider::before {
     height: auto;
     margin: 0 auto 10px;
 }
+/* 見本Dでは木の絵を小さくし、開いた直後の画面に「お約束＋手順1＋続きを読む」が入るようにする */
+.skill-know[data-pattern="D"] .skill-illust svg { max-width: 120px; margin-bottom: 6px; }
+/* 置き場所2（木の絵の代わり）のときは、絵を出さない */
+.skill-know.is-promise-inside .skill-illust { display: none; }
+
+/* お約束の4行。★読まなくても目に入るくらいの、静かな置き方。見出しは付けない（言葉を足さない） */
+.skill-promise {
+    border-left: 3px solid var(--accent);
+    padding: 2px 0 2px 12px;
+    margin: 0 4px 16px;
+}
+.skill-promise p {
+    word-break: keep-all;   /* 「休憩するこ／と」のような途中の折り返しを避け、読点の位置で折り返す */
+    overflow-wrap: anywhere;
+    font-size: 0.8rem;
+    line-height: 1.7;
+    color: var(--text-light);
+}
+.skill-know .skill-promise { margin: 0 0 14px; }
+.skill-promise[data-place="3"] { margin: 16px 4px 0; }
+
 .skill-intro p {
     font-size: 0.9rem;
     line-height: 1.8;
