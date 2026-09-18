@@ -1624,39 +1624,6 @@ input:checked + .toggle-slider::before {
 }
 
 /* 試作専用：見本の切りかえ */
-.skill-proto-bar {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 2px;
-    margin: -12px 34px 14px 0;
-    padding: 4px 6px;
-    border: 1px dashed #DCD6CD;
-    border-radius: 12px;
-    font-size: 0.7rem;
-    color: var(--text-light);
-}
-.skill-proto-bar[hidden] { display: none; }
-.skill-proto-label { margin: 0 2px 0 6px; }
-.skill-proto-label:first-child { margin-left: 0; }
-.skill-proto-chip {
-    min-width: 24px;
-    height: 24px;
-    border-radius: 12px;
-    padding: 0;
-    border: 1px solid #DCD6CD;
-    background: transparent;
-    color: var(--text-light);
-    font-family: inherit;
-    font-size: 0.75rem;
-    cursor: pointer;
-}
-.skill-proto-chip.is-on {
-    background: var(--accent);
-    border-color: var(--accent);
-    color: #FFFFFF;
-}
-
 /* 「知る」の欄 */
 .skill-know {
     background-color: #FFFFFF;
@@ -1795,6 +1762,7 @@ input:checked + .toggle-slider::before {
 /* 見本D：最初の数行（手順1の全文＋手順2の出だし）だけ見せ、下は薄く消す。「続きを読む」で全文 */
 .skill-steps-head, .skill-more-btn { display: none; }
 .skill-know[data-pattern="D"] .skill-steps summary { display: none; }
+.skill-know[data-pattern="D"] .skill-illust svg { max-width: 96px; }
 .skill-know[data-pattern="D"] .skill-steps-head {
     display: block;
     font-size: 0.8rem;
@@ -1802,7 +1770,7 @@ input:checked + .toggle-slider::before {
     margin-bottom: 4px;
 }
 .skill-know[data-pattern="D"]:not(.is-expanded) .skill-steps-list {
-    max-height: 10.5em;
+    max-height: 4.5em;
     overflow: hidden;
     -webkit-mask-image: linear-gradient(to bottom, #000 55%, transparent 100%);
     mask-image: linear-gradient(to bottom, #000 55%, transparent 100%);

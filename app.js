@@ -3385,7 +3385,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const body = document.getElementById('skillBody');
         const kicker = document.getElementById('skillPracticeKicker');
         const title = document.getElementById('skillPracticeTitle');
-        const protoBar = document.getElementById('skillProtoBar');
         const player = modal.querySelector('.skill-player');
         let currentSkill = null;
         function showSkill(id) {
@@ -3405,9 +3404,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 kicker.textContent = tpl.dataset.kicker;
                 title.innerHTML = tpl.dataset.title; // 自分で書いた固定の文だけ（<wbr> を効かせるため）
                 body.replaceChildren(tpl.content.cloneNode(true));
-                // ★試作専用の見本の切りかえは、練習の流れがある画面でだけ出す
-                protoBar.hidden = !body.querySelector('.skill-steps');
-                modal.querySelectorAll('.skill-proto-chip[data-pattern]').forEach(c => c.classList.toggle('is-on', c.dataset.pattern === 'D'));
                 currentSkill = id;
             }
             return true;
@@ -3497,21 +3493,6 @@ document.addEventListener('DOMContentLoaded', () => {
         ['play', 'pause', 'ended', 'seeked', 'loadedmetadata', 'durationchange'].forEach(ev => audio.addEventListener(ev, render));
         audio.addEventListener('timeupdate', renderPosition);
 
-        // ★試作専用：見本A/B/C/D の切りかえ（練習の流れがある画面だけ）
-        modal.querySelectorAll('.skill-proto-chip[data-pattern]').forEach(chip => {
-            chip.addEventListener('click', () => {
-                const know = body.querySelector('.skill-know');
-                const steps = body.querySelector('.skill-steps');
-                const moreBtn = body.querySelector('.skill-more-btn');
-                if (!know || !steps || !moreBtn) return;
-                know.dataset.pattern = chip.dataset.pattern;
-                steps.open = chip.dataset.pattern === 'B' || chip.dataset.pattern === 'D';
-                know.classList.remove('is-expanded');
-                moreBtn.textContent = '続きを読む';
-                moreBtn.setAttribute('aria-expanded', 'false');
-                modal.querySelectorAll('.skill-proto-chip[data-pattern]').forEach(c => c.classList.toggle('is-on', c === chip));
-            });
-        });
         body.addEventListener('click', (e) => {
             const moreBtn = e.target.closest('.skill-more-btn');
             if (!moreBtn) return;
