@@ -1720,8 +1720,7 @@ input:checked + .toggle-slider::before {
    ★塊ひとつが1行に入りきらないときは、塊の中でふつうに折り返す（禁則は効いたまま）。
      そのために、塊の中だけ word-break を normal に戻している。
      ここを overflow-wrap:anywhere にすると、また句読点が行頭に来るので入れないこと。 */
-.skill-promise .bn,
-.skill-know .bn {
+.bn {
     display: inline-block;
     word-break: normal;      /* 親の keep-all を、この中では打ち消す */
     overflow-wrap: normal;   /* anywhere にすると禁則が効かず、句読点が行頭に来る */
@@ -1750,7 +1749,6 @@ input:checked + .toggle-slider::before {
     font-size: 0.75rem;
     line-height: 1.9;
     color: var(--text-light);
-    overflow-wrap: anywhere;
 }
 
 /* リソーシングの説明から、リソース箱への一言（2026-09-18） */
