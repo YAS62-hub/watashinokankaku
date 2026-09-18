@@ -3212,6 +3212,7 @@ document.addEventListener('DOMContentLoaded', () => {
         wordPaletteModal:   'closeWordPaletteModal',
         paletteModal:       'closePaletteModal',
         addResourceModal:   'closeAddResourceModal',
+        emergencyModal:     'closeEmergency',
         editRecordModal:    'closeEditModal',
         skillPracticeModal: 'closeSkillPractice',
         skillListModal:     'closeSkillList',
@@ -3259,6 +3260,63 @@ document.addEventListener('DOMContentLoaded', () => {
     // ★「再生中に画面に何を出すか」は未決定。いまは位置のつまみ・時間・▶︎/⏸・15秒もどる/すすむ
     //   （全部の時間と今の位置は 2026-09-17 永田さんのご依頼で出している。
     //    録音で時間を言わないと決めた理由も「音源の時間を見たら明白なので」だった）
+    // === 連絡先（A13）。2026-09-19 永田さん承認・★仮の実装（実物を見てから見直す前提） ===
+    // ★「わたしのお守り自由帳」は「中身は1つ、入口は2つ」（2026-09-18 永田さん決定）。
+    //   いまあるのは入口①（この画面）だけ。入口②（リソース箱）は次に作る。
+    //   中身が1つであることは、同じ localStorage キーを読むことで保つ
+    (function setupEmergency() {
+        const modal = document.getElementById('emergencyModal');
+        if (!modal) return;
+        const closeBtn = document.getElementById('closeEmergency');
+        const ideaToggle = document.getElementById('jiyuchoIdeaToggle');
+        const idea = document.getElementById('jiyuchoIdea');
+        const text = document.getElementById('jiyuchoText');
+        const saved = document.getElementById('jiyuchoSaved');
+        const KEY = 'seAppOmamoriJiyucho';
+
+        // 開く。★健康法５の先頭のボタンは template から写されるので、押されたときに拾う
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('[data-open-emergency]')) return;
+            try { text.value = localStorage.getItem(KEY) || ''; } catch (err) { /* 読めないときは空のまま */ }
+            saved.textContent = '';
+            modal.classList.add('active');
+            document.body.classList.add('modal-open');
+            modal.querySelector('.modal-content').scrollTop = 0;
+        });
+
+        function closeEmergency() {
+            modal.classList.remove('active');
+            // ★下に健康法５の画面がまだ開いている。ほかに開いている箱が無いときだけスクロール止めを外す
+            if (!document.querySelector('.modal.active')) {
+                document.body.classList.remove('modal-open');
+            }
+        }
+        closeBtn.addEventListener('click', closeEmergency);
+        modal.addEventListener('click', (e) => { if (e.target === modal) closeEmergency(); });
+
+        // 「この欄を活用するアイディア」の開け閉め（お約束の「詳しく見る ▼」と同じ開き方）
+        ideaToggle.addEventListener('click', () => {
+            const open = idea.hidden;
+            idea.hidden = !open;
+            ideaToggle.textContent = open ? 'とじる ▲' : 'この欄を活用するアイディア ▼';
+            ideaToggle.setAttribute('aria-expanded', String(open));
+        });
+
+        // ★保存ボタンを押させない。書いたそばから残す（しんどいときに手順を増やさない）
+        let timer = null;
+        text.addEventListener('input', () => {
+            clearTimeout(timer);
+            timer = setTimeout(() => {
+                try {
+                    localStorage.setItem(KEY, text.value);
+                    saved.textContent = '書いたものは、この端末に残ります';
+                } catch (err) {
+                    saved.textContent = '保存できませんでした。端末の空きが足りないかもしれません';
+                }
+            }, 400);
+        });
+    })();
+
     (function setupSkillPractice() {
         const modal = document.getElementById('skillPracticeModal');
         const openBtn = document.getElementById('openSkillPracticeBtn');

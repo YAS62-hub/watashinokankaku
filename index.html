@@ -908,6 +908,14 @@
             <!-- 健康法５の説明（第4回 slide26）。録音なし -->
             <template id="skillTpl-5-0" data-kicker="健康法５　ヘルプ・ナウ！" data-title="ヘルプ・ナウ！の説明">
                 <div class="skill-know">
+                    <!-- 命に関わるときの案内（2026-09-19 永田さん承認・★仮の実装。実物を見てから見直す）
+                         ★押さなくても目に入る位置に置く。iChill も Help Now! の画面の先頭に、
+                           赤い大文字で「命に関わるときは911へ」を置いている（2026-09-19 永田さんのスクリーンショットで確認）
+                         ★詳しい連絡先は、押した人にだけ開く。ふだん 119・110 が画面に居座らないように -->
+                    <div class="emergency-lead">
+                        <p class="emergency-lead-text">命に関わるときは、119（救急）・110（警察）へ。</p>
+                        <button type="button" class="emergency-lead-btn" data-open-emergency>連絡先を見る ▸</button>
+                    </div>
                     <div class="skill-illust" aria-hidden="true">
                         <!-- 救急箱の絵：AI（Claude）が描いた図形。スライドの絵の「イメージ」だけを借り、木の絵と同じ描き方・同じ色にした -->
                         <svg viewBox="0 0 240 150" xmlns="http://www.w3.org/2000/svg">
@@ -1294,6 +1302,61 @@
             <p class="skill-credit">ここでご紹介している内容は、コレモ（CRM）の資料（Trauma Resource Institute／Center for HEART）を参考に、アプリの作成者がまとめたものです。</p>
 
             <audio id="skillAudio" preload="none"></audio>
+        </div>
+    </div>
+
+    <!-- 連絡先（A13）。2026-09-19 永田さん承認・★仮の実装（実物を見てから見直す前提）
+         3段の形は2026-09-17夜の永田さん決定。番号・受付時間は2026-09-19に公式で確かめ直した
+           #いのちSOS／よりそいホットライン＝厚労省「まもろうよ こころ」
+           #8891／#8008＝内閣府男女共同参画局
+         ★電話番号は、いまは押しても電話がかからない「ただの文字」にしてある（誤って119にかかると害が大きいため）。
+           押せるようにもできる（未決定・永田さんに相談中） -->
+    <div id="emergencyModal" class="modal" style="z-index: 1050;">
+        <div class="modal-content">
+            <button type="button" class="close-button" id="closeEmergency" aria-label="連絡先を閉じる">×</button>
+            <h3>連絡先</h3>
+
+            <!-- 1段目：命に関わるとき -->
+            <section class="emg-section">
+                <h4 class="emg-head">命に関わるとき</h4>
+                <ul class="emg-list">
+                    <li><span class="emg-name">救急・消防</span><span class="emg-num">119</span></li>
+                    <li><span class="emg-name">警察</span><span class="emg-num">110</span></li>
+                    <li><span class="emg-name">#いのちSOS<span class="emg-note">24時間365日・無料</span></span><span class="emg-num">0120-061-338</span></li>
+                    <li><span class="emg-name">つながらないときは<br>よりそいホットライン<span class="emg-note">24時間・無料</span></span><span class="emg-num">0120-279-338</span></li>
+                </ul>
+                <!-- 添える一言。2026-09-17夜 永田さん決定（案1）。文は決定どおり -->
+                <p class="emg-tip"><span class="bn">#いのちSOSとよりそいホットラインは、</span><span class="bn">回線に限りがあるため、</span><span class="bn">つながりにくいことがあります。</span><br><span class="bn">命の危険が迫っているときは、</span><span class="bn">119（救急）・110（警察）へ。</span><br><span class="bn">かかりつけの病院やクリニックがあれば、</span><span class="bn">その名前を伝えると、</span><span class="bn">救急や警察の人が、</span><span class="bn">行き先を考える手がかりになります。</span></p>
+            </section>
+
+            <!-- 2段目：こんなときの相談先 -->
+            <section class="emg-section">
+                <h4 class="emg-head">こんなときの相談先</h4>
+                <ul class="emg-list">
+                    <li><span class="emg-name">性暴力のこと<span class="emg-note">通話料無料・受付時間は地域によって異なります</span></span><span class="emg-num">#8891</span></li>
+                    <li><span class="emg-name">DVのこと<span class="emg-note">通話料がかかります・受付時間は相談機関によって異なります</span></span><span class="emg-num">#8008</span></li>
+                </ul>
+                <p class="emg-tip"><span class="bn">ほかの相談先は、</span><span class="bn">厚生労働省「まもろうよ こころ」にまとまっています。</span></p>
+            </section>
+
+            <!-- 3段目：わたしのお守り自由帳。★中身は1つ、入口は2つ（もう1つはリソース箱・次に作る） -->
+            <section class="emg-section">
+                <h4 class="emg-head">わたしのお守り自由帳</h4>
+                <button type="button" id="jiyuchoIdeaToggle" class="emg-toggle" aria-expanded="false">この欄を活用するアイディア ▼</button>
+                <div id="jiyuchoIdea" class="emg-idea" hidden>
+                    <p>ここは、自由にあなたが何か書き残しておくこともできるメモ欄です。</p>
+                    <p>例えば、</p>
+                    <ul>
+                        <li>どなたかの連絡先等をメモする</li>
+                        <li>リソース箱を見てね、ヘルプ・ナウ！をやろう、と、自分へのメモ</li>
+                        <li>あなたを勇気づける言葉、心がけ、座右の銘</li>
+                    </ul>
+                </div>
+                <!-- ★この2行は、たたんでいるときもいつも見える（2026-09-17深夜 永田さん「ちょうどいい加減」） -->
+                <p class="emg-always"><span class="bn">ご自由にお使いください。</span><br><span class="bn">使わない、</span><span class="bn">というのも大切な選択肢です。</span></p>
+                <textarea id="jiyuchoText" class="emg-textarea" aria-label="わたしのお守り自由帳"></textarea>
+                <p id="jiyuchoSaved" class="emg-saved" aria-live="polite"></p>
+            </section>
         </div>
     </div>
 

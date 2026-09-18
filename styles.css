@@ -2020,3 +2020,99 @@ input:checked + .toggle-slider::before {
     overflow-wrap: anywhere;   /* 読点が行頭に来ないよう、keep-all は付けない */
 }
 .skill-topic-list li::marker { color: var(--text-light); }
+
+/* ===== 連絡先（A13）。2026-09-19 永田さん承認・★仮の実装 =====
+   色は、このアプリが「ハイゾーン」に使っている濃いオレンジ茶（--btn-high-text）。
+   ★赤にしなかった理由＝アースカラーの画面から浮くため。ただし iChill は赤の大文字で、
+     「見た目の統一より命を優先する」判断をしている。実物を並べて見てから決める（未決定） */
+.emergency-lead {
+    border: 2px solid var(--btn-high-text);
+    background-color: var(--btn-high-bg);
+    border-radius: 16px;
+    padding: 14px 16px;
+    margin-bottom: 20px;
+}
+.emergency-lead-text {
+    color: var(--btn-high-text);
+    font-size: 0.95rem;
+    font-weight: 500;
+    line-height: 1.7;
+    margin-bottom: 10px;
+}
+.emergency-lead-btn {
+    display: block;
+    width: 100%;
+    background-color: #FFFFFF;
+    border: none;
+    border-radius: 12px;
+    padding: 11px;
+    color: var(--btn-high-text);
+    font-size: 0.9rem;
+    font-weight: 500;
+    font-family: inherit;
+    cursor: pointer;
+}
+
+.emg-section { margin-bottom: 28px; }
+.emg-head {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text-color);
+    margin-bottom: 10px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #E6E0D3;
+}
+.emg-list { list-style: none; margin-bottom: 12px; }
+.emg-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    padding: 10px 2px;
+    border-bottom: 1px solid #F0EDE6;
+}
+.emg-name { font-size: 0.9rem; line-height: 1.5; }
+.emg-note { display: block; font-size: 0.72rem; color: var(--text-light); margin-top: 3px; line-height: 1.5; }
+.emg-num {
+    font-size: 1.05rem;
+    font-weight: 500;
+    color: var(--btn-high-text);
+    white-space: nowrap;
+}
+.emg-tip {
+    font-size: 0.78rem;
+    line-height: 1.9;
+    color: var(--text-light);
+    background-color: #F5F2EC;
+    border-radius: 14px;
+    padding: 12px 14px;
+}
+.emg-toggle {
+    display: block;
+    background: none;
+    border: none;
+    color: var(--text-light);
+    font-size: 0.85rem;
+    font-family: inherit;
+    cursor: pointer;
+    padding: 4px 0;
+    margin-bottom: 4px;
+}
+.emg-idea { font-size: 0.85rem; line-height: 1.9; color: var(--text-light); margin-bottom: 10px; }
+.emg-idea ul { margin: 4px 0 0 1.3em; }
+.emg-always { font-size: 0.85rem; line-height: 1.9; color: var(--text-light); margin-bottom: 10px; }
+.emg-textarea {
+    width: 100%;
+    min-height: 160px;
+    padding: 16px;
+    border-radius: 20px;
+    border: none;
+    background-color: #F1F0EC;
+    color: var(--text-color);
+    font-size: 1rem;
+    line-height: 1.8;
+    resize: none;
+    outline: none;
+    font-family: inherit;
+}
+.emg-saved { font-size: 0.75rem; color: var(--text-light); margin-top: 8px; min-height: 1.3em; }
