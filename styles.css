@@ -1587,22 +1587,7 @@ input:checked + .toggle-slider::before {
     opacity: 0.55;
 }
 
-/* 【試作・skill-test ブランチ】スキルの実践（声の案内） */
-.skill-entry-btn {
-    display: block;
-    width: 100%;
-    margin-bottom: 24px;
-    padding: 16px 20px;
-    background-color: #F8F7F4;
-    border: 1px solid rgba(0,0,0,0.03);
-    border-radius: 20px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.02);
-    color: var(--text-color);
-    font-family: inherit;
-    font-size: 0.95rem;
-    cursor: pointer;
-}
-
+/* 【試作・skill-test ブランチ】スキルの実践（声のガイド） */
 .skill-kicker {
     text-align: center;
     font-size: 0.75rem;

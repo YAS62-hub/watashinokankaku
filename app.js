@@ -507,12 +507,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // === タブ切り替え ===
     navItems.forEach(item => {
         item.addEventListener('click', () => {
+            const targetId = item.getAttribute('data-target');
+            // 【試作・skill-test】data-target が無いもの（健康法）は、画面を切りかえるのではなく
+            // 一覧を開くだけ。だから active も動かさない（閉じたら、いま見ていた画面に戻る）
+            if (!targetId) return;
+
             // タブメニューのactive切り替え
             navItems.forEach(nav => nav.classList.remove('active'));
             item.classList.add('active');
             
-            // コンテンツのactive切り替え
-            const targetId = item.getAttribute('data-target');
             tabs.forEach(tab => {
                 tab.classList.remove('active');
                 if (tab.id === targetId) {

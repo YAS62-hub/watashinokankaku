@@ -74,10 +74,6 @@
                 </div>
             </div>
             
-            <!-- 【試作・skill-test ブランチ】スキルの実践（声の案内）への入口。
-                 ★置き場所は未決定（永田さんに伺う）。仮にリソース箱に置いている -->
-            <button type="button" id="openSkillPracticeBtn" class="skill-entry-btn">健康法のご紹介</button>
-
             <!-- 内部タブ -->
             <div class="inner-tabs">
                 <button class="inner-tab-btn active" data-in-target="photoGalleryTab">📷 写真</button>
@@ -569,8 +565,15 @@
             <span class="nav-icon">🌱</span>
             <span class="nav-label">ホーム</span>
         </button>
+        <!-- 【試作・skill-test ブランチ】健康法のご紹介（2026-09-18 永田さん「4つで採用です」）。
+             ★これはタブではない。押すと一覧が開き、閉じるといま見ていた画面に戻る
+             ★アイコン（🌿・🐾）は相談の途中。決定ではない -->
+        <button class="nav-item" type="button" id="openSkillPracticeBtn">
+            <span class="nav-icon">🌿</span>
+            <span class="nav-label">健康法</span>
+        </button>
         <button class="nav-item" data-target="reflectionTab">
-            <span class="nav-icon">📊</span>
+            <span class="nav-icon">🐾</span>
             <span class="nav-label">振り返り</span>
         </button>
         <button class="nav-item" data-target="resourceTab">
