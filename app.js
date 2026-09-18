@@ -3386,6 +3386,33 @@ document.addEventListener('DOMContentLoaded', () => {
         const kicker = document.getElementById('skillPracticeKicker');
         const title = document.getElementById('skillPracticeTitle');
         const player = modal.querySelector('.skill-player');
+
+        // 日本語の折り返しを、読点・句点のうしろだけに限る（開発の落とし穴メモ 11）
+        // 読点・句点・！・？のうしろで区切った塊を <span class="bn">（inline-block）で包む。
+        // 折り返しは塊と塊のあいだでだけ起きるので、「、」「。」が行頭に来ない。
+        // ★お約束の4行は index.html に直接書いてある（いつも見えるので、実物を見て直せるように）。
+        //   練習の画面は文が多いので、ここで写すときにまとめて包む。
+        function wrapKinsoku(root) {
+            const walk = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+            const targets = [];
+            let node;
+            while ((node = walk.nextNode())) {
+                if (node.nodeValue.trim() && /[、。！？]/.test(node.nodeValue)) targets.push(node);
+            }
+            targets.forEach(textNode => {
+                const parts = textNode.nodeValue.match(/[^、。！？]*[、。！？]|[^、。！？]+/g);
+                if (!parts || parts.length < 2) return;
+                const frag = document.createDocumentFragment();
+                parts.forEach(part => {
+                    const span = document.createElement('span');
+                    span.className = 'bn';
+                    span.textContent = part;
+                    frag.appendChild(span);
+                });
+                textNode.parentNode.replaceChild(frag, textNode);
+            });
+        }
+
         let currentSkill = null;
         function showSkill(id) {
             const tpl = document.getElementById('skillTpl-' + id);
@@ -3404,6 +3431,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 kicker.textContent = tpl.dataset.kicker;
                 title.innerHTML = tpl.dataset.title; // 自分で書いた固定の文だけ（<wbr> を効かせるため）
                 body.replaceChildren(tpl.content.cloneNode(true));
+                wrapKinsoku(body);
                 currentSkill = id;
             }
             return true;

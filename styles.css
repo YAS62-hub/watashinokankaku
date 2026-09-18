@@ -1717,11 +1717,14 @@ input:checked + .toggle-slider::before {
      どこででも切るため、行頭に「、」「。」が来ていた（iPhoneの実機で発生）。
    ★そこで、読点・句点のうしろで区切った塊（.bn）を、それ自体は折り返さない箱にした。
      折り返しは塊と塊のあいだでだけ起きるので、句読点が行頭に来ない。
-   ★塊ひとつが1行に入りきらないときだけ、最後の手段として途中で折り返す
-     （はみ出して読めなくなるより良いため）。 */
-.skill-promise .bn {
+   ★塊ひとつが1行に入りきらないときは、塊の中でふつうに折り返す（禁則は効いたまま）。
+     そのために、塊の中だけ word-break を normal に戻している。
+     ここを overflow-wrap:anywhere にすると、また句読点が行頭に来るので入れないこと。 */
+.skill-promise .bn,
+.skill-know .bn {
     display: inline-block;
-    overflow-wrap: anywhere;
+    word-break: normal;      /* 親の keep-all を、この中では打ち消す */
+    overflow-wrap: normal;   /* anywhere にすると禁則が効かず、句読点が行頭に来る */
 }
 
 /* 説明の画面：スライドの見出し（「接点に気づく」）と、例の行 */
