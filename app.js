@@ -3474,9 +3474,13 @@ document.addEventListener('DOMContentLoaded', () => {
             return true;
         }
 
+        // 一覧を通らずに開いたか（いまはリソース箱の入口だけ）。閉じたときの戻り先を分ける
+        let openedOutsideList = false;
+
         listModal.querySelectorAll('[data-open-practice]').forEach(item => {
             item.addEventListener('click', () => {
                 if (!showSkill(item.dataset.openPractice)) return;
+                openedOutsideList = false;
                 listModal.classList.remove('active');
                 modal.classList.add('active');
                 modal.querySelector('.modal-content').scrollTop = 0;
@@ -3489,10 +3493,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // 閉じたら声も止める（閉じたのに声だけ続くと、止め方が分からなくなる）
         // 練習を閉じると、一覧にもどる（一覧を閉じるとリソース箱にもどる）
+        // リソース箱からの入口（2026-09-19 永田さんのご発案）：健康法２「リソーシングの説明」を
+        // そのまま開く。★お約束の4行（一覧の先頭）は通らない。開いた先の画面が自分で
+        //   「リソースの注意点」を持っており、お約束は「読まないと進めない形にしない」決まりのため
+        //   （実装予定.md A12・2026-09-17 永田さん）
+        const resourceSkillTip = document.getElementById('resourceSkillTip');
+        if (resourceSkillTip) {
+            resourceSkillTip.addEventListener('click', () => {
+                if (!showSkill('2-0')) return;
+                openedOutsideList = true;
+                modal.classList.add('active');
+                document.body.classList.add('modal-open');
+                modal.querySelector('.modal-content').scrollTop = 0;
+            });
+        }
+
         function closeSkillPractice() {
             audio.pause();
             modal.classList.remove('active');
-            listModal.classList.add('active');
+            // 一覧から開いたときは一覧にもどる。リソース箱から開いたときは、そのまま閉じる
+            if (openedOutsideList) {
+                openedOutsideList = false;
+                document.body.classList.remove('modal-open');
+            } else {
+                listModal.classList.add('active');
+            }
         }
         closeBtn.addEventListener('click', closeSkillPractice);
         modal.addEventListener('click', (e) => {

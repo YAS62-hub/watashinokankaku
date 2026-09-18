@@ -1729,6 +1729,23 @@ input:checked + .toggle-slider::before {
 }
 /* リソース箱の脚注：入りきらないリソースについて（2026-09-18）
    ★主役にしない。ギャラリーの下に、静かに置く */
+/* リソース箱から、健康法２「リソーシング」への入口（2026-09-19） */
+.resource-skill-tip {
+    display: block;
+    width: 100%;
+    margin: 28px 0 10px;
+    padding: 12px 14px;
+    border: none;
+    border-radius: 16px;
+    background-color: #F1F0EC;
+    color: var(--text-light);
+    font-size: 0.8rem;
+    line-height: 1.7;
+    text-align: left;
+    font-family: inherit;
+    cursor: pointer;
+}
+
 .resource-footnote {
     margin: 4px 0 90px;     /* 下は＋ボタン（fab）にかからない余白 */
     font-size: 0.75rem;
