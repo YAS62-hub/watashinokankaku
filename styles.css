@@ -1706,11 +1706,22 @@ input:checked + .toggle-slider::before {
     -webkit-tap-highlight-color: transparent;
 }
 .skill-promise p {
-    word-break: keep-all;   /* 「休憩するこ／と」のような途中の折り返しを避け、読点の位置で折り返す */
-    overflow-wrap: anywhere;
     font-size: 0.9rem;
     line-height: 1.8;
     color: var(--text-color);
+}
+
+/* お約束の折り返し（2026-09-18）
+   ★もとは word-break:keep-all + overflow-wrap:anywhere にしていたが、
+     keep-all で日本語がひとつながりの「語」になり、入りきらない分を anywhere が
+     どこででも切るため、行頭に「、」「。」が来ていた（iPhoneの実機で発生）。
+   ★そこで、読点・句点のうしろで区切った塊（.bn）を、それ自体は折り返さない箱にした。
+     折り返しは塊と塊のあいだでだけ起きるので、句読点が行頭に来ない。
+   ★塊ひとつが1行に入りきらないときだけ、最後の手段として途中で折り返す
+     （はみ出して読めなくなるより良いため）。 */
+.skill-promise .bn {
+    display: inline-block;
+    overflow-wrap: anywhere;
 }
 
 /* 説明の画面：スライドの見出し（「接点に気づく」）と、例の行 */
