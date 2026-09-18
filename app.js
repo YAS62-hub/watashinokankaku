@@ -3556,4 +3556,51 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
         }, 3000);
     });
+
+    // ===== 【試作・skill-test】声のガイドを、先に端末へ入れておく =====
+    // ホーム画面に追加して開いた人にだけ、静かに取っておく（2026-09-18 永田さんのご発案・承認済み）。
+    //   ★画面には何も出さない。設定も置かない（非・要求。利用者の身には何も起きないため）
+    //   ★取るのは fetch するだけでよい。sw.js が audio/ をキャッシュに入れる仕組みになっている
+    //     （キャッシュの名前を2か所に書かないため。名前は sw.js の AUDIO_CACHE ひとつ）
+    //   ★失敗したら黙って諦め、次に開いたときにまた試す
+    const AUDIO_PREFETCH_KEY = 'seAppAudioPrefetchDone';
+    const AUDIO_NO_ROOM_KEY = 'seAppAudioNoRoom';   // 端末の空きが足りなかった印
+    function prefetchSkillAudio() {
+        // ホーム画面から開かれたときだけ。ブラウザのタブで見ているだけの人には何もしない
+        const fromHomeScreen = window.navigator.standalone === true
+            || (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches);
+        if (!fromHomeScreen) return;
+        if (localStorage.getItem(AUDIO_PREFETCH_KEY) === 'done') return;
+        const urls = Array.from(document.querySelectorAll('template[data-audio]'))
+            .map(t => t.dataset.audio).filter(Boolean);
+        if (!urls.length) return;
+
+        (async () => {
+            // 端末の空きを先に見る。足りないなら手を出さない（途中で失敗させない）
+            try {
+                if (navigator.storage && navigator.storage.estimate) {
+                    const { usage, quota } = await navigator.storage.estimate();
+                    if (typeof usage === 'number' && typeof quota === 'number'
+                        && quota - usage < 40 * 1024 * 1024) {   // 声は全部で約18MB。余裕をみて40MB
+                        localStorage.setItem(AUDIO_NO_ROOM_KEY, '1');
+                        return;
+                    }
+                }
+            } catch (err) { /* 見積もれない端末では、そのまま進む */ }
+
+            for (const url of urls) {
+                try {
+                    const res = await fetch(url);
+                    if (!res || res.status !== 200) return;   // 電波が無い。またの機会に
+                    await res.blob();                          // 最後まで読み切る（sw.js が残す）
+                } catch (err) {
+                    return;
+                }
+            }
+            localStorage.removeItem(AUDIO_NO_ROOM_KEY);
+            localStorage.setItem(AUDIO_PREFETCH_KEY, 'done');
+        })();
+    }
+    // 起動の邪魔をしないよう、少し待ってから始める（写真の引っ越しより後）
+    setTimeout(prefetchSkillAudio, 6000);
 });
