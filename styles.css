@@ -1729,6 +1729,19 @@ input:checked + .toggle-slider::before {
     line-height: 1.8;
     color: var(--text-color);
 }
+/* 立って動く練習の、場所の案内（気になる木・グラウンディング１）
+   ★危険を語らず、距離の話だけ。身構えさせないよう、警告色（赤・黄）は使わない */
+.skill-space-note {
+    margin-top: 10px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    background: var(--btn-mid-bg);
+    font-size: 0.8rem;
+    line-height: 1.7;
+    color: var(--btn-mid-text);
+    overflow-wrap: anywhere;
+}
+
 .skill-steps {
     margin-top: 14px;
     border-top: 1px solid #EFEBE4;
