@@ -1794,6 +1794,10 @@ input:checked + .toggle-slider::before {
 .skill-steps-head, .skill-more-btn { display: none; }
 .skill-know[data-pattern="D"] .skill-steps summary { display: none; }
 .skill-know[data-pattern="D"] .skill-illust svg { max-width: 96px; }
+/* ただし絵を横に並べるときは、96pxだと小さすぎて見えない（2026-09-18 永田さん
+   「ちっちゃくて、ピンチ拡大しないと見えませんでした」）。
+   ★この画面は前置きの文が無いぶん余白があるので、広げても「続きを読む」は画面内に収まる。 */
+.skill-know[data-pattern="D"] .skill-illust--wide svg { max-width: 300px; }
 .skill-know[data-pattern="D"] .skill-steps-head {
     display: block;
     font-size: 0.8rem;

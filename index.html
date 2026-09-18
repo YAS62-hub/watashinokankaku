@@ -1039,31 +1039,40 @@
             <template id="skillTpl-2-3" data-kicker="健康法３　グラウンディング" data-title="グラウンディングの練習１" data-audio="audio/2-3_grounding1.m4a">
             <div class="skill-know" data-pattern="D">
                 <div class="skill-illust skill-illust--wide" aria-hidden="true">
-                    <!-- 椅子に座る／横になる の2つ：AI（Claude）が描いた図形。木の絵と同じ描き方・同じ色。
-                         ★グラウンディングの説明（2-1）の絵は「あぐら・壁を押す・立つ」なので、重ならない2つにした -->
-                    <svg viewBox="0 0 330 150" xmlns="http://www.w3.org/2000/svg">
-                        <!-- 椅子に座って、足の裏が床に触れている -->
-                        <ellipse cx="88" cy="136" rx="66" ry="7" fill="#E6E0D3"/>
-                        <rect x="116" y="50" width="10" height="52" rx="4" fill="#C9B79F"/>
-                        <rect x="62" y="96" width="64" height="9" rx="4" fill="#C9B79F"/>
-                        <path d="M68 105 L 66 132 M120 105 L 122 132" stroke="#C9B79F" stroke-width="6" stroke-linecap="round"/>
-                        <rect x="92" y="58" width="26" height="44" rx="13" fill="#A9BCA3"/>
-                        <path d="M96 94 L 70 96" stroke="#A9BCA3" stroke-width="15" stroke-linecap="round"/>
-                        <path d="M68 98 L 64 128" stroke="#A9BCA3" stroke-width="9" stroke-linecap="round"/>
-                        <ellipse cx="59" cy="131" rx="9" ry="5" fill="#E9D3BC"/>
-                        <path d="M94 68 L 80 92" stroke="#A9BCA3" stroke-width="7" stroke-linecap="round"/>
-                        <circle cx="79" cy="94" r="4.5" fill="#E9D3BC"/>
-                        <circle cx="104" cy="42" r="14" fill="#E9D3BC"/>
-                        <!-- 横になって、支えてくれる表面に触れている -->
-                        <ellipse cx="248" cy="136" rx="76" ry="7" fill="#E6E0D3"/>
-                        <rect x="176" y="118" width="148" height="9" rx="4" fill="#C9B79F"/>
-                        <rect x="206" y="96" width="76" height="22" rx="11" fill="#A9BCA3"/>
-                        <path d="M282 108 L 308 108" stroke="#A9BCA3" stroke-width="15" stroke-linecap="round"/>
-                        <ellipse cx="313" cy="106" rx="5" ry="8" fill="#E9D3BC"/>
-                        <path d="M222 100 L 244 100" stroke="#A9BCA3" stroke-width="7" stroke-linecap="round"/>
-                        <circle cx="246" cy="100" r="4.5" fill="#E9D3BC"/>
-                        <circle cx="196" cy="102" r="14" fill="#E9D3BC"/>
-                        <path d="M150 138 Q 157 132 164 138 M330 138 Q 337 132 344 138" stroke="#9FB499" stroke-width="3" fill="none" stroke-linecap="round"/>
+                    <!-- 立つ／座る／横になる の3つ：AI（Claude）が描いた図形。木の絵と同じ描き方・同じ色。
+                         ★2026-09-18 永田さん「立っていても構いません、と書いてあるので、立ってある絵も」。
+                           並びは永田さんのお言葉どおり 立つ→座る→横になる -->
+                    <svg viewBox="0 0 360 130" xmlns="http://www.w3.org/2000/svg">
+                        <!-- 立つ -->
+                        <ellipse cx="60" cy="120" rx="44" ry="6" fill="#E6E0D3"/>
+                        <path d="M52 84 L 50 112 M68 84 L 70 112" stroke="#A9BCA3" stroke-width="9" stroke-linecap="round"/>
+                        <ellipse cx="45" cy="115" rx="9" ry="5" fill="#E9D3BC"/><ellipse cx="75" cy="115" rx="9" ry="5" fill="#E9D3BC"/>
+                        <rect x="47" y="44" width="26" height="46" rx="13" fill="#A9BCA3"/>
+                        <path d="M49 54 L 40 84 M71 54 L 80 84" stroke="#A9BCA3" stroke-width="7" stroke-linecap="round"/>
+                        <circle cx="39" cy="87" r="4.5" fill="#E9D3BC"/><circle cx="81" cy="87" r="4.5" fill="#E9D3BC"/>
+                        <circle cx="60" cy="28" r="14" fill="#E9D3BC"/>
+                        <!-- 座る -->
+                        <ellipse cx="182" cy="120" rx="52" ry="6" fill="#E6E0D3"/>
+                        <rect x="206" y="36" width="10" height="52" rx="4" fill="#C9B79F"/>
+                        <rect x="152" y="82" width="64" height="9" rx="4" fill="#C9B79F"/>
+                        <path d="M158 91 L 156 116 M210 91 L 212 116" stroke="#C9B79F" stroke-width="6" stroke-linecap="round"/>
+                        <rect x="182" y="44" width="26" height="44" rx="13" fill="#A9BCA3"/>
+                        <path d="M186 80 L 160 82" stroke="#A9BCA3" stroke-width="15" stroke-linecap="round"/>
+                        <path d="M158 84 L 154 112" stroke="#A9BCA3" stroke-width="9" stroke-linecap="round"/>
+                        <ellipse cx="149" cy="115" rx="9" ry="5" fill="#E9D3BC"/>
+                        <path d="M184 54 L 170 78" stroke="#A9BCA3" stroke-width="7" stroke-linecap="round"/>
+                        <circle cx="169" cy="80" r="4.5" fill="#E9D3BC"/>
+                        <circle cx="194" cy="28" r="14" fill="#E9D3BC"/>
+                        <!-- 横になる -->
+                        <ellipse cx="296" cy="120" rx="58" ry="6" fill="#E6E0D3"/>
+                        <rect x="232" y="104" width="124" height="8" rx="4" fill="#C9B79F"/>
+                        <rect x="262" y="84" width="66" height="20" rx="10" fill="#A9BCA3"/>
+                        <path d="M328 94 L 344 94" stroke="#A9BCA3" stroke-width="14" stroke-linecap="round"/>
+                        <ellipse cx="348" cy="92" rx="5" ry="8" fill="#E9D3BC"/>
+                        <!-- この絵では、横になっている人の腕を描いていない。
+                             この描き方だと手だけがお腹の上の点に見えたため（2026-09-18）。
+                             ★次に描くときの決まりではない。絵は毎回、永田さんに見ていただく -->
+                        <circle cx="250" cy="90" r="14" fill="#E9D3BC"/>
                     </svg>
                 </div>
 
