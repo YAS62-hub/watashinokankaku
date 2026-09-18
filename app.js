@@ -2170,7 +2170,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             todayResourceId = null;
             // ★index.html にも同じ文がある。片方だけ直さないこと
-            todayResourceContent.innerHTML = '<p id="todayWordText">右下の＋ボタンから、言葉や写真を入れておけます</p>';
+            todayResourceContent.innerHTML = '<p id="todayWordText"><span class="bn">右下の＋ボタンから、</span><span class="bn">言葉や写真を入れておけます</span></p>';
         }
     }
 

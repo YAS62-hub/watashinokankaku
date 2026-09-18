@@ -72,7 +72,7 @@
                 <div id="todayResourceContent" class="today-content">
                     <!-- ★2026-09-19：「追加してみましょう」（要求の形）をやめ、「入れておけます」（できる形）にした。
                          どんなものを入れてよいかの説明は、＋を押した画面の側に置いてある。★app.js にも同じ文がある -->
-                    <p id="todayWordText">右下の＋ボタンから、言葉や写真を入れておけます</p>
+                    <p id="todayWordText"><span class="bn">右下の＋ボタンから、</span><span class="bn">言葉や写真を入れておけます</span></p>
                 </div>
             </div>
             
@@ -531,7 +531,9 @@
                          ★「なんでも構いません」は、その説明にある原文そのまま。
                          ★入れる場面は、割と安定しているとき。だから少し長くてよい（2026-09-19 永田さん）。
                            しんどいときに見るのは、入れたものを眺める側の画面 -->
-                    <p class="setting-desc">ホッとするもの、力になるもの、好きなもの。なんでも構いません。<br>写真だけでも、言葉だけでも、両方でも。</p>
+                    <!-- ★塊を .bn（inline-block）で包む。包まないと「なんでも構／いません。」のように
+                         語の途中で折り返す（落とし穴メモ 11番） -->
+                    <p class="setting-desc"><span class="bn">ホッとするもの、</span><span class="bn">力になるもの、</span><span class="bn">好きなもの。</span><span class="bn">なんでも構いません。</span><br><span class="bn">写真だけでも、</span><span class="bn">言葉だけでも、</span><span class="bn">両方でも。</span></p>
 
                     <div class="resource-section" style="margin-bottom: 24px;">
                         <label class="memo-label">📷 写真（任意）</label>
