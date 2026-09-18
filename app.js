@@ -3492,6 +3492,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const targets = [];
             let node;
             while ((node = walk.nextNode())) {
+                // ★たたみ札（summary）は対象外。短い見出しで折り返す心配がないうえ、
+                //   中身を左右に振り分けている（▼を右端に出す）ので、塊に割ると左右に離れてしまう。
+                //   実例：「ヘルプ・ナウ！のアイディア」が「ヘルプ・ナウ！」と「のアイディア」に
+                //   割れて両端に飛んでいた（2026-09-19に発見。呼び名に「！」が入った9/18から出ていた）
+                if (node.parentElement && node.parentElement.closest('summary')) continue;
                 if (node.nodeValue.trim() && /[、。！？]/.test(node.nodeValue)) targets.push(node);
             }
             targets.forEach(textNode => {
