@@ -1729,6 +1729,16 @@ input:checked + .toggle-slider::before {
     line-height: 1.8;
     color: var(--text-color);
 }
+/* リソース箱の脚注：入りきらないリソースについて（2026-09-18）
+   ★主役にしない。ギャラリーの下に、静かに置く */
+.resource-footnote {
+    margin: 4px 0 90px;     /* 下は＋ボタン（fab）にかからない余白 */
+    font-size: 0.75rem;
+    line-height: 1.9;
+    color: var(--text-light);
+    overflow-wrap: anywhere;
+}
+
 /* リソーシングの説明から、リソース箱への一言（2026-09-18） */
 .skill-box-tip {
     margin-top: 14px;
