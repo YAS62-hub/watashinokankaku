@@ -3285,10 +3285,37 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         let loadToken = 0;       // 読み込み中に別の録音へ切りかえたとき、前の読み込み結果を捨てるための印
+
+        // 待っている間の案内（2026-09-18 永田さん承認済み）
+        //   ★電波が弱いと、取ってくるのは何分でも終わらない。それまで「準備しています…」だけが
+        //     出たままだったので、時間で言葉を変える。
+        //   ★45秒たっても、裏では取り続ける。だから押し直さなくてよい
+        //     ＝電波が不安定な場所で空振りを繰り返させない（永田さんのご懸念）
+        //   ★何％といった数字は出さない。見つめるものになるため
+        const WAIT_STAGE1_MS = 15000;   // 4Gが快適なら、いちばん大きい5.6MBでも約4.5秒で終わる
+        const WAIT_STAGE2_MS = 45000;   // 4Gが混んでいても約22秒。ここまで来たら、待たなくてよい合図
+        const MSG_TAKING = 'インターネットから、声を取ってきています。電波の状況によっては、お待ちいただくかもしれません。';
+        const MSG_STILL = 'まだ取ってきています。電波が弱いのかもしれません。';
+        const MSG_NOT_HEARD = '音声ガイドの内容は、この画面の言葉と同様のものです。電波の届くところでなら、聴けるかもしれません。';
+        let loadStage = 0;
+        let stageTimers = [];
+        function clearStageTimers() {
+            stageTimers.forEach(clearTimeout);
+            stageTimers = [];
+        }
+
         function loadAudio() {
             if (loadState === 'loading' || loadState === 'ready') return;
             loadState = 'loading';
+            loadStage = 0;
             const token = ++loadToken;
+            clearStageTimers();
+            stageTimers.push(setTimeout(() => {
+                if (token === loadToken && loadState === 'loading') { loadStage = 1; render(); }
+            }, WAIT_STAGE1_MS));
+            stageTimers.push(setTimeout(() => {
+                if (token === loadToken && loadState === 'loading') { loadStage = 2; render(); }
+            }, WAIT_STAGE2_MS));
             render();
             fetch(audio.dataset.src)
                 .then(res => {
@@ -3297,6 +3324,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 })
                 .then(blob => {
                     if (token !== loadToken) return;
+                    clearStageTimers();
                     audio.src = URL.createObjectURL(blob);
                     audio.load();
                     loadState = 'ready';
@@ -3304,6 +3332,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 })
                 .catch(err => {
                     if (token !== loadToken) return;
+                    clearStageTimers();
                     console.warn('声の案内を読み込めませんでした。', err);
                     loadState = 'failed';
                     render();
@@ -3337,8 +3366,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 : playing ? 'いったん止める'
                 : (audio.currentTime > 0 && !audio.ended ? 'つづきから聴く' : '声の案内をはじめる'));
             status.textContent =
-                loadState === 'loading' ? '声の案内を準備しています…'
-                : loadState === 'failed' ? '読み込めませんでした。▶︎ を押すと、もう一度読み込みます'
+                loadState === 'loading'
+                    ? (loadStage >= 2 ? MSG_NOT_HEARD : loadStage === 1 ? MSG_STILL : MSG_TAKING)
+                : loadState === 'failed' ? MSG_NOT_HEARD
                 : '';
             renderPosition();
         }

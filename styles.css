@@ -1945,7 +1945,10 @@ input:checked + .toggle-slider::before {
 }
 
 .skill-status {
-    min-height: 1.2em;
+    /* 2行ぶんの高さを、いつも確保しておく（2026-09-18）。
+       ★待っている間の案内は、15秒・45秒で言葉が変わる。高さを決めておかないと、
+         変わるたびに画面がガタつく。落ち着かない画面にしないため */
+    min-height: 2.6em;
     margin-top: 10px;
     text-align: center;
     font-size: 0.8rem;
