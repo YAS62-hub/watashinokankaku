@@ -662,6 +662,10 @@
                     </div>
                     <button type="button" class="skill-promise-toggle" id="skillPromiseToggle" aria-expanded="false">詳しく見る ▼</button>
                 </div>
+                <!-- お約束の声（2026-09-18 永田さん承認）。第2回②を土台に、第1回①・第2回③から足りない分を差し込んでつないだ。
+                     ★つなぎ方と根拠は 言葉づくり/録音台本/つなぎ案_お約束_20260918/_この中について.md
+                     ★言葉は上の「詳しく見る」と同じものなので、練習の画面には文を出さない（同じ文が2か所に出ないように） -->
+                <button type="button" class="skill-list-item" data-open-practice="0">🎧 お約束を声で聞く</button>
             </section>
 
             <!-- 6つの健康法（第1回 slide21／第4回 slide19 の順と名前）。録音が無いものも、説明だけは並べる（2026-09-17 永田さん） -->
@@ -718,6 +722,16 @@
 
             <!-- 健康法１の説明（第4回 slide22）。声は第1回②から「このグループで…基本です。」「周りの人と伝え合えたり、」の2行を切ったもの（2026-09-17夜 永田さん聞き比べてOK）
                  ★画面の文からも「トラッキングは、このグループでお伝えする健康法の基本です。」を外し、声とそろえた（2026-09-17夜 永田さん①。「スライドはリバランスグループのもの。アプリはアプリ用に微調整する」） -->
+            <!-- お約束の声。★文は出さない（一覧の「詳しく見る」に同じ言葉があるため）。
+                 ここに出すのは、声と、一覧に戻る案内だけ -->
+            <template id="skillTpl-0" data-kicker="はじめに" data-title="お約束・大切なこと" data-audio="audio/0_oyakusoku.m4a">
+                <div class="skill-know">
+                    <div class="skill-intro">
+                        <p>ここでお話ししている言葉は、一覧の「詳しく見る」で読むこともできます。</p>
+                    </div>
+                </div>
+            </template>
+
             <template id="skillTpl-1-0" data-kicker="健康法１　トラッキング" data-title="トラッキングの説明" data-audio="audio/1-2_tracking_setsumei.m4a">
                 <div class="skill-know">
                     <div class="skill-illust" aria-hidden="true">
