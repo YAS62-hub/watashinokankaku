@@ -2156,7 +2156,7 @@ document.addEventListener('DOMContentLoaded', () => {
             let html = '';
             const randomPhoto = getPhotoStr(randomRes);
             if (randomPhoto) {
-                html += `<img src="${randomPhoto}" alt="お気に入りの写真">`;
+                html += `<img src="${randomPhoto}" alt="今日のリソースの写真">`;
             } else if (randomRes.text && randomRes.text.trim() !== '') {
                 html += `<p style="font-size: 1.1rem; text-align: center;">${randomRes.text.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</p>`;
             }
@@ -2169,7 +2169,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } else {
             todayResourceId = null;
-            todayResourceContent.innerHTML = '<p id="todayWordText">右下の＋ボタンから、あなたの支えになるもの、好きなものを、言葉や写真で追加してみましょう</p>';
+            // ★index.html にも同じ文がある。片方だけ直さないこと
+            todayResourceContent.innerHTML = '<p id="todayWordText">右下の＋ボタンから、言葉や写真を入れておけます</p>';
         }
     }
 

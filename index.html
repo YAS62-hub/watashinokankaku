@@ -70,7 +70,9 @@
             <div id="todayWordArea" class="today-word-area" style="cursor: pointer;" title="タップして引き直す">
                 <div class="today-header">🎁 今日のリソース（タップで引き直し）</div>
                 <div id="todayResourceContent" class="today-content">
-                    <p id="todayWordText">右下の＋ボタンから、あなたの支えになるもの、好きなものを、言葉や写真で追加してみましょう</p>
+                    <!-- ★2026-09-19：「追加してみましょう」（要求の形）をやめ、「入れておけます」（できる形）にした。
+                         どんなものを入れてよいかの説明は、＋を押した画面の側に置いてある。★app.js にも同じ文がある -->
+                    <p id="todayWordText">右下の＋ボタンから、言葉や写真を入れておけます</p>
                 </div>
             </div>
             
@@ -479,7 +481,7 @@
                 <div class="photo-view-area" style="position: relative; margin-top: 10px;">
                     <button id="prevPhotoBtn" aria-label="前の写真" style="position: absolute; left: -10px; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.6); color: white; border: none; width: 40px; height: 40px; border-radius: 50%; font-size: 1.5rem; display: none; align-items: center; justify-content: center; z-index: 10; text-shadow: 0 0 8px rgba(255,255,255,0.8);">&lt;</button>
                     <button id="nextPhotoBtn" aria-label="次の写真" style="position: absolute; right: -10px; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.6); color: white; border: none; width: 40px; height: 40px; border-radius: 50%; font-size: 1.5rem; display: none; align-items: center; justify-content: center; z-index: 10; text-shadow: 0 0 8px rgba(255,255,255,0.8);">&gt;</button>
-                    <img id="photoViewImg" src="" alt="お気に入りの写真" style="width: 100%; border-radius: 12px; object-fit: contain; max-height: 70vh;">
+                    <img id="photoViewImg" src="" alt="リソース箱の写真" style="width: 100%; border-radius: 12px; object-fit: contain; max-height: 70vh;">
                     <p id="photoViewText" style="margin-top: 12px; font-size: 0.95rem;"></p>
                 </div>
                 <input type="hidden" id="photoViewResourceId">
@@ -524,12 +526,17 @@
                 <h3>新しく追加する</h3>
                 
                 <div class="setting-item">
-                    <p class="setting-desc">どちらか一つでも、両方入力してもOKです。あなたの心が少し「ホッ」とする要素を残してみましょう。</p>
-                    
+                    <!-- 2026-09-19 永田さん承認（案い）：「ホッ」「安心」だけに寄っていた言い方をやめ、
+                         健康法２「リソーシング」の説明と同じ幅にした。
+                         ★「なんでも構いません」は、その説明にある原文そのまま。
+                         ★入れる場面は、割と安定しているとき。だから少し長くてよい（2026-09-19 永田さん）。
+                           しんどいときに見るのは、入れたものを眺める側の画面 -->
+                    <p class="setting-desc">ホッとするもの、力になるもの、好きなもの。なんでも構いません。<br>写真だけでも、言葉だけでも、両方でも。</p>
+
                     <div class="resource-section" style="margin-bottom: 24px;">
-                        <label class="memo-label">📷 安心する写真（任意）</label>
+                        <label class="memo-label">📷 写真（任意）</label>
                         <div class="photo-upload-area" id="photoArea" style="margin-top: 8px;">
-                            <img id="photoPreview" src="" alt="お気に入りの写真" style="display: none;">
+                            <img id="photoPreview" src="" alt="選んだ写真" style="display: none;">
                             <div id="photoPlaceholder" class="photo-placeholder">
                                 <span>写真をえらぶ</span>
                             </div>
@@ -538,8 +545,10 @@
                     </div>
 
                     <div class="resource-section">
-                        <label class="memo-label">📝 安心できる言葉やメモ（任意）</label>
-                        <textarea id="resourceNote" placeholder="大丈夫、焦らなくていいよ..." style="margin-top: 8px;"></textarea>
+                        <label class="memo-label">📝 言葉やメモ（任意）</label>
+                        <!-- ★薄い文字は「書かれうる言葉そのもの」の例（大丈夫、焦らなくていいよ…）から、
+                             「どんなものを書くか」の例に変えた。前の文は、焦っているという前提を置いていた -->
+                        <textarea id="resourceNote" placeholder="すきな言葉、だいじな思い出、ひとことでも…" style="margin-top: 8px;"></textarea>
                     </div>
                     
                     <div class="settings-actions" style="margin-top: 24px;">
