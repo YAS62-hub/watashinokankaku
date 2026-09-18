@@ -1948,7 +1948,7 @@ input:checked + .toggle-slider::before {
     /* 2行ぶんの高さを、いつも確保しておく（2026-09-18）。
        ★待っている間の案内は、15秒・45秒で言葉が変わる。高さを決めておかないと、
          変わるたびに画面がガタつく。落ち着かない画面にしないため */
-    min-height: 2.6em;
+    min-height: 3em;   /* 3行ぶん。375×812 で、3つの案内がどれも 38px に収まる */
     margin-top: 10px;
     text-align: center;
     font-size: 0.8rem;

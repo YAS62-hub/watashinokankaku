@@ -3370,6 +3370,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     ? (loadStage >= 2 ? MSG_NOT_HEARD : loadStage === 1 ? MSG_STILL : MSG_TAKING)
                 : loadState === 'failed' ? MSG_NOT_HEARD
                 : '';
+            // 読点・句点のうしろで区切って折り返す（落とし穴メモ11番）。
+            // 包まないと「電波」が「電／波」に割れる（375×812 で実測）
+            if (status.textContent) wrapKinsoku(status);
             renderPosition();
         }
 
