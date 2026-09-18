@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('App v12.0.5 starting (20260917)...');
+    console.log('App v12.0.6 starting (20260918)...');
     // === 要素の取得 ===
     const tabs = document.querySelectorAll('.tab-content');
     const navItems = document.querySelectorAll('.nav-item');
@@ -3201,6 +3201,95 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!btnId) return;
         const btn = document.getElementById(btnId);
         if (btn) { e.preventDefault(); btn.click(); }
+    });
+
+    // === 箱（モーダル）が開いたら、キーボードの操作位置を箱の中へ移す（D-3の残り） ===
+    // ★見た目は変えない。焦点は「箱そのもの」に移し、枠は出さない。
+    //   ボタンに移すと、指で開いた方にも枠が見えることがあるため。
+    // ★文字を書く欄には移さない。スマホで、触っていないのにキーボードが立ち上がるのを避ける。
+    // ★閉じたら、開く前に触っていたボタンへ戻す（Tabの位置が先頭に戻らないように）。
+    const FOCUSABLE_SELECTOR = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+
+    // いま実際に押せる（＝画面に出ている）ものだけを、HTMLの並び順で返す。
+    function focusableItemsIn(modal) {
+        return Array.from(modal.querySelectorAll(FOCUSABLE_SELECTOR)).filter(el => {
+            if (el.disabled) return false;
+            if (el.getAttribute('aria-hidden') === 'true') return false;
+            return el.offsetParent !== null;   // display:none や、閉じている折りたたみの中は外れる
+        });
+    }
+
+    function focusQuietly(el) {
+        try { el.focus({ preventScroll: true }); } catch (e) { el.focus(); }
+    }
+
+    // 箱ごとに「開く前に触っていたもの」を覚えておく（閉じたときに戻すため）。
+    const focusBeforeModal = new WeakMap();
+
+    function onModalOpened(modal) {
+        const content = modal.querySelector('.modal-content') || modal;
+        if (!content.hasAttribute('tabindex')) content.setAttribute('tabindex', '-1');
+        content.style.outline = 'none';
+        const before = document.activeElement;
+        if (before && before !== document.body && !modal.contains(before)) {
+            focusBeforeModal.set(modal, before);
+        }
+        // ひと呼吸おいてから移す。起動と同時に開く箱では、待たないと
+        // 画面ができあがるときに操作位置が本体へ戻され、移動が無かったことになる。
+        // ★requestAnimationFrame は使わない。画面が裏に回っているあいだ動かないため。
+        setTimeout(() => {
+            if (modal.classList.contains('active')) focusQuietly(content);
+        }, 0);
+    }
+
+    function onModalClosed(modal) {
+        const before = focusBeforeModal.get(modal);
+        focusBeforeModal.delete(modal);
+        const stillInside = document.activeElement && modal.contains(document.activeElement);
+        if (before && document.contains(before) && before.offsetParent !== null) {
+            focusQuietly(before);
+        } else if (stillInside) {
+            document.activeElement.blur();   // 閉じた箱の中に操作位置を置き去りにしない
+        }
+    }
+
+    document.querySelectorAll('.modal').forEach(modal => {
+        let wasActive = modal.classList.contains('active');
+        // 起動と同時に開く箱（初回のチュートリアルなど）も、同じ扱いにする。
+        if (wasActive) onModalOpened(modal);
+        const observer = new MutationObserver(() => {
+            const isActive = modal.classList.contains('active');
+            if (isActive === wasActive) return;
+            wasActive = isActive;
+            if (isActive) onModalOpened(modal); else onModalClosed(modal);
+        });
+        observer.observe(modal, { attributes: true, attributeFilter: ['class'] });
+    });
+
+    // === Tabキーで、箱の外（後ろの画面）へ出て行かないようにする ===
+    // ★箱が開いていないときは、これまでどおり何もしない。
+    document.addEventListener('keydown', (e) => {
+        if (e.key !== 'Tab') return;
+        const modal = findFrontMostModal();
+        if (!modal) return;
+
+        const items = focusableItemsIn(modal);
+        if (items.length === 0) { e.preventDefault(); return; }
+        const first = items[0];
+        const last = items[items.length - 1];
+        const content = modal.querySelector('.modal-content') || modal;
+        const active = document.activeElement;
+
+        if (!modal.contains(active)) {           // 箱の外にいる → 中へ連れ戻す
+            e.preventDefault();
+            focusQuietly(e.shiftKey ? last : first);
+        } else if (active === content) {         // 箱そのものにいる（開いた直後）
+            if (e.shiftKey) { e.preventDefault(); focusQuietly(last); }
+        } else if (!e.shiftKey && active === last) {
+            e.preventDefault(); focusQuietly(first);
+        } else if (e.shiftKey && active === first) {
+            e.preventDefault(); focusQuietly(last);
+        }
     });
 
     // 工事プラン 段階4：古い場所に残っている写真を、少しずつ新しい場所へ引っ越す。
