@@ -2188,6 +2188,8 @@ document.addEventListener('DOMContentLoaded', () => {
         item.addEventListener('click', () => {
             if (item.getAttribute('data-target') === 'resourceTab') {
                 updateTodayWord();
+                // 自由帳は入口が2つあるので、開くたびに端末の中身を読み直す（同じ1冊に保つ）
+                jiyucho.reload();
             }
         });
     });
@@ -3260,25 +3262,74 @@ document.addEventListener('DOMContentLoaded', () => {
     // ★「再生中に画面に何を出すか」は未決定。いまは位置のつまみ・時間・▶︎/⏸・15秒もどる/すすむ
     //   （全部の時間と今の位置は 2026-09-17 永田さんのご依頼で出している。
     //    録音で時間を言わないと決めた理由も「音源の時間を見たら明白なので」だった）
+    // === わたしのお守り自由帳。2026-09-18 永田さん承認・★仮の実装（実物を見てから見直す前提） ===
+    // ★「中身は1つ、入口は2つ」——入口①＝連絡先の3段目（渦中）、入口②＝リソース箱（ふだん）。
+    //   ★中身が1冊であることは、両方が同じ localStorage キーを読み書きすることで保つ。
+    //   ★画面の中身（アイディア・2行・書く欄）は index.html の #jiyuchoTemplate に1つだけ書き、
+    //     .jiyucho-host の場所に写す（同じ文を2か所に書くと、片方だけ直して食い違うため）
+    const jiyucho = (function setupJiyucho() {
+        const KEY = 'seAppOmamoriJiyucho';
+        const tpl = document.getElementById('jiyuchoTemplate');
+        const hosts = Array.from(document.querySelectorAll('.jiyucho-host'));
+        const books = []; // 写した先の { text, saved } を覚えておく
+        if (!tpl) return { reload() {} };
+
+        hosts.forEach(host => {
+            host.appendChild(tpl.content.cloneNode(true));
+            const ideaToggle = host.querySelector('.jiyucho-idea-toggle');
+            const idea = host.querySelector('.jiyucho-idea');
+            const text = host.querySelector('.jiyucho-text');
+            const saved = host.querySelector('.jiyucho-saved');
+            books.push({ text, saved });
+
+            // 「この欄を活用するアイディア」の開け閉め（お約束の「詳しく見る ▼」と同じ開き方）
+            ideaToggle.addEventListener('click', () => {
+                const open = idea.hidden;
+                idea.hidden = !open;
+                ideaToggle.textContent = open ? 'とじる ▲' : 'この欄を活用するアイディア ▼';
+                ideaToggle.setAttribute('aria-expanded', String(open));
+            });
+
+            // ★保存ボタンを押させない。書いたそばから残す（しんどいときに手順を増やさない）
+            let timer = null;
+            text.addEventListener('input', () => {
+                clearTimeout(timer);
+                timer = setTimeout(() => {
+                    try {
+                        localStorage.setItem(KEY, text.value);
+                        saved.textContent = '書いたものは、この端末に残ります';
+                    } catch (err) {
+                        saved.textContent = '保存できませんでした。端末の空きが足りないかもしれません';
+                    }
+                }, 400);
+            });
+        });
+
+        // 端末に残っている中身を読み直して、両方の入口に映す。
+        // ★いま書いている最中の欄は上書きしない（書きかけが消えるため）
+        function reload() {
+            let value = '';
+            try { value = localStorage.getItem(KEY) || ''; } catch (err) { /* 読めないときは空のまま */ }
+            books.forEach(({ text, saved }) => {
+                if (document.activeElement === text) return;
+                text.value = value;
+                saved.textContent = '';
+            });
+        }
+        reload();
+        return { reload };
+    })();
+
     // === 連絡先（A13）。2026-09-19 永田さん承認・★仮の実装（実物を見てから見直す前提） ===
-    // ★「わたしのお守り自由帳」は「中身は1つ、入口は2つ」（2026-09-18 永田さん決定）。
-    //   いまあるのは入口①（この画面）だけ。入口②（リソース箱）は次に作る。
-    //   中身が1つであることは、同じ localStorage キーを読むことで保つ
     (function setupEmergency() {
         const modal = document.getElementById('emergencyModal');
         if (!modal) return;
         const closeBtn = document.getElementById('closeEmergency');
-        const ideaToggle = document.getElementById('jiyuchoIdeaToggle');
-        const idea = document.getElementById('jiyuchoIdea');
-        const text = document.getElementById('jiyuchoText');
-        const saved = document.getElementById('jiyuchoSaved');
-        const KEY = 'seAppOmamoriJiyucho';
 
         // 開く。★健康法５の先頭のボタンは template から写されるので、押されたときに拾う
         document.addEventListener('click', (e) => {
             if (!e.target.closest('[data-open-emergency]')) return;
-            try { text.value = localStorage.getItem(KEY) || ''; } catch (err) { /* 読めないときは空のまま */ }
-            saved.textContent = '';
+            jiyucho.reload(); // リソース箱側で書いたものが、こちらにも映るように
             modal.classList.add('active');
             document.body.classList.add('modal-open');
             modal.querySelector('.modal-content').scrollTop = 0;
@@ -3286,6 +3337,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         function closeEmergency() {
             modal.classList.remove('active');
+            jiyucho.reload(); // ここで書いたものが、リソース箱側にも映るように
             // ★下に健康法５の画面がまだ開いている。ほかに開いている箱が無いときだけスクロール止めを外す
             if (!document.querySelector('.modal.active')) {
                 document.body.classList.remove('modal-open');
@@ -3294,27 +3346,19 @@ document.addEventListener('DOMContentLoaded', () => {
         closeBtn.addEventListener('click', closeEmergency);
         modal.addEventListener('click', (e) => { if (e.target === modal) closeEmergency(); });
 
-        // 「この欄を活用するアイディア」の開け閉め（お約束の「詳しく見る ▼」と同じ開き方）
-        ideaToggle.addEventListener('click', () => {
-            const open = idea.hidden;
-            idea.hidden = !open;
-            ideaToggle.textContent = open ? 'とじる ▲' : 'この欄を活用するアイディア ▼';
-            ideaToggle.setAttribute('aria-expanded', String(open));
-        });
-
-        // ★保存ボタンを押させない。書いたそばから残す（しんどいときに手順を増やさない）
-        let timer = null;
-        text.addEventListener('input', () => {
-            clearTimeout(timer);
-            timer = setTimeout(() => {
-                try {
-                    localStorage.setItem(KEY, text.value);
-                    saved.textContent = '書いたものは、この端末に残ります';
-                } catch (err) {
-                    saved.textContent = '保存できませんでした。端末の空きが足りないかもしれません';
-                }
-            }, 400);
-        });
+        // 「この自由帳について」の開け閉め（リソース箱側だけにある説明。2026-09-18 永田さん決定・案D）
+        const aboutToggle = document.getElementById('jiyuchoAboutToggle');
+        const about = document.getElementById('jiyuchoAbout');
+        if (aboutToggle && about) {
+            aboutToggle.addEventListener('click', () => {
+                const open = about.hidden;
+                about.hidden = !open;
+                // ★ここだけ「とじる ▲」にしない。リソース箱ではたたみ札が2つ縦に並ぶので、
+                //   両方が「とじる ▲」になると、どちらが何を閉じるのか分からなくなる
+                aboutToggle.textContent = open ? 'この自由帳について ▲' : 'この自由帳について ▼';
+                aboutToggle.setAttribute('aria-expanded', String(open));
+            });
+        }
     })();
 
     (function setupSkillPractice() {

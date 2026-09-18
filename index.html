@@ -76,6 +76,21 @@
                 </div>
             </div>
             
+            <!-- わたしのお守り自由帳の入口②（ふだん側）。2026-09-18 永田さん承認・★仮の実装
+                 ★置き場所は永田さんのご指定＝「今日のリソース」（特等席）と内タブ（📷写真／📝言葉）の間
+                 ★中身は、連絡先の3段目とまったく同じ1冊（同じ localStorage キーを読む）
+                 ★たたみ札は「この自由帳について ▼」——いつも見える側に「緊急」の語を出さないため -->
+            <section class="emg-section jiyucho-inbox">
+                <h4 class="emg-head">わたしのお守り自由帳</h4>
+                <button type="button" id="jiyuchoAboutToggle" class="emg-toggle" aria-expanded="false">この自由帳について ▼</button>
+                <!-- 中の文＝案D（2026-09-18 永田さん決定）。一字一句このまま -->
+                <div id="jiyuchoAbout" class="emg-idea" hidden>
+                    <p><span class="bn">ここは、</span><span class="bn">緊急時の連絡先の画面にある</span><span class="bn">「わたしのお守り自由帳」と、</span><span class="bn">同じ1冊です。</span></p>
+                    <p><span class="bn">書いても、</span><span class="bn">書かなくても、</span><span class="bn">かまいません。</span></p>
+                </div>
+                <div class="jiyucho-host"></div>
+            </section>
+
             <!-- 内部タブ -->
             <div class="inner-tabs">
                 <button class="inner-tab-btn active" data-in-target="photoGalleryTab">📷 写真</button>
@@ -1339,26 +1354,37 @@
                 <p class="emg-tip"><span class="bn">ほかの相談先は、</span><span class="bn">厚生労働省「まもろうよ こころ」にまとまっています。</span></p>
             </section>
 
-            <!-- 3段目：わたしのお守り自由帳。★中身は1つ、入口は2つ（もう1つはリソース箱・次に作る） -->
+            <!-- 3段目：わたしのお守り自由帳
+                 ★中身は1つ、入口は2つ（もう1つはリソース箱＝ふだん側。2026-09-18 永田さん承認・★仮の実装）
+                 ★自由帳の中身（アイディア・2行・書く欄）は #jiyuchoTemplate に1つだけ書いてある。
+                   2か所に同じ文を書くと、片方だけ直したときに食い違うため（CLAUDE.md 5章の7）
+                 ★緊急側には説明を添えない（2026-09-18 永田さん決定。
+                   理由も永田さん＝緊急時は視野狭窄で、ごちゃごちゃ書いてあると分からない） -->
             <section class="emg-section">
                 <h4 class="emg-head">わたしのお守り自由帳</h4>
-                <button type="button" id="jiyuchoIdeaToggle" class="emg-toggle" aria-expanded="false">この欄を活用するアイディア ▼</button>
-                <div id="jiyuchoIdea" class="emg-idea" hidden>
-                    <p>ここは、自由にあなたが何か書き残しておくこともできるメモ欄です。</p>
-                    <p>例えば、</p>
-                    <ul>
-                        <li>どなたかの連絡先等をメモする</li>
-                        <li>リソース箱を見てね、ヘルプ・ナウ！をやろう、と、自分へのメモ</li>
-                        <li>あなたを勇気づける言葉、心がけ、座右の銘</li>
-                    </ul>
-                </div>
-                <!-- ★この2行は、たたんでいるときもいつも見える（2026-09-17深夜 永田さん「ちょうどいい加減」） -->
-                <p class="emg-always"><span class="bn">ご自由にお使いください。</span><br><span class="bn">使わない、</span><span class="bn">というのも大切な選択肢です。</span></p>
-                <textarea id="jiyuchoText" class="emg-textarea" aria-label="わたしのお守り自由帳"></textarea>
-                <p id="jiyuchoSaved" class="emg-saved" aria-live="polite"></p>
+                <div class="jiyucho-host"></div>
             </section>
         </div>
     </div>
+
+    <!-- わたしのお守り自由帳の中身。★2か所（連絡先の3段目／リソース箱）に、ここから写す。
+         中身が1冊であることは、同じ localStorage キー（seAppOmamoriJiyucho）で保つ -->
+    <template id="jiyuchoTemplate">
+        <button type="button" class="emg-toggle jiyucho-idea-toggle" aria-expanded="false">この欄を活用するアイディア ▼</button>
+        <div class="emg-idea jiyucho-idea" hidden>
+            <p>ここは、自由にあなたが何か書き残しておくこともできるメモ欄です。</p>
+            <p>例えば、</p>
+            <ul>
+                <li>どなたかの連絡先等をメモする</li>
+                <li>リソース箱を見てね、ヘルプ・ナウ！をやろう、と、自分へのメモ</li>
+                <li>あなたを勇気づける言葉、心がけ、座右の銘</li>
+            </ul>
+        </div>
+        <!-- ★この2行は、たたんでいるときもいつも見える（2026-09-17深夜 永田さん「ちょうどいい加減」） -->
+        <p class="emg-always"><span class="bn">ご自由にお使いください。</span><br><span class="bn">使わない、</span><span class="bn">というのも大切な選択肢です。</span></p>
+        <textarea class="emg-textarea jiyucho-text" aria-label="わたしのお守り自由帳"></textarea>
+        <p class="emg-saved jiyucho-saved" aria-live="polite"></p>
+    </template>
 
     <!-- 設定画面を閉じようとしたとき、ボタンの言葉が未保存なら確認する -->
     <div id="unsavedLabelsModal" class="modal" style="z-index: 1100;">
