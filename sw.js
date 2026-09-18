@@ -1,4 +1,7 @@
 const CACHE_NAME = 'se-app-v8'; // バージョン。変更すると更新が強制されます
+// 声のガイド（audio/）だけは別のたなに入れる。アプリを更新しても取り直さずに済むように。
+// ★音声ファイルを差し替えたときは、この番号を上げること（上げないと古い音が残る）
+const AUDIO_CACHE = 'se-app-audio-v1';
 
 self.addEventListener('install', (e) => {
     self.skipWaiting(); // 新しいバージョンを即座にインストール
@@ -9,7 +12,7 @@ self.addEventListener('activate', (e) => {
         caches.keys().then(keys => Promise.all(
             keys.map(key => {
                 // 古いバージョンのキャッシュを削除
-                if (key !== CACHE_NAME) {
+                if (key !== CACHE_NAME && key !== AUDIO_CACHE) {
                     return caches.delete(key);
                 }
             })
@@ -26,11 +29,22 @@ self.addEventListener('fetch', (e) => {
         return;
     }
 
-    // 声の案内（audio/ の下）も素通しにする。
-    // ★音声は「途中から少しずつ取る」取り方（Range）で読まれる。SWを挟むと、
-    //   iPhone では再生できない・途中に飛べないことがあるため、ブラウザに任せる。
-    //   ★そのぶん、声の案内はオフラインでは聴けない（キャッシュに入らない）
+    // 声のガイド（audio/ の下）は、一度取ったら端末に残す（キャッシュ優先）。
+    // 2回目からは待ち時間なしで、電波が無くても聴ける。
+    // ★2026-09-17、ここは「素通し」だった。音声を <audio src> で直に再生していた頃、
+    //   iPhone が「途中から少しずつ取る」取り方（Range）で読むため、SWを挟むと壊れたから。
+    //   同じ日に app.js が「fetch でまるごと取ってから再生」に変わり、Range は来なくなった。
+    //   → 素通しにする理由は消えていたので、2026-09-18 にここを直した。
+    //   ★もし将来 <audio src="audio/..."> の直接再生に戻すなら、ここを見直すこと。
     if (new URL(e.request.url).pathname.includes('/audio/')) {
+        e.respondWith(
+            caches.open(AUDIO_CACHE).then(cache =>
+                cache.match(e.request).then(hit => hit || fetch(e.request).then(res => {
+                    if (res && res.status === 200) cache.put(e.request, res.clone());
+                    return res;
+                }))
+            )
+        );
         return;
     }
 
