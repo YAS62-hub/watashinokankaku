@@ -1729,6 +1729,15 @@ input:checked + .toggle-slider::before {
     line-height: 1.8;
     color: var(--text-color);
 }
+/* リソーシングの説明から、リソース箱への一言（2026-09-18） */
+.skill-box-tip {
+    margin-top: 14px;
+    font-size: 0.8rem;
+    line-height: 1.7;
+    color: var(--text-light);
+    overflow-wrap: anywhere;
+}
+
 .skill-steps {
     margin-top: 14px;
     border-top: 1px solid #EFEBE4;

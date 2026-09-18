@@ -2166,7 +2166,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } else {
             todayResourceId = null;
-            todayResourceContent.innerHTML = '<p id="todayWordText">右下の＋ボタンから、あなたのホッとする言葉や写真を追加してみましょう</p>';
+            todayResourceContent.innerHTML = '<p id="todayWordText">右下の＋ボタンから、あなたの支えになるもの、好きなものを、言葉や写真で追加してみましょう</p>';
         }
     }
 
