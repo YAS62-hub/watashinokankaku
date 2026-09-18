@@ -1966,3 +1966,17 @@ input:checked + .toggle-slider::before {
 }
 .skill-topic p + p { margin-top: 6px; }
 .skill-topic p:last-child { margin-bottom: 14px; }
+
+/* ヒント・アイディア集の箇条書き（たたんだ見出しの中） */
+.skill-topic-list {
+    margin: 0 0 14px;
+    padding-left: 1.2em;
+}
+.skill-topic-list li {
+    font-size: 0.85rem;
+    line-height: 1.8;
+    color: var(--text-color);
+    margin-bottom: 6px;
+    overflow-wrap: anywhere;   /* 読点が行頭に来ないよう、keep-all は付けない */
+}
+.skill-topic-list li::marker { color: var(--text-light); }
