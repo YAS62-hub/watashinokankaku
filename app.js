@@ -3543,10 +3543,13 @@ document.addEventListener('DOMContentLoaded', () => {
         //     練習の画面を開いた直後と、たたみ札を開いた直後に走らせる。
         function unwrapWideChunks(root) {
             root.querySelectorAll('.bn').forEach(span => {
-                // 幅を持つ親（p・li など）を探す。まだ隠れているところは、開いたときにやり直す
+                // 幅を持つ親（p・li など）を探す。
+                // ★root より外へは出ない。出ると、画面が隠れているとき（幅が 0 のとき）に
+                //   さかのぼって body の 375px と比べてしまい、「入りきる」と誤判定する
+                //   （2026-09-19に実際に起きた。健康法３の説明の2行が外れなかった）
                 let box = span.parentElement;
-                while (box && !box.clientWidth) box = box.parentElement;
-                if (!box) return;
+                while (box && box !== root && !box.clientWidth) box = box.parentElement;
+                if (!box || !box.clientWidth) return;   // まだ隠れている。開いたときにやり直す
                 const cs = getComputedStyle(box);
                 const avail = box.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
                 const probe = document.createElement('span');
@@ -3585,14 +3588,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 //   （包まないと「こともで／きる」のように語の途中で折り返す。落とし穴メモ 11の追記(1)）
                 jiyucho.mount(body);
                 wrapKinsoku(body);
-                // 画面に出てから幅を測る（この時点ではまだ隠れている）。
-                // rAF は描かれる前に走るので、包みが外れる様子は目に見えない
-                requestAnimationFrame(() => unwrapWideChunks(body));
                 currentSkill = id;
             }
             return true;
         }
 
+        // ★幅は「画面に出てから」でないと測れない。隠れているあいだは 0 になる。
+        //   そこで、練習の画面に .active を付けた「直後」に呼ぶ。
+        // ★requestAnimationFrame は使わない。画面が裏に回っていると動かないため
+        //   （開発の落とし穴メモ 10番。2026-09-19に実際にこれで動かなかった）。
+        //   clientWidth を読むと、その場で配置が確定するので、待たなくても正しく測れる。
+        function measureAfterShown() {
+            unwrapWideChunks(body);
+        }
         // たたみ札（details）は、閉じているあいだ中身の幅が 0 なので測れない。
         // 開いた瞬間に、その中の塊だけ測り直す。★toggle は上に伝わらないので捕まえる側（true）で拾う
         body.addEventListener('toggle', (e) => {
@@ -3608,6 +3616,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 openedOutsideList = false;
                 listModal.classList.remove('active');
                 modal.classList.add('active');
+                measureAfterShown();
                 modal.querySelector('.modal-content').scrollTop = 0;
                 if (audio.dataset.src) {
                     render();
@@ -3628,6 +3637,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!showSkill('2-0')) return;
                 openedOutsideList = true;
                 modal.classList.add('active');
+                measureAfterShown();
                 document.body.classList.add('modal-open');
                 modal.querySelector('.modal-content').scrollTop = 0;
             });

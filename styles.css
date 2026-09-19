@@ -1714,13 +1714,21 @@ input:checked + .toggle-slider::before {
 /* ★禁則をきびしい側にする（2026-09-19）
    line-break の初期値 auto は、小さい「ゃゅょっ」を行頭に置くことがある。
    （実例：健康法１「両掌をくっつけてみるのはいかがでし／ょうか。」）
-   strict にすると、句読点と同じように行頭から追い出される。 */
+   strict にすると、句読点と同じように行頭から追い出される。
+
+   ★word-break: auto-phrase は「文節で折り返す」新しい指定（2026-09-19 追加）。
+     .bn に入りきらず素の文にもどした塊は、ふつうの日本語として折り返すので、
+     「つながりを感／じましょう。」のように語の途中で切れることがある。
+     auto-phrase が効くブラウザでは「つながりを／感じましょう。」になる。
+   ★iPhone の Safari は未対応で、そのときは何も起きない（ふつうの折り返しのまま）。
+     アプリでは既に `.safe-message`（記録後メッセージ）で同じ書き方をしている。 */
 .modal-content .skill-intro,
 .modal-content .skill-topics,
 .modal-content .skill-steps,
 .modal-content .skill-promise,
 #skillBody {
     line-break: strict;
+    word-break: auto-phrase;
 }
 
 /* 説明の画面：スライドの見出し（「接点に気づく」）と、例の行 */
