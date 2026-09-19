@@ -3564,6 +3564,41 @@ document.addEventListener('DOMContentLoaded', () => {
                     parent.normalize();
                 }
             });
+            protectQuotes(root);
+        }
+
+        // ★かぎ括弧の中では折り返さない（2026-09-19）
+        //   永田さんの実機（iPhone）で「今ここ」が「今こ／こ」と割れていた。
+        //   包みを外した塊は、ふつうの日本語としてどこででも折り返すため。
+        //   「今ここ」「大丈夫ゾーン」「マシ」はこのアプリの中心の言葉なので、
+        //   ひとかたまりのまま読めるようにする。
+        //   ★長い括弧は対象外（10文字まで）。長いものを切らないと、逆に行があふれる。
+        //   ★たたみ札（summary）は対象外。中身を左右に振り分けるので、包むと離れる（.bn と同じ理由）
+        function protectQuotes(root) {
+            const walk = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+            const targets = [];
+            let node;
+            while ((node = walk.nextNode())) {
+                if (node.parentElement && node.parentElement.closest('summary, .nb')) continue;
+                if (/「[^「」]{1,10}」/.test(node.nodeValue)) targets.push(node);
+            }
+            targets.forEach(textNode => {
+                const parts = textNode.nodeValue.split(/(「[^「」]{1,10}」)/);
+                if (parts.length < 2) return;
+                const frag = document.createDocumentFragment();
+                parts.forEach(part => {
+                    if (!part) return;
+                    if (/^「[^「」]{1,10}」$/.test(part)) {
+                        const span = document.createElement('span');
+                        span.className = 'nb';
+                        span.textContent = part;
+                        frag.appendChild(span);
+                    } else {
+                        frag.appendChild(document.createTextNode(part));
+                    }
+                });
+                textNode.parentNode.replaceChild(frag, textNode);
+            });
         }
 
         let currentSkill = null;

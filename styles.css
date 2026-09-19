@@ -1711,6 +1711,11 @@ input:checked + .toggle-slider::before {
     overflow-wrap: normal;   /* anywhere にすると禁則が効かず、句読点が行頭に来る */
 }
 
+/* かぎ括弧の中では折り返さない（2026-09-19）
+   永田さんの実機で「今ここ」が「今こ／こ」と割れていた。
+   ★inline-block にはしない。inline のままなら、前の行の余りにそのまま入る */
+.nb { white-space: nowrap; }
+
 /* ★禁則をきびしい側にする（2026-09-19）
    line-break の初期値 auto は、小さい「ゃゅょっ」を行頭に置くことがある。
    （実例：健康法１「両掌をくっつけてみるのはいかがでし／ょうか。」）
