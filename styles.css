@@ -2149,3 +2149,65 @@ input:checked + .toggle-slider::before {
     font-family: inherit;
 }
 .emg-saved { font-size: 0.75rem; color: var(--text-light); margin-top: 8px; min-height: 1.3em; }
+
+/* ===== わたしのヘルプ・ナウ！リスト（A10）の器。2026-09-20・★仮の実装 =====
+   ★地の文・脚注は .skill-topic p（たたみ札の中の文）の見た目をそのまま使う。
+     この画面のほかの文と同じ大きさ・同じ行間にするため、ここでは指定し直さない */
+.hn-list {
+    list-style: none;
+    margin: 10px 0 4px;
+    padding: 0;
+}
+/* ★ボタンは文の「下」に置く（2026-09-20に実機幅375pxで見比べて決めた）。
+   横に並べると、ボタンが約110px取るので「コップ１杯、お水を／飲んでみる」と
+   短い文まで2行に折れ、上のアイディア一覧と見え方が揃わなかった */
+.hn-item {
+    padding: 8px 0 4px;
+    border-top: 1px solid #F1EEE8;
+}
+.hn-item:last-child { border-bottom: 1px solid #F1EEE8; }
+.hn-item-text {
+    display: block;
+    font-size: 0.85rem;
+    line-height: 1.8;
+    color: var(--text-color);
+}
+.hn-item-tools {
+    display: flex;
+    justify-content: flex-end;
+}
+/* ★指で押せる大きさ（32px）を確保する。見た目は文字だけで、枠は出さない */
+.hn-move, .hn-remove {
+    min-width: 32px;
+    min-height: 32px;
+    background: none;
+    border: none;
+    border-radius: 10px;
+    color: var(--text-light);
+    font-size: 0.75rem;
+    font-family: inherit;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+.hn-move:disabled { opacity: 0.25; cursor: default; }   /* いちばん上の▲、いちばん下の▼ */
+/* ★「外す」は並べ替えから少し離す。隣り合わせだと、動かすつもりで外してしまう */
+.hn-remove { padding: 0 8px; margin-left: 10px; }
+
+.hn-add { margin: 2px 0 10px; }
+.hn-input { min-height: 84px; font-size: 0.95rem; }
+.hn-add-btn {
+    display: block;
+    width: 100%;
+    margin-top: 8px;
+    background-color: var(--btn-low-bg);
+    border: none;
+    border-radius: 12px;
+    padding: 11px;
+    color: var(--btn-low-text);
+    font-size: 0.9rem;
+    font-weight: 500;
+    font-family: inherit;
+    cursor: pointer;
+}
+/* 脚注。地の文より一段うしろに引く（読まなくてもよい、の位置） */
+.skill-topic p.hn-note { color: var(--text-light); }

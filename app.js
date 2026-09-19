@@ -3309,6 +3309,140 @@ document.addEventListener('DOMContentLoaded', () => {
         return { mount };
     })();
 
+    // === わたしのヘルプ・ナウ！リスト（A10）の「器」。2026-09-20・★仮の実装 ===
+    // ★永田さんのご決定＝読み物（27項目の一覧）と仕組みを分ける。一覧には「足す」ボタンを付けない。
+    //   付けると、しんどいときに眺めるだけでよかった読み物が「選ばなければ」に変わる（非・要求）。
+    // ★いまできるのは「自分で書いて入れる」「並べ替える」「外す」の3つだけ。
+    //   「選択肢から試してみる」（ジャンル → 一覧 → 2択）は、ジャンル分けが決まってから足す
+    //   （設計メモ_A10 7章の③）。そのとき項目の入り口が増えても、この入れ物はそのまま使える。
+    // ★「外す」という言い方は、永田さんの地の文「今後お気に召さなくなったら外すこともできます」から取った。
+    // ★自由帳と同じく、健康法の画面は開くたびに作り直されるので、そのつど写す（mount）。
+    const helpNowList = (function setupHelpNowList() {
+        const KEY = 'seAppHelpNowList';
+        const tpl = document.getElementById('helpNowListTemplate');
+        if (!tpl) return { mount() {} };
+
+        function load() {
+            try {
+                const got = JSON.parse(localStorage.getItem(KEY) || '[]');
+                return Array.isArray(got) ? got : [];
+            } catch (err) { return []; }   // 読めないときは空として扱う（上書きはしない）
+        }
+
+        function mount(root) {
+            (root || document).querySelectorAll('.helpnow-host').forEach(host => {
+                if (host.dataset.mounted) return;
+                host.dataset.mounted = '1';
+                host.appendChild(tpl.content.cloneNode(true));
+                const listEl = host.querySelector('.hn-list');
+                const addToggle = host.querySelector('.hn-add-toggle');
+                const addBox = host.querySelector('.hn-add');
+                const input = host.querySelector('.hn-input');
+                const addBtn = host.querySelector('.hn-add-btn');
+                const saved = host.querySelector('.hn-saved');
+
+                let items = load();
+
+                // ★保存ボタンを押させない（自由帳と同じ）。入れた・動かした・外したら、そのつど残す
+                function save() {
+                    try {
+                        localStorage.setItem(KEY, JSON.stringify(items));
+                        saved.textContent = '';
+                    } catch (err) {
+                        saved.textContent = '保存できませんでした。端末の空きが足りないかもしれません';
+                    }
+                }
+
+                function toolBtn(label, aria, cls, onClick, off) {
+                    const b = document.createElement('button');
+                    b.type = 'button';
+                    b.className = cls;
+                    b.textContent = label;
+                    b.setAttribute('aria-label', aria);
+                    if (off) b.disabled = true;          // いちばん上の「▲」、いちばん下の「▼」
+                    else b.addEventListener('click', onClick);
+                    return b;
+                }
+
+                function render() {
+                    listEl.replaceChildren();
+                    items.forEach((item, i) => {
+                        const li = document.createElement('li');
+                        li.className = 'hn-item';
+                        const text = document.createElement('span');
+                        text.className = 'hn-item-text';
+                        text.textContent = item.text;   // ★本人が書いた文。innerHTML では入れない
+                        const tools = document.createElement('span');
+                        tools.className = 'hn-item-tools';
+                        tools.appendChild(toolBtn('▲', 'ひとつ上へ', 'hn-move', () => move(i, -1), i === 0));
+                        tools.appendChild(toolBtn('▼', 'ひとつ下へ', 'hn-move', () => move(i, 1), i === items.length - 1));
+                        tools.appendChild(toolBtn('外す', item.text + 'をリストから外す', 'hn-remove', () => remove(i), false));
+                        li.append(text, tools);
+                        listEl.appendChild(li);
+                    });
+                }
+
+                // 並べ替えは▲▼で1つずつ。★指でつまんで動かす形にしていない理由＝
+                //   スマホでは触っただけで動いてしまい、しんどいときに事故になりやすい（設計メモ_A10 8章）
+                function move(i, dir) {
+                    const j = i + dir;
+                    if (j < 0 || j >= items.length) return;
+                    const moved = items[i];
+                    items[i] = items[j];
+                    items[j] = moved;
+                    save();
+                    render();
+                }
+
+                // ★外すときだけ一度たずねる。本人が書いた文なので、押し間違いで消えると戻せない
+                function remove(i) {
+                    const item = items[i];
+                    if (!item) return;
+                    appConfirm('「' + item.text + '」をリストから外しますか？').then(ok => {
+                        if (!ok) return;
+                        items.splice(i, 1);
+                        save();
+                        render();
+                    });
+                }
+
+                function closeAdd() {
+                    addBox.hidden = true;
+                    addToggle.textContent = '＋ 自分で書く';
+                    addToggle.setAttribute('aria-expanded', 'false');
+                }
+
+                // ★書く欄は、押したときだけ開く。ふだんは空の入力欄が待ち構えていない（非・要求）
+                addToggle.addEventListener('click', () => {
+                    const open = addBox.hidden;
+                    if (!open) { closeAdd(); return; }
+                    addBox.hidden = false;
+                    addToggle.textContent = 'とじる ▲';
+                    addToggle.setAttribute('aria-expanded', 'true');
+                    input.focus();
+                });
+
+                addBtn.addEventListener('click', () => {
+                    const text = input.value.trim();
+                    if (!text) return;        // 空のまま押されても、何も言わない（叱らない）
+                    items.push({
+                        id: 'hn' + Date.now() + Math.random().toString(36).slice(2, 7),
+                        text: text,
+                        from: 'self',         // 自分で書いたもの。あとで「選択肢から」入れたものと見分けるため
+                        addedAt: new Date().toISOString()
+                    });
+                    save();
+                    render();
+                    input.value = '';
+                    closeAdd();
+                });
+
+                render();
+            });
+        }
+        return { mount };
+    })();
+
     // === 連絡先（A13）。2026-09-19 永田さん承認・★仮の実装（実物を見てから見直す前提） ===
     (function setupEmergency() {
         const modal = document.getElementById('emergencyModal');
@@ -3622,6 +3756,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 // ★自由帳を先に写す。中の文も、このあとの wrapKinsoku で包まれるようにするため
                 //   （包まないと「こともで／きる」のように語の途中で折り返す。落とし穴メモ 11の追記(1)）
                 jiyucho.mount(body);
+                // ★ヘルプ・ナウリストも同じ理由で先に写す（地の文が wrapKinsoku で包まれるように）。
+                //   ただし本人が入れた項目は、このあと JS が組み立てるので包まれない（本人の文なので、ふつうの折り返し）
+                helpNowList.mount(body);
                 wrapKinsoku(body);
                 currentSkill = id;
             }
