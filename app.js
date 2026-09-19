@@ -3322,6 +3322,20 @@ document.addEventListener('DOMContentLoaded', () => {
         const tpl = document.getElementById('helpNowListTemplate');
         if (!tpl) return { mount() {} };
 
+        // ジャンル（2026-09-20 永田さん「一旦①でいきましょう」＝★実物を見てから見直す前提のご承認）。
+        // ★並びは永田さんが挙げられた6つの順そのまま。AIが足した2つ（足・音）を最後に置いた。
+        // ★項目の文と、どのジャンルに入るかは index.html 側（data-hn）に1つだけ持つ。ここには名前だけ
+        const GENRES = [
+            { key: 'sit',    name: '座ってできるもの' },
+            { key: 'people', name: '周りに人がいてもできそうなもの' },
+            { key: 'tool',   name: '道具を使うもの' },
+            { key: 'eye',    name: '目を使うもの' },
+            { key: 'hand',   name: '手を使うもの' },
+            { key: 'place',  name: '場所・空間に関わるもの' },
+            { key: 'foot',   name: '足を使うもの' },
+            { key: 'sound',  name: '音に関わるもの' }
+        ];
+
         function load() {
             try {
                 const got = JSON.parse(localStorage.getItem(KEY) || '[]');
@@ -3330,7 +3344,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         function mount(root) {
-            (root || document).querySelectorAll('.helpnow-host').forEach(host => {
+            const scope = root || document;
+            // 27項目の文は、読み物の一覧（.hn-source）から読む。★app.js に写しを持たない
+            const source = [...scope.querySelectorAll('.hn-source li[data-hn]')].map(li => ({
+                text: li.textContent.trim(),
+                genres: li.dataset.hn.split(/\s+/)
+            }));
+
+            scope.querySelectorAll('.helpnow-host').forEach(host => {
                 if (host.dataset.mounted) return;
                 host.dataset.mounted = '1';
                 host.appendChild(tpl.content.cloneNode(true));
@@ -3340,6 +3361,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 const input = host.querySelector('.hn-input');
                 const addBtn = host.querySelector('.hn-add-btn');
                 const saved = host.querySelector('.hn-saved');
+                const browseBtn = host.querySelector('.hn-browse-btn');
+                const browse = host.querySelector('.hn-browse');
+                const genresEl = host.querySelector('.hn-genres');
+                const genreView = host.querySelector('.hn-genre-view');
+                const genreTitle = host.querySelector('.hn-genre-title');
+                const choicesEl = host.querySelector('.hn-choices');
+                const backBtn = host.querySelector('.hn-back');
 
                 let items = load();
 
@@ -3422,19 +3450,106 @@ document.addEventListener('DOMContentLoaded', () => {
                     input.focus();
                 });
 
-                addBtn.addEventListener('click', () => {
-                    const text = input.value.trim();
-                    if (!text) return;        // 空のまま押されても、何も言わない（叱らない）
+                // ★入れる道は1本にまとめる（自分で書くときも、選択肢から入れるときも同じ）
+                function addItem(text, from) {
                     items.push({
                         id: 'hn' + Date.now() + Math.random().toString(36).slice(2, 7),
                         text: text,
-                        from: 'self',         // 自分で書いたもの。あとで「選択肢から」入れたものと見分けるため
+                        from: from,           // 'self'＝自分で書いた／'list'＝選択肢から入れた
                         addedAt: new Date().toISOString()
                     });
                     save();
                     render();
+                }
+                function inList(text) { return items.some(it => it.text === text); }
+
+                addBtn.addEventListener('click', () => {
+                    const text = input.value.trim();
+                    if (!text) return;        // 空のまま押されても、何も言わない（叱らない）
+                    addItem(text, 'self');
                     input.value = '';
                     closeAdd();
+                });
+
+                // === 選択肢から試してみる（ジャンル → 一覧 → 2択） ===
+                const browseLead = host.querySelector('.hn-browse-lead');
+
+                function showGenres() {
+                    genreView.hidden = true;
+                    genresEl.hidden = false;
+                    browseLead.hidden = false;
+                }
+
+                // ★中身が0のジャンルは出さない（押して空っぽ、を作らない）
+                function renderGenres() {
+                    genresEl.replaceChildren();
+                    GENRES.forEach(g => {
+                        if (!source.some(s => s.genres.includes(g.key))) return;
+                        const b = document.createElement('button');
+                        b.type = 'button';
+                        b.className = 'hn-genre-btn';
+                        b.textContent = g.name;
+                        b.addEventListener('click', () => {
+                            genreTitle.textContent = g.name;
+                            genresEl.hidden = true;
+                            browseLead.hidden = true;
+                            genreView.hidden = false;
+                            renderChoices(g);
+                        });
+                        genresEl.appendChild(b);
+                    });
+                }
+
+                // ★もうリストにあるものは、2択を出さずに「リストにあります」と出すだけ。
+                //   同じものが二重に入らないようにするため
+                function renderChoices(g) {
+                    choicesEl.replaceChildren();
+                    source.filter(s => s.genres.includes(g.key)).forEach(s => {
+                        const li = document.createElement('li');
+                        li.className = 'hn-choice';
+                        if (inList(s.text)) {
+                            const already = document.createElement('p');
+                            already.className = 'hn-choice-in';
+                            already.textContent = s.text;
+                            const mark = document.createElement('p');
+                            mark.className = 'hn-choice-mark';
+                            mark.textContent = 'リストにあります';
+                            li.append(already, mark);
+                            choicesEl.appendChild(li);
+                            return;
+                        }
+                        const btn = document.createElement('button');
+                        btn.type = 'button';
+                        btn.className = 'hn-choice-btn';
+                        btn.textContent = s.text;
+                        const ask = document.createElement('div');
+                        ask.className = 'hn-choice-ask';
+                        ask.hidden = true;
+                        const yes = document.createElement('button');
+                        yes.type = 'button';
+                        yes.className = 'hn-choice-yes';
+                        yes.textContent = 'わたしのヘルプ・ナウ！リストに入れる';
+                        const no = document.createElement('button');
+                        no.type = 'button';
+                        no.className = 'hn-choice-no';
+                        no.textContent = '今は入れない';
+                        ask.append(yes, no);
+                        // ★押しても、その場で開くだけ。入るかどうかは、もう一度選んでから
+                        btn.addEventListener('click', () => { ask.hidden = !ask.hidden; });
+                        yes.addEventListener('click', () => { addItem(s.text, 'list'); renderChoices(g); });
+                        no.addEventListener('click', () => { ask.hidden = true; });
+                        li.append(btn, ask);
+                        choicesEl.appendChild(li);
+                    });
+                }
+
+                backBtn.addEventListener('click', showGenres);
+
+                browseBtn.addEventListener('click', () => {
+                    const open = browse.hidden;
+                    browse.hidden = !open;
+                    browseBtn.textContent = open ? 'とじる ▲' : '選択肢から試してみる';
+                    if (open) { showGenres(); renderGenres(); }
                 });
 
                 render();

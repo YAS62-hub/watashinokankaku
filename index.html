@@ -1005,33 +1005,43 @@
                     <div class="skill-topics">
                         <details class="skill-topic">
                             <summary>ヘルプ・ナウ！のアイディア</summary>
-                            <ul class="skill-topic-list">
-                                <li>コップ１杯、お水を飲んでみる</li>
-                                <li>目を閉じて、ゆっくり開けて、周囲をゆっくり見渡す</li>
-                                <li>20,19,18と数えながら歩く</li>
-                                <li>今、目に見える「色」の名前を６つあげる</li>
-                                <li>周りを見渡し、気になるもの、なんとなく目に止まるものを観察してみる</li>
-                                <li>木や草花、川、山、空など、自然の中にあるものを観察する</li>
-                                <li>そばにあるものに触れてみる</li>
-                                <li>聞こえてくる「音」を観察する</li>
-                                <li>手や背中を壁などにぐっと押しつけてみる</li>
-                                <li>足裏が地面に触れていることを感じながら、歩く</li>
-                                <li>椅子に座って、座面とお尻の感覚、背もたれの感覚をトラッキングする</li>
-                                <li>重心を移動して、右、左、真ん中、ちょうどいいところを探す</li>
-                                <li>おへその少し下あたり（丹田）に手でそっと触れる</li>
-                                <li>腎臓のあたり（左右の腰のあたり）をそっと触れる</li>
-                                <li>つま先立ちをして、かかとを何回かとん、とん、とんと床につける</li>
-                                <li>座った姿勢から、できるだけゆっくり立ち上がる（できるだけゆっくり。筋肉の力の入り具合、抜け具合、重心の移動など好奇心を寄せる）</li>
-                                <li>顔の周りを優しくマッサージする</li>
-                                <li>口の中で舌ベロをぐるぐると動かして、休憩する</li>
-                                <li>「ヴー」「ヴォー」などの音を、ゆっくり、長く息を吐きながら出す。</li>
-                                <li>両手をギュッとまっすぐ伸ばし、自分のスペースを作る</li>
-                                <li>両手を伸ばしたまま、自分の周囲を囲うように動かす</li>
-                                <li>安心する場所に移動する</li>
-                                <li>好きな感触のものをにぎる、ふれる</li>
-                                <li>クッションなどをぎゅーっとゆっくり力をこめて押す、にぎる</li>
-                                <li>肩などをほんの少し緊張させ、力を抜く</li>
-                                <li>好きな香りをかぐ</li>
+                            <!-- ★2026-09-20：各行に data-hn（ジャンルの札）を付けた。
+                                 ★画面に出る文字は1文字も変えていない（属性は目に見えない）。ボタンも付けていない。
+                                   読み物は読み物のまま（永田さんのご決定・設計メモ_A10 2章）。
+                                 ★なぜここに付けるか＝27項目の文を app.js にもう1つ持つと、同じ文が2か所になり、
+                                   直したときに片方だけ古くなる（CLAUDE.md 5章の7）。文と札を同じ場所に置けば、正は1つで済む。
+                                 ★札の中身（AIの下書き。永田さんが実物を見て直す前提）：
+                                   sit=座ってできる／people=周りに人がいてもできそう／tool=道具を使う／
+                                   eye=目を使う／hand=手を使う／place=場所・空間に関わる／foot=足を使う／sound=音に関わる
+                                 ★最後の「他の健康法をゆっくり行う」だけ札が無い＝置き場が未決（設計メモ_A10 6-4）。
+                                   AIが黙って決めないため、わざと付けていない -->
+                            <ul class="skill-topic-list hn-source">
+                                <li data-hn="sit people tool hand">コップ１杯、お水を飲んでみる</li>
+                                <li data-hn="sit people eye">目を閉じて、ゆっくり開けて、周囲をゆっくり見渡す</li>
+                                <li data-hn="foot place">20,19,18と数えながら歩く</li>
+                                <li data-hn="sit people eye">今、目に見える「色」の名前を６つあげる</li>
+                                <li data-hn="sit people eye">周りを見渡し、気になるもの、なんとなく目に止まるものを観察してみる</li>
+                                <li data-hn="eye place">木や草花、川、山、空など、自然の中にあるものを観察する</li>
+                                <li data-hn="sit people hand">そばにあるものに触れてみる</li>
+                                <li data-hn="sit people sound">聞こえてくる「音」を観察する</li>
+                                <li data-hn="hand place">手や背中を壁などにぐっと押しつけてみる</li>
+                                <li data-hn="foot place">足裏が地面に触れていることを感じながら、歩く</li>
+                                <li data-hn="sit people">椅子に座って、座面とお尻の感覚、背もたれの感覚をトラッキングする</li>
+                                <li data-hn="sit people foot">重心を移動して、右、左、真ん中、ちょうどいいところを探す</li>
+                                <li data-hn="sit people hand">おへその少し下あたり（丹田）に手でそっと触れる</li>
+                                <li data-hn="sit people hand">腎臓のあたり（左右の腰のあたり）をそっと触れる</li>
+                                <li data-hn="foot">つま先立ちをして、かかとを何回かとん、とん、とんと床につける</li>
+                                <li data-hn="sit foot">座った姿勢から、できるだけゆっくり立ち上がる（できるだけゆっくり。筋肉の力の入り具合、抜け具合、重心の移動など好奇心を寄せる）</li>
+                                <li data-hn="sit hand">顔の周りを優しくマッサージする</li>
+                                <li data-hn="sit people">口の中で舌ベロをぐるぐると動かして、休憩する</li>
+                                <li data-hn="sound">「ヴー」「ヴォー」などの音を、ゆっくり、長く息を吐きながら出す。</li>
+                                <li data-hn="hand place">両手をギュッとまっすぐ伸ばし、自分のスペースを作る</li>
+                                <li data-hn="hand place">両手を伸ばしたまま、自分の周囲を囲うように動かす</li>
+                                <li data-hn="place">安心する場所に移動する</li>
+                                <li data-hn="sit people tool hand">好きな感触のものをにぎる、ふれる</li>
+                                <li data-hn="sit tool hand">クッションなどをぎゅーっとゆっくり力をこめて押す、にぎる</li>
+                                <li data-hn="sit people">肩などをほんの少し緊張させ、力を抜く</li>
+                                <li data-hn="sit people tool">好きな香りをかぐ</li>
                                 <li>他の健康法をゆっくり行う</li>
                             </ul>
                             <!-- ★2026-09-19 永田さんのご判断で、この1文は箇条書きから外して地の文にした。
@@ -1515,6 +1525,19 @@
         <div class="hn-add" hidden>
             <textarea class="emg-textarea hn-input" aria-label="リストに入れることを書く"></textarea>
             <button type="button" class="hn-add-btn">リストに入れる</button>
+        </div>
+        <!-- 選択肢から試してみる（2026-09-20）。ジャンル → そのジャンルの一覧 → 2択、の3段。
+             ★並びは設計メモ_A10 3章の図のとおり（「＋ 自分で書く」の下）。
+             ★「どんなものを探しますか」「ジャンルにもどる」はAIが書いた操作の言葉（永田さんの原文ではない） -->
+        <button type="button" class="hn-browse-btn">選択肢から試してみる</button>
+        <div class="hn-browse" hidden>
+            <p class="hn-browse-lead">どんなものを探しますか</p>
+            <div class="hn-genres"></div>
+            <div class="hn-genre-view" hidden>
+                <button type="button" class="hn-back">◂ ジャンルにもどる</button>
+                <p class="hn-genre-title"></p>
+                <ul class="hn-choices"></ul>
+            </div>
         </div>
         <p class="hn-note">咄嗟の時にできるように、日頃から試してみるのも役立つかもしれません。</p>
         <p class="emg-saved hn-saved" aria-live="polite"></p>
