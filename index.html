@@ -871,14 +871,52 @@
             <!-- 健康法４の説明（第4回 slide25）。録音なし -->
             <template id="skillTpl-4-0" data-kicker="健康法４　ジェスチャリング" data-title="ジェスチャリングの説明">
                 <div class="skill-know">
-                    <div class="skill-illust" aria-hidden="true">
-                        <!-- 自分を抱きしめるしぐさの絵：AI（Claude）が描いた図形。スライドの絵の「イメージ」だけを借り、木の絵と同じ描き方・同じ色にした -->
-                        <svg viewBox="0 0 240 150" xmlns="http://www.w3.org/2000/svg">
-                            <ellipse cx="120" cy="136" rx="72" ry="9" fill="#E6E0D3"/>
-                            <path d="M84 134 C 84 96, 96 74, 120 74 C 144 74, 156 96, 156 134 Z" fill="#A9BCA3"/>
-                            <circle cx="120" cy="46" r="24" fill="#E9D3BC"/>
-                            <path d="M108 48 Q 112 52, 116 48 M124 48 Q 128 52, 132 48" stroke="#9C7F60" stroke-width="2" fill="none" stroke-linecap="round"/>
-                            <path d="M92 92 C 108 100, 130 108, 146 112 M148 92 C 132 100, 110 108, 94 112" stroke="#DFC5AA" stroke-width="11" fill="none" stroke-linecap="round"/>
+                    <div class="skill-illust skill-illust--wide" aria-hidden="true">
+                        <!-- 自分を抱きしめる／背筋をのばす／両手をあげる の3つ：AI（Claude）が描いた図形。
+                             素材サイトの絵ではないので、利用条件の確認は要らない。
+                             寸法・色づかいは、グラウンディングの説明（3つ横並び）とまったく同じに揃えた。
+                             ★2026-09-19 永田さん承認済み（①）。それまではセルフハグ1つだけだった。
+                             ★きっかけ＝永田さん「挿絵がセルフハグだけですね。…グラウンディングのように
+                               複数パターンを載せるのはどうでしょうか？」
+                             ★調べて分かったこと：この画面の説明文の出どころ slide11 には、
+                               永田さんご自身が絵を3つ横一列に置いておられた
+                               （左＝セルフハグ／中＝両手をあげる／右＝ねこ）。アプリは左の1つだけを写していた。
+                             ★3つの選び方＝同じ画面の活用ヒントの問い「落ち着く／自信／喜び」と呼応させた。
+                               背筋をのばす＝slide16 アイディア集「ちょっと猫背になってみる→背筋を伸ばしてみる」、
+                               両手をあげる＝slide11 の中央の絵＋slide16「手を挙げてみる」。
+                               ねこ（slide11 の右）は、置かれた意図が記録に無いので入れていない。
+                             ★顔（閉じた目）は描いていない。3つ横並びにすると小さくなり、
+                               グラウンディングの3人も顔は描いていないため、そちらに揃えた -->
+                        <svg viewBox="0 0 330 150" xmlns="http://www.w3.org/2000/svg">
+                            <!-- ★3人とも腕は素肌の色 #DFC5AA。胴と同じ緑にすると、
+                                 胴に近づく腕（抱きしめる・腰にあてる）が胴に沈んで見えなくなる。
+                                 もとのセルフハグの絵も、腕はこの色だった -->
+                            <!-- 自分を抱きしめる（気持ちが落ち着くしぐさ） -->
+                            <ellipse cx="55" cy="134" rx="46" ry="7" fill="#E6E0D3"/>
+                            <path d="M47 96 L 45 126 M63 96 L 65 126" stroke="#9C7F60" stroke-width="9" stroke-linecap="round"/>
+                            <ellipse cx="40" cy="129" rx="9" ry="5" fill="#E9D3BC"/><ellipse cx="70" cy="129" rx="9" ry="5" fill="#E9D3BC"/>
+                            <rect x="42" y="56" width="26" height="46" rx="13" fill="#A9BCA3"/>
+                            <path d="M43 64 C 44 78, 56 87, 69 86 M67 64 C 66 78, 54 87, 41 86" stroke="#DFC5AA" stroke-width="8" fill="none" stroke-linecap="round"/>
+                            <circle cx="55" cy="40" r="14" fill="#E9D3BC"/>
+                            <!-- 背筋をのばして、腰に手（自信につながるしぐさ）。
+                                 胴と頭を2pxだけ高くして、背が伸びた形にしている。
+                                 ★腕は「ひじを外へ張って、わきに三角の空きを作る」形にした。
+                                   腕を胴に沿わせる描き方（腕をひらく／腕を下ろす）も試したが、
+                                   どちらも腕が胴の輪郭に溶けて「太った体」に見えるだけだった（3案を並べて確認） -->
+                            <ellipse cx="165" cy="134" rx="46" ry="7" fill="#E6E0D3"/>
+                            <path d="M157 96 L 155 126 M173 96 L 175 126" stroke="#9C7F60" stroke-width="9" stroke-linecap="round"/>
+                            <ellipse cx="150" cy="129" rx="9" ry="5" fill="#E9D3BC"/><ellipse cx="180" cy="129" rx="9" ry="5" fill="#E9D3BC"/>
+                            <rect x="152" y="54" width="26" height="48" rx="13" fill="#A9BCA3"/>
+                            <path d="M158 64 L 143 78 L 155 89 M172 64 L 187 78 L 175 89" stroke="#DFC5AA" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                            <circle cx="165" cy="38" r="14" fill="#E9D3BC"/>
+                            <!-- 両手をあげる（喜びと関連するしぐさ）。★きらきら等の飾りは足していない。
+                                 「喜びましょう」と促す絵にしないため（非・要求の原則） -->
+                            <ellipse cx="275" cy="134" rx="46" ry="7" fill="#E6E0D3"/>
+                            <path d="M267 96 L 265 126 M283 96 L 285 126" stroke="#9C7F60" stroke-width="9" stroke-linecap="round"/>
+                            <ellipse cx="260" cy="129" rx="9" ry="5" fill="#E9D3BC"/><ellipse cx="290" cy="129" rx="9" ry="5" fill="#E9D3BC"/>
+                            <rect x="262" y="56" width="26" height="46" rx="13" fill="#A9BCA3"/>
+                            <path d="M265 64 L 253 38 M285 64 L 297 38" stroke="#DFC5AA" stroke-width="7" fill="none" stroke-linecap="round"/>
+                            <circle cx="275" cy="40" r="14" fill="#E9D3BC"/>
                         </svg>
                     </div>
                     <div class="skill-intro">
