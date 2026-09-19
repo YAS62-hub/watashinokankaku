@@ -2021,6 +2021,12 @@ input:checked + .toggle-slider::before {
 }
 .skill-topic-list li::marker { color: var(--text-light); }
 
+/* 箇条書きに混ざっていた「コメント」を、地の文として外に出したもの（2026-09-19 永田さんのご判断）
+   ・リストの下に置くとき ＝「これで全部ではない」という閉じ方（ヘルプ・ナウ！の「他、十人十色〜」）
+   ・リストの上に置くとき ＝ 答えの幅を先に示す（リソーシングの「香り、音、イメージ〜」） */
+.skill-topic-note { margin-bottom: 14px; }
+.skill-topic-note-lead { margin: 2px 0 10px; }
+
 /* ===== 連絡先（A13）。2026-09-19 永田さん承認・★仮の実装 =====
    色は、このアプリが「ハイゾーン」に使っている濃いオレンジ茶（--btn-high-text）。
    ★赤にしなかった理由＝アースカラーの画面から浮くため。ただし iChill は赤の大文字で、
