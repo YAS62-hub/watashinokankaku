@@ -1711,6 +1711,18 @@ input:checked + .toggle-slider::before {
     overflow-wrap: normal;   /* anywhere にすると禁則が効かず、句読点が行頭に来る */
 }
 
+/* ★禁則をきびしい側にする（2026-09-19）
+   line-break の初期値 auto は、小さい「ゃゅょっ」を行頭に置くことがある。
+   （実例：健康法１「両掌をくっつけてみるのはいかがでし／ょうか。」）
+   strict にすると、句読点と同じように行頭から追い出される。 */
+.modal-content .skill-intro,
+.modal-content .skill-topics,
+.modal-content .skill-steps,
+.modal-content .skill-promise,
+#skillBody {
+    line-break: strict;
+}
+
 /* 説明の画面：スライドの見出し（「接点に気づく」）と、例の行 */
 .skill-intro p.skill-lead {
     font-weight: 500;
@@ -1997,12 +2009,14 @@ input:checked + .toggle-slider::before {
     margin-left: 8px;
 }
 .skill-topic[open] summary::after { content: '▲'; }
+/* ★2026-09-19：word-break:keep-all と overflow-wrap:anywhere をやめた。
+   折り返しの役目は .bn（塊）が持っており、入りきらない塊は素の文にもどすようにした。
+   素の文にもどった部分に anywhere が残っていると、そこだけ禁則が効かず
+   「良い加減。／It's OK」のように句点が行頭に来ていた（2026-09-19に実測）。 */
 .skill-topic p {
     font-size: 0.85rem;
     line-height: 1.8;
     color: var(--text-color);
-    word-break: keep-all;
-    overflow-wrap: anywhere;
 }
 .skill-topic p + p { margin-top: 6px; }
 .skill-topic p:last-child { margin-bottom: 14px; }
@@ -2017,7 +2031,7 @@ input:checked + .toggle-slider::before {
     line-height: 1.8;
     color: var(--text-color);
     margin-bottom: 6px;
-    overflow-wrap: anywhere;   /* 読点が行頭に来ないよう、keep-all は付けない */
+    /* ★2026-09-19：overflow-wrap:anywhere をやめた（.skill-topic p と同じ理由） */
 }
 .skill-topic-list li::marker { color: var(--text-light); }
 

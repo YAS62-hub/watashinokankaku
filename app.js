@@ -3530,6 +3530,39 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
+        // ★入りきらない塊は、包みを外して素の文にもどす（2026-09-19）
+        //   理由：.bn は inline-block なので、1行に入りきらない塊は「1行まるごと」を使う。
+        //   すると手前の行に大きな空きができ、「今、」だけの行が生まれていた。
+        //     今、
+        //     あなたにとって助けに
+        //     なっているのは、
+        //   包みを外した塊は、ふつうの日本語として折り返す（ブラウザの禁則が効くので
+        //   句読点は行頭に来ない）。入りきる塊は包んだままなので、
+        //   「思い出、／物、／人、」のようなきれいな折り返しは残る。
+        //   ★幅は画面に出てからでないと測れない（隠れていると 0 になる）ので、
+        //     練習の画面を開いた直後と、たたみ札を開いた直後に走らせる。
+        function unwrapWideChunks(root) {
+            root.querySelectorAll('.bn').forEach(span => {
+                // 幅を持つ親（p・li など）を探す。まだ隠れているところは、開いたときにやり直す
+                let box = span.parentElement;
+                while (box && !box.clientWidth) box = box.parentElement;
+                if (!box) return;
+                const cs = getComputedStyle(box);
+                const avail = box.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+                const probe = document.createElement('span');
+                probe.textContent = span.textContent;
+                probe.style.cssText = 'position:absolute;visibility:hidden;white-space:nowrap';
+                span.parentNode.insertBefore(probe, span);   // 同じ親に入れて、同じ書体で測る
+                const width = probe.getBoundingClientRect().width;
+                probe.remove();
+                if (width > avail) {
+                    const parent = span.parentNode;
+                    span.replaceWith(document.createTextNode(span.textContent));
+                    parent.normalize();
+                }
+            });
+        }
+
         let currentSkill = null;
         function showSkill(id) {
             const tpl = document.getElementById('skillTpl-' + id);
@@ -3552,10 +3585,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 //   （包まないと「こともで／きる」のように語の途中で折り返す。落とし穴メモ 11の追記(1)）
                 jiyucho.mount(body);
                 wrapKinsoku(body);
+                // 画面に出てから幅を測る（この時点ではまだ隠れている）。
+                // rAF は描かれる前に走るので、包みが外れる様子は目に見えない
+                requestAnimationFrame(() => unwrapWideChunks(body));
                 currentSkill = id;
             }
             return true;
         }
+
+        // たたみ札（details）は、閉じているあいだ中身の幅が 0 なので測れない。
+        // 開いた瞬間に、その中の塊だけ測り直す。★toggle は上に伝わらないので捕まえる側（true）で拾う
+        body.addEventListener('toggle', (e) => {
+            if (e.target.open) unwrapWideChunks(e.target);
+        }, true);
 
         // 一覧を通らずに開いたか（いまはリソース箱の入口だけ）。閉じたときの戻り先を分ける
         let openedOutsideList = false;
