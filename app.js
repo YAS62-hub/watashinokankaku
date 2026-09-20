@@ -2580,6 +2580,11 @@ document.addEventListener('DOMContentLoaded', () => {
             '　作った日　：' + y + '年' + m + '月' + d + '日\n' +
             '　保存した場所：（　　　　　　　）← ご自分で書き足してください';
         backupNoteArea.style.display = '';
+
+        // 「入らないもの」の案内も、同じときに出す（作る前ではなく、作ったあと）。
+        // 押す前から出しておくと、押すかどうかを迷わせる材料が増えるため。
+        const missing = document.getElementById('backupMissingArea');
+        if (missing) missing.style.display = '';
     }
 
     if (copyBackupNoteBtn && backupNoteText) {
