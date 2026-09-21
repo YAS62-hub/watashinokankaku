@@ -3585,7 +3585,14 @@ document.addEventListener('DOMContentLoaded', () => {
                         no.textContent = '今は入れない';
                         ask.append(yes, no);
                         // ★押しても、その場で開くだけ。入るかどうかは、もう一度選んでから
-                        btn.addEventListener('click', () => { ask.hidden = !ask.hidden; });
+                        // ★同時に開くのは1つだけ。別の項目を押したら、前に開いていた2択は閉じる。
+                        //   閉じないと2択が並んでいき、どれに答えているのか分からなくなる
+                        //   （永田さん「選択肢が多いのはフリーズを誘発」2026-09-17）。2026-09-21に直した
+                        btn.addEventListener('click', () => {
+                            const open = ask.hidden;
+                            choicesEl.querySelectorAll('.hn-choice-ask').forEach(el => { el.hidden = true; });
+                            ask.hidden = !open;
+                        });
                         yes.addEventListener('click', () => { addItem(s.text, 'list'); renderChoices(g); });
                         no.addEventListener('click', () => { ask.hidden = true; });
                         li.append(btn, ask);
