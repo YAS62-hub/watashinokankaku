@@ -2264,6 +2264,15 @@ input:checked + .toggle-slider::before {
     color: var(--btn-low-text);
     margin: 4px 0 10px;
 }
+/* ジャンルに属さない項目の置き場（2026-09-21）。ジャンルのボタンの下に、線で区切って置く。
+   ★hidden が効くよう display は指定しない（.hn-genres で踏んだのと同じ落とし穴） */
+.hn-free { margin-top: 14px; padding-top: 12px; border-top: 1px solid #EFEBE0; }
+.hn-free[hidden] { display: none; }
+.skill-topic p.hn-free-lead {
+    font-size: 0.78rem;
+    color: var(--text-light);
+    margin: 0 0 8px;
+}
 .hn-choices { list-style: none; margin: 0; padding: 0; }
 .hn-choice { margin-bottom: 8px; }
 .hn-choice-btn {

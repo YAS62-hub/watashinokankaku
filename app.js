@@ -3395,10 +3395,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
         function mount(root) {
             const scope = root || document;
-            // 27項目の文は、読み物の一覧（.hn-source）から読む。★app.js に写しを持たない
+            // 項目の文は、読み物の一覧（.hn-source）から読む。★app.js に写しを持たない
             const source = [...scope.querySelectorAll('.hn-source li[data-hn]')].map(li => ({
                 text: li.textContent.trim(),
                 genres: li.dataset.hn.split(/\s+/)
+            }));
+            // ★ジャンルに属さない項目（data-hn-free）。いまは「他の健康法をゆっくり行う」だけ。
+            //   ジャンルのボタンの下に別立てで出す（2026-09-21 永田さんのご指示）
+            const freeSource = [...scope.querySelectorAll('.hn-source li[data-hn-free]')].map(li => ({
+                text: li.textContent.trim(),
+                genres: []
             }));
 
             scope.querySelectorAll('.helpnow-host').forEach(host => {
@@ -3416,7 +3422,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 const genresEl = host.querySelector('.hn-genres');
                 const genreView = host.querySelector('.hn-genre-view');
                 const genreTitle = host.querySelector('.hn-genre-title');
-                const choicesEl = host.querySelector('.hn-choices');
+                // ★「.hn-choices」は2か所にある（ジャンルの一覧と、ジャンルに属さない項目の一覧）。
+                //   場所まで書かないと、先に出てくる方を拾ってしまう（2026-09-21に踏んだ）
+                const choicesEl = host.querySelector('.hn-genre-view .hn-choices');
                 const backBtn = host.querySelector('.hn-back');
 
                 let items = load();
@@ -3523,11 +3531,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // === 選択肢から試してみる（ジャンル → 一覧 → 2択） ===
                 const browseLead = host.querySelector('.hn-browse-lead');
+                const freeBox = host.querySelector('.hn-free');
+                const freeList = host.querySelector('.hn-free-list');
 
                 function showGenres() {
                     genreView.hidden = true;
                     genresEl.hidden = false;
                     browseLead.hidden = false;
+                    renderFree();            // 入れたあとに戻ってきたら「リストにあります」に変わる
                 }
 
                 // ★中身が0のジャンルは出さない（押して空っぽ、を作らない）
@@ -3543,6 +3554,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             genreTitle.textContent = g.name;
                             genresEl.hidden = true;
                             browseLead.hidden = true;
+                            if (freeBox) freeBox.hidden = true;
                             genreView.hidden = false;
                             renderChoices(g);
                         });
@@ -3552,9 +3564,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // ★もうリストにあるものは、2択を出さずに「リストにあります」と出すだけ。
                 //   同じものが二重に入らないようにするため
-                function renderChoices(g) {
+                // ★ジャンルの一覧と、ジャンルに属さない項目の両方から呼ぶ。
+                //   同じ作りの札を2か所に書かないため（正は1つ）
+                function fillChoices(choicesEl, list, redraw) {
                     choicesEl.replaceChildren();
-                    source.filter(s => s.genres.includes(g.key)).forEach(s => {
+                    list.forEach(s => {
                         const li = document.createElement('li');
                         li.className = 'hn-choice';
                         if (inList(s.text)) {
@@ -3593,11 +3607,24 @@ document.addEventListener('DOMContentLoaded', () => {
                             choicesEl.querySelectorAll('.hn-choice-ask').forEach(el => { el.hidden = true; });
                             ask.hidden = !open;
                         });
-                        yes.addEventListener('click', () => { addItem(s.text, 'list'); renderChoices(g); });
+                        yes.addEventListener('click', () => { addItem(s.text, 'list'); redraw(); });
                         no.addEventListener('click', () => { ask.hidden = true; });
                         li.append(btn, ask);
                         choicesEl.appendChild(li);
                     });
+                }
+
+                function renderChoices(g) {
+                    fillChoices(choicesEl, source.filter(s => s.genres.includes(g.key)), () => renderChoices(g));
+                }
+
+                // ★ジャンルに属さない項目（いまは「他の健康法をゆっくり行う」だけ）。
+                //   ジャンルのボタンの下に、別立てで出す。中身が0なら箱ごと出さない
+                function renderFree() {
+                    if (!freeBox || !freeList) return;
+                    if (!freeSource.length) { freeBox.hidden = true; return; }
+                    freeBox.hidden = false;
+                    fillChoices(freeList, freeSource, renderFree);
                 }
 
                 backBtn.addEventListener('click', showGenres);
