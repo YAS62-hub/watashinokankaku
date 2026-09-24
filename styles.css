@@ -1066,6 +1066,80 @@ input:checked + .toggle-slider::before {
     height: 250px;
     position: relative;
     border: 1px solid rgba(0,0,0,0.03);
+    display: flex;
+}
+
+/* 絵文字の目盛り。波をなぞっても左に残る。高さの位置は app.js が波に合わせて決める */
+.wave-axis {
+    position: relative;
+    width: 24px;
+    flex-shrink: 0;
+}
+.wave-axis span {
+    position: absolute;
+    left: 0;
+    transform: translateY(-50%);
+    font-size: 14px;
+    line-height: 1;
+}
+
+.wave-body {
+    position: relative;
+    flex: 1;
+    min-width: 0;
+}
+
+/* 横線（ハイ・大丈夫・ローの高さ）。これもなぞっても動かない */
+.wave-grid span {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: rgba(0,0,0,0.05);
+}
+
+.wave-scroll {
+    position: relative;
+    height: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    border-radius: 8px;
+}
+.wave-scroll::-webkit-scrollbar { display: none; }
+.wave-scroll:focus { outline: none; }
+.wave-scroll:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* 端の先にまだ記録があるときは、その端を薄くぼかす（なぞれることの手がかり） */
+.wave-scroll.more-left {
+    -webkit-mask-image: linear-gradient(to right, transparent 0, #000 28px);
+    mask-image: linear-gradient(to right, transparent 0, #000 28px);
+}
+.wave-scroll.more-right {
+    -webkit-mask-image: linear-gradient(to left, transparent 0, #000 28px);
+    mask-image: linear-gradient(to left, transparent 0, #000 28px);
+}
+.wave-scroll.more-left.more-right {
+    -webkit-mask-image: linear-gradient(to right, transparent 0, #000 28px, #000 calc(100% - 28px), transparent 100%);
+    mask-image: linear-gradient(to right, transparent 0, #000 28px, #000 calc(100% - 28px), transparent 100%);
+}
+
+.wave-track {
+    position: relative;
+    height: 100%;
+}
+.wave-canvas-box {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+}
+.wave-dates span {
+    position: absolute;
+    bottom: 4px;
+    transform: translateX(-50%);
+    font-size: 10px;
+    color: var(--text-light);
+    white-space: nowrap;
 }
 
 /* Calendar */
