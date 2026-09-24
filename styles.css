@@ -1586,3 +1586,23 @@ input:checked + .toggle-slider::before {
 .photo-gallery-selecting .photo-grid-item.selected img {
     opacity: 0.55;
 }
+
+/* リソース箱の脚注：入りきらないリソースについて（2026-09-18）
+   ★主役にしない。ギャラリーの下に、静かに置く */
+.resource-footnote {
+    margin: 4px 0 90px;     /* 下は＋ボタン（fab）にかからない余白 */
+    font-size: 0.75rem;
+    line-height: 1.9;
+    color: var(--text-light);
+    overflow-wrap: anywhere;
+}
+
+/* 文の塊（読点・句点のうしろで区切ったもの）を、それ自体は折り返さない箱にする（2026-09-18）
+   ★折り返しは塊と塊のあいだでだけ起きるので、句読点が行頭に来ず、語の途中でも切れない。
+   ★塊ひとつが1行に入りきらないときは、塊の中でふつうに折り返す（禁則は効いたまま）。
+   ★overflow-wrap:anywhere にすると、また句読点が行頭に来るので入れないこと。 */
+.bn {
+    display: inline-block;
+    word-break: normal;
+    overflow-wrap: normal;
+}

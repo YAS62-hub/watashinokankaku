@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('App v12.0.6 starting (20260918)...');
+    console.log('App v12.0.7 starting (20260924)...');
     // === 要素の取得 ===
     const tabs = document.querySelectorAll('.tab-content');
     const navItems = document.querySelectorAll('.nav-item');
@@ -2107,7 +2107,7 @@ document.addEventListener('DOMContentLoaded', () => {
             let html = '';
             const randomPhoto = getPhotoStr(randomRes);
             if (randomPhoto) {
-                html += `<img src="${randomPhoto}" alt="お気に入りの写真">`;
+                html += `<img src="${randomPhoto}" alt="今日のリソースの写真">`;
             } else if (randomRes.text && randomRes.text.trim() !== '') {
                 html += `<p style="font-size: 1.1rem; text-align: center;">${randomRes.text.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</p>`;
             }
@@ -2120,7 +2120,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } else {
             todayResourceId = null;
-            todayResourceContent.innerHTML = '<p id="todayWordText">右下の＋ボタンから、あなたのホッとする言葉や写真を追加してみましょう</p>';
+            // ★index.html にも同じ文がある。片方だけ直さないこと
+            todayResourceContent.innerHTML = '<p id="todayWordText"><span class="bn">右下の＋ボタンから、</span><span class="bn">言葉や写真を入れておけます</span></p>';
         }
     }
 
@@ -2394,6 +2395,34 @@ document.addEventListener('DOMContentLoaded', () => {
     const BACKUP_FORMAT = 'watashinokankaku-backup';
     const BACKUP_VERSION = 2;
 
+    // ===== ここから：書き出し・復元に足した「本人が書いた・選んだもの」 =====
+    //
+    // 記録・リソース箱・設定の3つは、下の header に直接書いている。ここはそこに足した分。
+    // どれも「本人が書いた／選んだもの」で、失われると本人しか作り直せない。
+    //
+    // ★元に戻すとき
+    //   この配列から行を消すだけでよい。書き出し側も復元側もこの配列を見ているので、
+    //   消した項目は書き出されず、復元もされなくなる。
+    //   ファイルの format と version は変えていないので、
+    //   ★この版で作ったファイルは、行を消したあとの版でもそのまま復元できる
+    //     （余分な項目は読み飛ばされる。復元側は version を見ていない）。
+    // ★スキル実装（skill-test）の試作では、この一覧にスキル関係の2つ
+    //   （seAppOmamoriJiyucho／seAppHelpNowList）も入っている。スキルが本番に入るときに足す（2026-09-24）
+    const BACKUP_EXTRA_KEYS = [
+        'seAppLabels',           // ホーム画面の3択のボタンの言葉（本人が選んだ／自分で書いた）
+        'seAppToggle'            // 記録後メッセージを出すかどうか（本人が出した「NO」）
+    ];
+    //
+    // ★入れていないもの（2026-09-20に全部見て、意図して外した）
+    //   seAppPushSettings … お守り通知の曜日・時刻。通知の登録は端末ごとに作られるので
+    //       （pushManager.subscribe）、新しい端末に設定だけ戻すと、画面が
+    //       「現在の設定：オン（月曜 8:00頃）」と出すのに通知は来ない。
+    //       ★画面が嘘をつくので入れない。通知は新しい端末で登録し直してもらう
+    //   seAppTutorialSeen / seAppTutorialResumeSlide … 使い方を見たかどうか。
+    //       新しい端末では、また見られてよい
+    //   seAppNote / seAppPhoto … 古い形のリソース。起動時に seAppResources へ移して消える
+    // ===== ここまで =====
+
     if (exportDataBtn) {
         exportDataBtn.addEventListener('click', async () => {
             try {
@@ -2425,6 +2454,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     seAppHistory: historyStr,
                     seAppResources: JSON.stringify(strippedResources)
                 };
+
+                // 本人が書いた・選んだものも一緒に持ち出す（BACKUP_EXTRA_KEYS）。
+                // まだ一度も使っていない項目はファイルに入れない（空の項目で埋めない）。
+                BACKUP_EXTRA_KEYS.forEach(key => {
+                    const value = localStorage.getItem(key);
+                    if (value !== null) header[key] = value;
+                });
 
                 // メモリ負荷を最小限に抑えるため、単一の巨大な文字列ではなく配列としてBlobに渡す
                 const blob = new Blob(
@@ -2493,6 +2529,11 @@ document.addEventListener('DOMContentLoaded', () => {
             '　作った日　：' + y + '年' + m + '月' + d + '日\n' +
             '　保存した場所：（　　　　　　　）← ご自分で書き足してください';
         backupNoteArea.style.display = '';
+
+        // 「入らないもの」の案内も、同じときに出す（作る前ではなく、作ったあと）。
+        // 押す前から出しておくと、押すかどうかを迷わせる材料が増えるため。
+        const missing = document.getElementById('backupMissingArea');
+        if (missing) missing.style.display = '';
     }
 
     if (copyBackupNoteBtn && backupNoteText) {
@@ -2616,6 +2657,14 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('seAppSettings', header.seAppSettings || '{}');
         localStorage.setItem('seAppHistory', header.seAppHistory || '[]');
         localStorage.setItem('seAppResources', header.seAppResources || '[]');
+
+        // 本人が書いた・選んだもの（BACKUP_EXTRA_KEYS）。
+        // ★ファイルに入っていない項目は、この端末にあるものをそのまま残す（消さない）。
+        //   その項目ができる前に作られた古いファイルを復元したときに、
+        //   ファイルが持っていられなかったものまで消してしまわないため。
+        BACKUP_EXTRA_KEYS.forEach(key => {
+            if (typeof header[key] === 'string') localStorage.setItem(key, header[key]);
+        });
 
         // 今回のファイルに入っていなかった写真は、どこからも参照されないので消す。
         // 古い形式のファイルは写真を全部そのかたまりに持っているので、
