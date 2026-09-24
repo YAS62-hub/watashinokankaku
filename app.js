@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('App v12.0.7 starting (20260924)...');
+    console.log('App v12.0.8 starting (20260924)...');
     // === 要素の取得 ===
     const tabs = document.querySelectorAll('.tab-content');
     const navItems = document.querySelectorAll('.nav-item');
@@ -520,6 +520,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
             
+            // 振り返りを開いたら、波を並べ直す（隠れている間は幅が測れないため）
+            if (targetId === 'reflectionTab') layoutWave(true);
+
             // タブを切り替えたらトーストを消す
             hideToast();
         });
@@ -1499,6 +1502,42 @@ document.addEventListener('DOMContentLoaded', () => {
     let chartInstance = null;
     let currentCalDate = new Date();
 
+    // --- 波（グラフ） ---
+    // 波は横になぞって、前の記録へさかのぼれる（2026-09-24・永田さんの案）。
+    // ★横軸は「日付」ではなく「記録した順番」。記録の無い日・月は、波の上には出てこない。
+    //   記録の少ない月でも、点は間をあけずにつながる（抜けを見せない）。
+    // ★カレンダーの月は「波の右端に見えている記録」の月に合わせる。◀▶を押したときも同じ決まりで、
+    //   その月の最後の記録が右端に来るよう波を動かす。なぞっても押しても、同じ決まりで合う。
+    //   記録の無い月へ◀で行ったときは、前後の月のつなぎ目で静かに止める（何も書き添えない）。
+    // ★全部の記録を1枚に描くと、記録の多い方では iPhone の描ける大きさを超えて真っ白になる。
+    //   だから描くのは見えているあたりの WAVE_WINDOW 件だけにして、なぞるにつれて描き直す。
+    // ★点の位置は、どこでも「WAVE_PAD + 通し番号 × waveStep」。日付・描き直し・右端の判定は
+    //   すべてこの1つの式に合わせてある。ずらすときは全部一緒に。
+    const WAVE_POINTS_PER_VIEW = 50; // 1画面に入る点の数（以前の「最新50件」と同じ見え方）
+    const WAVE_WINDOW = 240;         // 一度に描く点の数
+    const WAVE_MARGIN = 40;          // 描いた範囲の端までこの件数に近づいたら、描き直す
+    const WAVE_PAD = 12;             // 波の左右の余白（px）
+    const WAVE_PAD_TOP = 10;
+    const WAVE_PAD_BOTTOM = 24;      // 日付を書く分
+    const WAVE_DATE_GAP = 34;        // 日付と日付の最小の間隔（px）。これより近いと重なるので省く
+    let waveHistory = [];            // すべての記録（古い→新しい）
+    let waveScores = [];
+    let waveDaily = {};
+    let waveStep = 0;                // 点と点の間隔（px）
+    let waveWindowStart = 0;
+    let waveProgrammatic = false;    // こちらから波を動かしている間は、カレンダーを合わせない
+    let waveProgrammaticTarget = 0;
+    let waveProgrammaticTimer = null;
+    const waveScrollEl = document.getElementById('waveScroll');
+
+    function scoreOfRecord(r) {
+        // 過去データは 'high' 'mid' 'low' の文字で入っていることがある（100／50／0として扱う）
+        if (!isNaN(parseInt(r.type))) return parseInt(r.type);
+        if (r.type === 'high') return 100;
+        if (r.type === 'mid') return 50;
+        return 0; // low
+    }
+
     function renderReflection() {
         let history = JSON.parse(localStorage.getItem('seAppHistory') || '[]');
         
@@ -1514,123 +1553,279 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             dailyData[dateStr].push(r);
         });
-        // --- グラフ：時間軸に沿った日内変動を描画 ---
-        const recentHistory = history.slice(-50); // 最新50件を表示
-        
-        // X軸をスッキリさせる：日付が切り替わった最初のみ文字を出し、それ以外は隠す
-        let lastDateString = "";
-        const chartLabels = recentHistory.map(r => {
-            const d = new Date(r.time);
-            const dateStr = `${d.getMonth()+1}/${d.getDate()}`;
-            if (dateStr !== lastDateString) {
-                lastDateString = dateStr;
-                return dateStr;
-            }
-            return ''; // 省略
-        });
-        
-        // データポイント：直接数値を保持するようにする（過去データは100,50,0へ）
-        const chartDataPoints = recentHistory.map(r => {
-            if (!isNaN(parseInt(r.type))) return parseInt(r.type);
-            if (r.type === 'high') return 100;
-            if (r.type === 'mid') return 50;
-            return 0; // low
-        });
-        
-        // グラフの部品（Chart.js）はアプリ内の chart.umd.min.js から読み込んでいる。
-        // 万一読み込めなかった場合は、グラフだけを静かに省いてカレンダーの描画へ進む。
-        // ※ここで例外が出ると renderCalendar と、この関数を呼んでいる記録処理の続き
-        //   （記録後メッセージ）まで巻き添えで止まり、実際には保存できているのに
-        //   「保存中にエラーが発生しました」という事実と異なる案内が出てしまう。
+
+        waveHistory = history;
+        waveScores = history.map(scoreOfRecord);
+        waveDaily = dailyData;
+
+        buildWaveChart();
+        renderCalendar(dailyData);
+        layoutWave(true);
+    }
+
+    // グラフの部品（Chart.js）はアプリ内の chart.umd.min.js から読み込んでいる。
+    // 万一読み込めなかった場合は、グラフだけを静かに省いてカレンダーの描画へ進む。
+    // ※ここで例外が出ると renderCalendar と、この関数を呼んでいる記録処理の続き
+    //   （記録後メッセージ）まで巻き添えで止まり、実際には保存できているのに
+    //   「保存中にエラーが発生しました」という事実と異なる案内が出てしまう。
+    function buildWaveChart() {
         const canvas = document.getElementById('waveChart');
-        if (canvas && typeof Chart !== 'undefined') {
-            try {
-                const ctx = canvas.getContext('2d');
-                if (chartInstance) chartInstance.destroy();
-        
-                chartInstance = new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: chartLabels,
-                        datasets: [{
-                            label: '状態',
-                            data: chartDataPoints,
-                            borderColor: '#A9BCA3',
-                            backgroundColor: 'rgba(169, 188, 163, 0.2)',
-                            borderWidth: 3,
-                            tension: 0.4,
-                            pointBackgroundColor: '#A9BCA3',
-                            // 点は線（borderWidth: 3）より細くしておく。点のほうが太いと
-                            // 目が「点の連なり」を先に読み、グラフのすぐ上の
-                            // 「波があるのは、神経系が…」という“流れ”の言葉とずれる。
-                            // ※消さずに小さくするのは、記録が1件のとき線が引けず
-                            //   点だけが「いつ記録したか」の手がかりになるため。
-                            pointRadius: 2.5,   // 直径5px
-                            fill: true
-                        }]
+        if (!canvas) {
+            console.warn('グラフの描画先（waveChart）が見つかりませんでした。');
+            return;
+        }
+        if (typeof Chart === 'undefined') {
+            console.warn('グラフの部品（Chart.js）を読み込めませんでした。グラフは表示せず、カレンダーの表示は続けます。');
+            return;
+        }
+        try {
+            if (chartInstance) chartInstance.destroy();
+            chartInstance = new Chart(canvas.getContext('2d'), {
+                type: 'line',
+                data: {
+                    datasets: [{
+                        label: '状態',
+                        data: [],
+                        borderColor: '#A9BCA3',
+                        backgroundColor: 'rgba(169, 188, 163, 0.2)',
+                        borderWidth: 3,
+                        tension: 0.4,
+                        pointBackgroundColor: '#A9BCA3',
+                        // 点は線（borderWidth: 3）より細くしておく。点のほうが太いと
+                        // 目が「点の連なり」を先に読み、グラフのすぐ上の
+                        // 「波があるのは、神経系が…」という“流れ”の言葉とずれる。
+                        // ※消さずに小さくするのは、記録が1件のとき線が引けず
+                        //   点だけが「いつ記録したか」の手がかりになるため。
+                        pointRadius: 2.5,   // 直径5px
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: false,
+                    // ★目盛り（絵文字）と日付は、なぞっても残る／一緒に動くよう、グラフの外（HTML）に書いている。
+                    //   グラフの中に目盛りを描くと、波と一緒に画面の外へ流れていってしまう。
+                    layout: { padding: { left: WAVE_PAD, right: WAVE_PAD, top: WAVE_PAD_TOP, bottom: WAVE_PAD_BOTTOM } },
+                    scales: {
+                        x: { type: 'linear', display: false },
+                        y: { display: false, min: -10, max: 110 }
                     },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: {
-                            y: {
-                                min: -10,
-                                max: 110,
-                                ticks: {
-                                    stepSize: 50,
-                                    callback: function(value) {
-                                        if (value === 100) return ZONE_EMOJI.high;
-                                        if (value === 50) return ZONE_EMOJI.mid;
-                                        if (value === 0) return ZONE_EMOJI.low;
-                                        return '';
-                                    },
-                                    font: { size: 14 }
+                    plugins: { 
+                        legend: { display: false },
+                        tooltip: {
+                            displayColors: false,
+                            callbacks: {
+                                title: function(context) {
+                                    // ツールチップのタイトルには正確な時間を表示
+                                    const originalRecord = waveHistory[context[0].raw.x];
+                                    const d = new Date(originalRecord.time);
+                                    return `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
                                 },
-                                grid: { color: 'rgba(0,0,0,0.05)' }
-                            },
-                            x: {
-                                grid: { display: false },
-                                ticks: {
-                                    font: { size: 10 },
-                                    maxRotation: 45,
-                                    minRotation: 45
-                                }
-                            }
-                        },
-                        plugins: { 
-                            legend: { display: false },
-                            tooltip: {
-                                displayColors: false,
-                                callbacks: {
-                                    title: function(context) {
-                                        // ツールチップのタイトルには正確な時間を表示
-                                        const idx = context[0].dataIndex;
-                                        const originalRecord = recentHistory[idx];
-                                        const d = new Date(originalRecord.time);
-                                        return `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
-                                    },
-                                    // 数値（スコア）ではなく、そのときのゾーンの言葉を表示する
-                                    label: function(context) {
-                                        const originalRecord = recentHistory[context.dataIndex];
-                                        const zone = getZone(originalRecord.type);
-                                        const labels = getLabels();
-                                        return `${ZONE_EMOJI[zone]} ${labels[zone]}`;
-                                    }
+                                // 数値（スコア）ではなく、そのときのゾーンの言葉を表示する
+                                label: function(context) {
+                                    const originalRecord = waveHistory[context.raw.x];
+                                    const zone = getZone(originalRecord.type);
+                                    const labels = getLabels();
+                                    return `${ZONE_EMOJI[zone]} ${labels[zone]}`;
                                 }
                             }
                         }
                     }
-                });
-            } catch (err) {
-                console.error('グラフを描画できませんでした。グラフは表示せず、カレンダーの表示は続けます。', err);
-            }
-        } else if (!canvas) {
-            console.warn('グラフの描画先（waveChart）が見つかりませんでした。');
-        } else {
-            console.warn('グラフの部品（Chart.js）を読み込めませんでした。グラフは表示せず、カレンダーの表示は続けます。');
+                }
+            });
+        } catch (err) {
+            chartInstance = null;
+            console.error('グラフを描画できませんでした。グラフは表示せず、カレンダーの表示は続けます。', err);
         }
-        
-        renderCalendar(dailyData);
+    }
+
+    // 波の長さ・日付・目盛りの位置を決め直す。
+    // alignToMonth が true なら、カレンダーの月の最後の記録が右端に来るよう動かす。
+    function layoutWave(alignToMonth) {
+        if (!waveScrollEl) return;
+        const viewW = waveScrollEl.clientWidth;
+        if (viewW === 0) return; // 画面が隠れている間は測れない。振り返りを開いたときにもう一度呼ばれる
+        const n = waveHistory.length;
+        waveStep = (viewW - WAVE_PAD * 2) / Math.max(Math.min(n, WAVE_POINTS_PER_VIEW) - 1, 1);
+        const trackW = n > WAVE_POINTS_PER_VIEW ? (n - 1) * waveStep + WAVE_PAD * 2 : viewW;
+        document.getElementById('waveTrack').style.width = trackW + 'px';
+        placeWaveGuides();
+        renderWaveDates();
+        if (alignToMonth) scrollWaveToMonth(false);
+        drawWaveWindow(true);
+        updateWaveFade();
+    }
+
+    // 絵文字の目盛りと横線を、波の高さ（100／50／0）に合わせて置く
+    function placeWaveGuides() {
+        const axis = document.getElementById('waveAxis');
+        const grid = document.getElementById('waveGrid');
+        if (!axis || !grid) return;
+        const h = waveScrollEl.clientHeight;
+        const yOf = v => WAVE_PAD_TOP + (110 - v) / 120 * (h - WAVE_PAD_TOP - WAVE_PAD_BOTTOM);
+        axis.innerHTML = '';
+        grid.innerHTML = '';
+        [['high', 100], ['mid', 50], ['low', 0]].forEach(([zone, v]) => {
+            const mark = document.createElement('span');
+            mark.textContent = ZONE_EMOJI[zone];
+            mark.style.top = yOf(v) + 'px';
+            axis.appendChild(mark);
+            const line = document.createElement('span');
+            line.style.top = yOf(v) + 'px';
+            grid.appendChild(line);
+        });
+    }
+
+    // 日付は、日が変わった最初の記録にだけ書く。近すぎて重なるものは省く
+    function renderWaveDates() {
+        const box = document.getElementById('waveDates');
+        if (!box) return;
+        box.innerHTML = '';
+        const frag = document.createDocumentFragment();
+        let lastLabel = '';
+        let lastX = -Infinity;
+        waveHistory.forEach((r, g) => {
+            const d = new Date(r.time);
+            const label = `${d.getMonth()+1}/${d.getDate()}`;
+            if (label === lastLabel) return;
+            lastLabel = label;
+            const x = WAVE_PAD + g * waveStep;
+            if (x - lastX < WAVE_DATE_GAP) return;
+            lastX = x;
+            const span = document.createElement('span');
+            span.style.left = x + 'px';
+            span.textContent = label;
+            frag.appendChild(span);
+        });
+        box.appendChild(frag);
+    }
+
+    // いま見えている記録の範囲（通し番号）。last が「右端の記録」
+    function waveVisibleRange() {
+        const n = waveHistory.length;
+        const left = waveScrollEl.scrollLeft;
+        const w = waveScrollEl.clientWidth;
+        const clamp = i => Math.max(0, Math.min(n - 1, i));
+        return {
+            first: clamp(Math.ceil((left - WAVE_PAD) / waveStep - 0.01)),
+            last: clamp(Math.floor((left + w - WAVE_PAD * 2) / waveStep + 0.01))
+        };
+    }
+
+    // 見えているあたりの記録だけを描く。force でなければ、描いた範囲の端に近づいたときだけ描き直す
+    function drawWaveWindow(force) {
+        const box = document.getElementById('waveCanvasBox');
+        if (!box || waveStep === 0) return;
+        const n = waveHistory.length;
+        const scrollable = n > WAVE_POINTS_PER_VIEW;
+        let start = 0;
+        let count = n;
+        if (scrollable && n > WAVE_WINDOW) {
+            const { first, last } = waveVisibleRange();
+            const end = waveWindowStart + WAVE_WINDOW - 1;
+            const nearStart = waveWindowStart > 0 && first < waveWindowStart + WAVE_MARGIN;
+            const nearEnd = end < n - 1 && last > end - WAVE_MARGIN;
+            if (!force && !nearStart && !nearEnd) return;
+            const center = Math.round((first + last) / 2);
+            start = Math.max(0, Math.min(n - WAVE_WINDOW, center - Math.floor(WAVE_WINDOW / 2)));
+            count = WAVE_WINDOW;
+        } else if (!force) {
+            return;
+        }
+        waveWindowStart = start;
+        const span = scrollable ? (count - 1) * waveStep : waveScrollEl.clientWidth - WAVE_PAD * 2;
+        box.style.left = (start * waveStep) + 'px';
+        box.style.width = (span + WAVE_PAD * 2) + 'px';
+        if (!chartInstance) return;
+        const points = [];
+        for (let g = start; g < start + count; g++) points.push({ x: g, y: waveScores[g] });
+        chartInstance.data.datasets[0].data = points;
+        chartInstance.options.scales.x.min = start;
+        chartInstance.options.scales.x.max = start + span / waveStep;
+        chartInstance.resize();
+        chartInstance.update('none');
+    }
+
+    // 通し番号 g の記録が右端に来るよう、波を動かす
+    function scrollWaveToIndex(g, smooth) {
+        const maxLeft = waveScrollEl.scrollWidth - waveScrollEl.clientWidth;
+        const target = g < 0 ? 0 : Math.max(0, Math.min(maxLeft, WAVE_PAD * 2 + g * waveStep - waveScrollEl.clientWidth));
+        if (Math.abs(target - waveScrollEl.scrollLeft) < 1) return;
+        // ★「動かしている間」は時間ではなく、目的の位置に着いたか・指で触れたかで終える。
+        //   時間で区切ると、流れ始めが遅れたときに、押した月からカレンダーが勝手に戻ってしまう
+        //   （2026-09-24 手元の試験で実際に起きた）。念のため、2秒たったら終える。
+        waveProgrammatic = true;
+        waveProgrammaticTarget = target;
+        clearTimeout(waveProgrammaticTimer);
+        waveProgrammaticTimer = setTimeout(() => { waveProgrammatic = false; }, 2000);
+        const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        waveScrollEl.scrollTo({ left: target, behavior: (smooth && !reduce) ? 'smooth' : 'auto' });
+    }
+
+    // カレンダーの月の最後の記録（記録の無い月なら、その月より前の最後の記録＝つなぎ目）を右端に
+    function scrollWaveToMonth(smooth) {
+        if (!waveScrollEl || waveHistory.length <= WAVE_POINTS_PER_VIEW) return;
+        const nextMonthStart = new Date(currentCalDate.getFullYear(), currentCalDate.getMonth() + 1, 1);
+        let g = -1;
+        for (let i = waveHistory.length - 1; i >= 0; i--) {
+            if (new Date(waveHistory[i].time) < nextMonthStart) { g = i; break; }
+        }
+        scrollWaveToIndex(g, smooth);
+    }
+
+    // なぞって右端の記録の月が変わったら、カレンダーをその月にする
+    function syncCalendarToWave() {
+        if (waveHistory.length <= WAVE_POINTS_PER_VIEW) return;
+        const { last } = waveVisibleRange();
+        const d = new Date(waveHistory[last].time);
+        if (d.getFullYear() === currentCalDate.getFullYear() && d.getMonth() === currentCalDate.getMonth()) return;
+        currentCalDate = new Date(d.getFullYear(), d.getMonth(), 1);
+        renderCalendar(waveDaily);
+    }
+
+    // 端の先にまだ記録があるときは、その端を薄くぼかす（なぞれることの手がかり）
+    function updateWaveFade() {
+        const left = waveScrollEl.scrollLeft;
+        const maxLeft = waveScrollEl.scrollWidth - waveScrollEl.clientWidth;
+        waveScrollEl.classList.toggle('more-left', left > 1);
+        waveScrollEl.classList.toggle('more-right', left < maxLeft - 1);
+    }
+
+    if (waveScrollEl) {
+        waveScrollEl.addEventListener('scroll', () => {
+            drawWaveWindow(false);
+            updateWaveFade();
+            // なぞっている間に、前に出した吹き出し（時刻とゾーン）が置いていかれないよう消す
+            if (chartInstance && chartInstance.tooltip && chartInstance.tooltip.getActiveElements().length) {
+                chartInstance.tooltip.setActiveElements([], { x: 0, y: 0 });
+                chartInstance.update('none');
+            }
+            // こちらから動かした波が着くまでは、カレンダーを合わせない（押した月のまま保つ）
+            if (waveProgrammatic) {
+                if (Math.abs(waveScrollEl.scrollLeft - waveProgrammaticTarget) < 1) waveProgrammatic = false;
+                return;
+            }
+            syncCalendarToWave();
+        }, { passive: true });
+
+        // 指で触れたら、そこからはご本人の動き。カレンダーを波に合わせ始める
+        const waveTakeOver = () => { waveProgrammatic = false; };
+        waveScrollEl.addEventListener('touchstart', waveTakeOver, { passive: true });
+        waveScrollEl.addEventListener('pointerdown', waveTakeOver, { passive: true });
+        waveScrollEl.addEventListener('wheel', waveTakeOver, { passive: true });
+
+        // 画面の幅が変わったら（向きを変えたときなど）、右端の記録を保ったまま並べ直す
+        let waveResizeTimer = null;
+        window.addEventListener('resize', () => {
+            clearTimeout(waveResizeTimer);
+            waveResizeTimer = setTimeout(() => {
+                if (waveScrollEl.clientWidth === 0 || waveStep === 0) return;
+                const { last } = waveVisibleRange();
+                layoutWave(false);
+                if (waveHistory.length > WAVE_POINTS_PER_VIEW) scrollWaveToIndex(last, false);
+            }, 150);
+        });
     }
     
     // --- カレンダー描画（ドット対応） ---
@@ -1784,17 +1979,19 @@ document.addEventListener('DOMContentLoaded', () => {
     
     const prevMonthBtn = document.getElementById('prevMonth');
     const nextMonthBtn = document.getElementById('nextMonth');
+    // ◀▶ は、カレンダーの月を変えて、波もその月のところまで流す。
+    // ★月は必ず「1日」にしてから動かす。31日に setMonth で戻すと、30日までの月を飛び越えてしまう
+    //   （例：10月31日に◀ → 9月31日＝10月1日になり、月が変わらない）。
+    function moveCalendarMonth(delta) {
+        currentCalDate = new Date(currentCalDate.getFullYear(), currentCalDate.getMonth() + delta, 1);
+        renderCalendar(waveDaily);
+        scrollWaveToMonth(true);
+    }
     if(prevMonthBtn) {
-        prevMonthBtn.addEventListener('click', () => {
-            currentCalDate.setMonth(currentCalDate.getMonth() - 1);
-            renderReflection();
-        });
+        prevMonthBtn.addEventListener('click', () => moveCalendarMonth(-1));
     }
     if(nextMonthBtn) {
-        nextMonthBtn.addEventListener('click', () => {
-            currentCalDate.setMonth(currentCalDate.getMonth() + 1);
-            renderReflection();
-        });
+        nextMonthBtn.addEventListener('click', () => moveCalendarMonth(1));
     }
 
     setTimeout(() => {

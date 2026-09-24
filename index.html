@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>わたしのかんかく</title>
-    <link rel="stylesheet" href="styles.css?v=20260916_hikae">
+    <link rel="stylesheet" href="styles.css?v=20260924_ashiato">
     <!-- フォントの取り寄せ先へ、先に接続の準備をしておく（表示は変わらない・待ち時間だけ短くなる） -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -113,8 +113,20 @@
         <section id="reflectionTab" class="tab-content">
             <div class="reflection-container">
                 <p class="safe-message">波があるのは、神経系が環境に合わせてしなやかに生き残ろうとしている証拠です🍵</p>
+                <!-- 波は横になぞって過去へさかのぼれる。カレンダーの月は、波の右端に見えている記録の月に合う。
+                     ★絵文字の目盛り（wave-axis）と横線（wave-grid）は、なぞっても動かないよう帯の外に置いている。
+                     ★日付（wave-dates）は波と一緒に動くよう、帯の中（wave-track）に置いている。 -->
                 <div class="chart-container">
-                    <canvas id="waveChart"></canvas>
+                    <div class="wave-axis" id="waveAxis" aria-hidden="true"></div>
+                    <div class="wave-body">
+                        <div class="wave-grid" id="waveGrid" aria-hidden="true"></div>
+                        <div class="wave-scroll" id="waveScroll" tabindex="0" role="region" aria-label="記録の波。横にずらすと、前の記録が見られます">
+                            <div class="wave-track" id="waveTrack">
+                                <div class="wave-canvas-box" id="waveCanvasBox"><canvas id="waveChart"></canvas></div>
+                                <div class="wave-dates" id="waveDates" aria-hidden="true"></div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 
                 <hr class="setting-divider">
@@ -353,7 +365,7 @@
                 </div>
                 
                 <div style="text-align: center; margin-top: 24px; padding-top: 16px; border-top: 1px solid #E9ECEF; font-size: 0.75rem; color: #ADB5BD;">
-                    アプリについて：わたしのかんかく v12.0.7
+                    アプリについて：わたしのかんかく v12.0.8
                 </div>
 
                 <div style="text-align: center; margin-top: 16px;">
@@ -637,7 +649,7 @@
         </div>
     </div>
 
-    <script src="app.js?v=20260916_hikae"></script>
+    <script src="app.js?v=20260924_ashiato"></script>
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', function() {
