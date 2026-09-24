@@ -70,7 +70,9 @@
             <div id="todayWordArea" class="today-word-area" style="cursor: pointer;" title="タップして引き直す">
                 <div class="today-header">🎁 今日のリソース（タップで引き直し）</div>
                 <div id="todayResourceContent" class="today-content">
-                    <p id="todayWordText">右下の＋ボタンから、あなたのホッとする言葉や写真を追加してみましょう</p>
+                    <!-- ★2026-09-19：「追加してみましょう」（要求の形）をやめ、「入れておけます」（できる形）にした。
+                         どんなものを入れてよいかの説明は、＋を押した画面の側に置いてある。★app.js にも同じ文がある -->
+                    <p id="todayWordText"><span class="bn">右下の＋ボタンから、</span><span class="bn">言葉や写真を入れておけます</span></p>
                 </div>
             </div>
             
@@ -96,7 +98,14 @@
             <div id="wordGalleryTab" class="inner-tab-content resource-gallery" style="display: none;">
                 <!-- JSで言葉のカードが追加されます -->
             </div>
-            
+
+            <!-- 脚注：入りきらないリソースについて（2026-09-18 永田さん決定・案あ）
+                 ★ねらいは「箱に入っているか」と「リソースであるか」を切り離すこと。
+                   入らなかった方が切り捨てられたように読めないようにする
+                 ★いまの仕様（言葉と写真だけ）はここでは書かない。＋ボタンを押せば分かるため
+                 ★入れなさい、と言わない（非・要求） -->
+            <p class="resource-footnote"><span class="bn">肌ざわり、</span><span class="bn">におい、</span><span class="bn">うまく言葉にならないもの。</span><span class="bn">ここに入りきらないリソースもあります。</span><br><span class="bn">入りきらなくても、</span><span class="bn">それはあなたの大切なリソースのままです。</span></p>
+
             <button id="addResourceFab" class="fab" aria-label="新しく追加する">+</button>
         </section>
 
@@ -322,13 +331,29 @@
                             <button type="button" id="copyBackupNoteBtn" class="secondary-btn" style="margin-top: 8px;">この文をコピーする</button>
                         </div>
 
+                        <!-- バックアップを作ったあとに出てくる「入らないもの」の案内。ふだんは隠れている。
+                             ★お守り通知は端末ごとに登録されるしくみ（pushManager.subscribe）なので、
+                               設定だけ新しい端末に戻しても通知は来ない。黙っていると、設定画面が
+                               「現在の設定：オン（月曜 8:00頃）」と出しているのに一通も来ない、
+                               という形になる（画面が嘘をつく）。
+                             ★「ひとつだけ」と先に言うのは、「入らないものがある」だけだと
+                               何が入っていないのか分からず、記録まで不安になるため。
+                               ★入らないものが増えたときは、この言い方も直すこと。
+                             ★登録し直すことを求めない（非・要求）。「こともできます」の形にしている。
+                             ★書き出しに何が入るかは app.js の BACKUP_EXTRA_KEYS のそばに一覧がある。 -->
+                        <div id="backupMissingArea" class="setting-note setting-note-block" style="display: none; margin-top: 12px;">
+                            <strong class="setting-note-title">🔔 ひとつだけ、入らないもの</strong>
+                            <p style="margin: 0;">お守り通知の設定（オン・オフ、曜日、時刻）は、このファイルには入りません。通知は端末ごとに登録されるしくみのためです。新しい端末に移ったときは、設定画面から改めて登録することもできます。</p>
+                            <p style="margin: 8px 0 0 0;">記録や写真、書いていただいたものは、すべてこのファイルに入っています。</p>
+                        </div>
+
                         <input type="file" id="importFileInput" accept=".json" class="custom-input file-input" style="margin-top: 10px;">
                         <button type="button" id="importDataBtn" class="primary-btn">復元する</button>
                     </div>
                 </div>
                 
                 <div style="text-align: center; margin-top: 24px; padding-top: 16px; border-top: 1px solid #E9ECEF; font-size: 0.75rem; color: #ADB5BD;">
-                    アプリについて：わたしのかんかく v12.0.6
+                    アプリについて：わたしのかんかく v12.0.7
                 </div>
 
                 <div style="text-align: center; margin-top: 16px;">
@@ -472,7 +497,7 @@
                 <div class="photo-view-area" style="position: relative; margin-top: 10px;">
                     <button id="prevPhotoBtn" aria-label="前の写真" style="position: absolute; left: -10px; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.6); color: white; border: none; width: 40px; height: 40px; border-radius: 50%; font-size: 1.5rem; display: none; align-items: center; justify-content: center; z-index: 10; text-shadow: 0 0 8px rgba(255,255,255,0.8);">&lt;</button>
                     <button id="nextPhotoBtn" aria-label="次の写真" style="position: absolute; right: -10px; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.6); color: white; border: none; width: 40px; height: 40px; border-radius: 50%; font-size: 1.5rem; display: none; align-items: center; justify-content: center; z-index: 10; text-shadow: 0 0 8px rgba(255,255,255,0.8);">&gt;</button>
-                    <img id="photoViewImg" src="" alt="お気に入りの写真" style="width: 100%; border-radius: 12px; object-fit: contain; max-height: 70vh;">
+                    <img id="photoViewImg" src="" alt="リソース箱の写真" style="width: 100%; border-radius: 12px; object-fit: contain; max-height: 70vh;">
                     <p id="photoViewText" style="margin-top: 12px; font-size: 0.95rem;"></p>
                 </div>
                 <input type="hidden" id="photoViewResourceId">
@@ -517,12 +542,19 @@
                 <h3>新しく追加する</h3>
                 
                 <div class="setting-item">
-                    <p class="setting-desc">どちらか一つでも、両方入力してもOKです。あなたの心が少し「ホッ」とする要素を残してみましょう。</p>
+                    <!-- 2026-09-19 永田さん承認（案い）：「ホッ」「安心」だけに寄っていた言い方をやめ、
+                         健康法２「リソーシング」の説明と同じ幅にした。
+                         ★「なんでも構いません」は、その説明にある原文そのまま。
+                         ★入れる場面は、割と安定しているとき。だから少し長くてよい（2026-09-19 永田さん）。
+                           しんどいときに見るのは、入れたものを眺める側の画面
+                         ★塊を .bn（inline-block）で包む。包まないと「なんでも構／いません。」のように
+                           語の途中で折り返す -->
+                    <p class="setting-desc"><span class="bn">ホッとするもの、</span><span class="bn">力になるもの、</span><span class="bn">好きなもの。</span><span class="bn">なんでも構いません。</span><br><span class="bn">写真だけでも、</span><span class="bn">言葉だけでも、</span><span class="bn">両方でも。</span></p>
                     
                     <div class="resource-section" style="margin-bottom: 24px;">
-                        <label class="memo-label">📷 安心する写真（任意）</label>
+                        <label class="memo-label">📷 写真（任意）</label>
                         <div class="photo-upload-area" id="photoArea" style="margin-top: 8px;">
-                            <img id="photoPreview" src="" alt="お気に入りの写真" style="display: none;">
+                            <img id="photoPreview" src="" alt="選んだ写真" style="display: none;">
                             <div id="photoPlaceholder" class="photo-placeholder">
                                 <span>写真をえらぶ</span>
                             </div>
@@ -531,8 +563,10 @@
                     </div>
 
                     <div class="resource-section">
-                        <label class="memo-label">📝 安心できる言葉やメモ（任意）</label>
-                        <textarea id="resourceNote" placeholder="大丈夫、焦らなくていいよ..." style="margin-top: 8px;"></textarea>
+                        <label class="memo-label">📝 言葉やメモ（任意）</label>
+                        <!-- ★薄い文字は「書かれうる言葉そのもの」の例（大丈夫、焦らなくていいよ…）から、
+                             「どんなものを書くか」の例に変えた。前の文は、焦っているという前提を置いていた -->
+                        <textarea id="resourceNote" placeholder="すきな言葉、だいじな思い出、ひとことでも…" style="margin-top: 8px;"></textarea>
                     </div>
                     
                     <div class="settings-actions" style="margin-top: 24px;">
@@ -559,8 +593,10 @@
             <span class="nav-label">ホーム</span>
         </button>
         <button class="nav-item" data-target="reflectionTab">
-            <span class="nav-icon">📊</span>
-            <span class="nav-label">振り返り</span>
+            <!-- 2026-09-18 永田さん「肉球＋あしあと」で決定（スキル実装チャット・2026-09-24 本番へ入れると決定）。
+                 ★画面に出る「振り返り」は、もともとここ1か所だけだった（アプリ全体を検索して確認） -->
+            <span class="nav-icon">🐾</span>
+            <span class="nav-label">あしあと</span>
         </button>
         <button class="nav-item" data-target="resourceTab">
             <span class="nav-icon">🎁</span>
