@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>わたしのかんかく</title>
-    <link rel="stylesheet" href="styles.css?v=20260916_hikae">
+    <link rel="stylesheet" href="styles.css?v=20260924_skill">
     <!-- フォントの取り寄せ先へ、先に接続の準備をしておく（表示は変わらない・待ち時間だけ短くなる） -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -738,6 +738,10 @@
             <section class="skill-list-section">
                 <h3 class="skill-list-head">健康法５　ヘルプ・ナウ！</h3>
                 <button type="button" class="skill-list-item" data-open-practice="5-0">ヘルプ・ナウ！の説明</button>
+                <!-- ★2026-09-21 永田さん承認（案い）。説明のたたみ札だった3つを、ここへ出した -->
+                <button type="button" class="skill-list-item" data-open-practice="5-1">ヘルプ・ナウ！のアイディア</button>
+                <button type="button" class="skill-list-item" data-open-practice="5-2">わたしのヘルプ・ナウ！リスト</button>
+                <button type="button" class="skill-list-item" data-open-practice="5-3">わたしのお守り自由帳</button>
             </section>
 
             <section class="skill-list-section">
@@ -1080,11 +1084,28 @@
                         <p>効果が感じられるもの、合う、合わないは人それぞれ。ご紹介するもの以外にもオリジナルのアイディア等湧くかもしれません。</p>
                         <p>これまでの健康法そのものが、応急お助け術になることも。</p>
                     </div>
+                    <!-- ★2026-09-21 永田さん承認（案い）：アイディア・わたしのヘルプ・ナウ！リスト・
+                         わたしのお守り自由帳の3つは、この画面のたたみ札から、一覧のボタン（健康法５の下）へ移した。
+                         永田さん「説明にとどまらない部分もあると思うので、見出しのタイトルを…外に出すのはどうですか」。
+                         ★全部の札を外に出したわけではない。他の健康法のヒント・アイディア集は、説明の中のまま
+                           （全部出すと一覧が11→25個になり、永田さん「選択肢が多いのはフリーズを誘発」に当たるため）。
+                           出したのは「読んで終わりではないもの」だけ（困ったときに開く／自分で作る／自分で書く） -->
+                </div>
+            </template>
+            <!-- 健康法５ ヘルプ・ナウ！のアイディア（2026-09-21 案いで独立した画面に）。録音なし -->
+            <template id="skillTpl-5-1" data-kicker="健康法５　ヘルプ・ナウ！" data-title="&lt;span class=&quot;bn&quot;&gt;ヘルプ・ナウ！の&lt;/span&gt;&lt;wbr&gt;アイディア">
+                <div class="skill-know">
+                    <!-- ★命に関わるときの案内を、この画面の先頭にも置く（2026-09-21）。
+                         アイディアを説明の画面から外に出したので、困ったときにここへ直接来た人が、
+                         説明の画面の先頭にある案内を通らなくなる。★文もボタンも説明の画面と同じ -->
+                    <div class="emergency-lead">
+                        <p class="emergency-lead-text">命に関わるときは、119（救急）・110（警察）へ。</p>
+                        <button type="button" class="emergency-lead-btn" data-open-emergency>連絡先を見る ▸</button>
+                    </div>
                     <!-- ヒント・アイディア集（2026-09-18 永田さん承認）。文は永田さんご自身のリバランス・スライド（2024-09-13版）の原文のまま。
-                         ★「ヘルプナウ！」「ヘルプ！ナウ」は「ヘルプ・ナウ！」に揃えた（表記のみ。中身は変えていない） -->
-                    <div class="skill-topics">
-                        <details class="skill-topic">
-                            <summary>ヘルプ・ナウ！のアイディア</summary>
+                         ★「ヘルプナウ！」「ヘルプ！ナウ」は「ヘルプ・ナウ！」に揃えた（表記のみ。中身は変えていない）
+                         ★skill-topic の見た目（文の大きさ・行間）をそのまま使うため、たたみ札ではない div に同じ名札を付けている -->
+                    <div class="skill-topic skill-page">
                             <!-- ★2026-09-20：各行に data-hn（ジャンルの札）を付けた。
                                  ★画面に出る文字は1文字も変えていない（属性は目に見えない）。ボタンも付けていない。
                                    読み物は読み物のまま（永田さんのご決定・設計メモ_A10 2章）。
@@ -1153,30 +1174,31 @@
                                  理由＝ほかの27個は「やること」だが、これは「これで全部ではない」という閉じ方で、
                                  性質が違う。並べると、アイディアの1つに見える。★文は原文のまま -->
                             <p class="skill-topic-note">他、十人十色、様々なヘルプ・ナウ！があります。</p>
-                        </details>
-                        <!-- わたしのヘルプ・ナウ！リスト（A10）の「器」。2026-09-20・★仮の実装
-                             ★永田さんのご決定＝読み物（上の27項目）と仕組みを分ける。
-                               上の一覧には「足す」ボタンを一切付けない（付けると読み物が「選ぶ画面」に変わる。非・要求）。
-                               仕組みは、このリスト側にだけ入れる（設計メモ_A10 2章）。
-                             ★いまは「器」だけ＝地の文・自分で書く・並べ替え・外す。
-                               「選択肢から試してみる」（ジャンル → 一覧 → 2択）は、ジャンル分けが決まってから（設計メモ_A10 7章の③）。
-                             ★置き場所はAIの判断（未確認）：アイディア（こちらからの提案）→ このリスト（選んだもの）→ 自由帳（自由に書くもの）の順。
-                               永田さんの整理は「この列に入る」までで、列の中の順番は決まっていない -->
-                        <details class="skill-topic">
-                            <summary>わたしのヘルプ・ナウ！リスト</summary>
-                            <div class="helpnow-host"></div>
-                        </details>
-                        <!-- わたしのお守り自由帳（A13の3段目）。2026-09-19 永田さん決定・★仮の実装
-                             ★アイディア（こちらからの提案）の下に、同じたたみ札の形で並べる。
-                               「こちらからの提案 → 本人のもの」の並びになる。
-                               ヘルプ・ナウリスト（A10）も、いずれこの列に入る（永田さんの整理・2026-09-19）
-                             ★連絡先の画面（119・110と同じ画面）からは外した。
-                               永田さん「緊急ではない時に緊急のものと一緒にいるのもちょっと重たい」（2026-09-18）
-                             ★リソース箱の入口も外した（2026-09-19。入口は1つに戻した） -->
-                        <details class="skill-topic">
-                            <summary>わたしのお守り自由帳</summary>
-                            <div class="jiyucho-host"></div>
-                        </details>
+                    </div>
+                </div>
+            </template>
+            <!-- 健康法５ わたしのヘルプ・ナウ！リスト（A10）。2026-09-20 に器を作り、2026-09-21 案いで独立した画面に。録音なし
+                 ★永田さんのご決定＝読み物（アイディアの一覧）と仕組みを分ける。
+                   アイディアの一覧には「足す」ボタンを一切付けない（付けると読み物が「選ぶ画面」に変わる。非・要求）。
+                   仕組みは、このリスト側にだけ入れる（設計メモ_A10 2章）。
+                 ★選択肢の元になる一覧（.hn-source）は、「ヘルプ・ナウ！のアイディア」の画面にある。
+                   app.js はこの画面に一覧が無いとき、template から読む（文の写しは持たない） -->
+            <template id="skillTpl-5-2" data-kicker="健康法５　ヘルプ・ナウ！" data-title="わたしの&lt;wbr&gt;&lt;span class=&quot;bn&quot;&gt;ヘルプ・ナウ！リスト&lt;/span&gt;">
+                <div class="skill-know">
+                    <div class="skill-topic skill-page">
+                        <div class="helpnow-host"></div>
+                    </div>
+                </div>
+            </template>
+            <!-- 健康法５ わたしのお守り自由帳（A13の3段目）。2026-09-21 案いで独立した画面に。録音なし
+                 ★置き場の経緯：連絡先の画面（119・110と同じ画面）→ 2026-09-19 健康法５の説明のたたみ札へ
+                   → 2026-09-21 一覧のボタンへ。入口は1つ（リソース箱の入口は2026-09-19に外した）
+                 ★119・110の案内は、この画面には置かない。
+                   永田さん「緊急ではない時に緊急のものと一緒にいるのもちょっと重たい」（2026-09-18） -->
+            <template id="skillTpl-5-3" data-kicker="健康法５　ヘルプ・ナウ！" data-title="わたしのお守り自由帳">
+                <div class="skill-know">
+                    <div class="skill-topic skill-page">
+                        <div class="jiyucho-host"></div>
                     </div>
                 </div>
             </template>
@@ -1626,15 +1648,22 @@
              「空のときの言い方」は未決（2026-09-17 永田さん「相談して決める」／設計メモ_A10 6-3）。
              仮の言葉を置くと、それが決まったものとして残ってしまうため、いまは言葉を足していない。
              上の地の文が「入れておくこともできます」と既に言っているので、説明が落ちることもない -->
-        <button type="button" class="emg-toggle hn-add-toggle" aria-expanded="false">＋ 自分で書く</button>
+        <!-- ★入れる道は2つ（自分で書く／選択肢から選ぶ）。2026-09-21 永田さん承認で、同じ形のボタンを横に並べた。
+             それまでは片方がただの文字、片方が下線つきの小さな文字で、どちらもボタンに見えにくかった
+             （永田さん「選択肢から選んだり自分で書こうとするところも、何か見分け？やりやすさ？が…」）。
+             ★一度に開くのは1つだけ。開いた方の文字が「とじる ▲」に変わる
+             ★「選択肢から試してみる」→「選択肢から選ぶ」に短くした（2026-09-21 永田さん承認）。
+               横に並べると長い方だけ2行に折れ、2つの形がそろわなくなるため -->
+        <div class="hn-entries">
+            <button type="button" class="hn-entry hn-add-toggle" aria-expanded="false">＋ 自分で書く</button>
+            <button type="button" class="hn-entry hn-browse-btn" aria-expanded="false">選択肢から選ぶ</button>
+        </div>
         <div class="hn-add" hidden>
             <textarea class="emg-textarea hn-input" aria-label="リストに入れることを書く"></textarea>
             <button type="button" class="hn-add-btn">リストに入れる</button>
         </div>
-        <!-- 選択肢から試してみる（2026-09-20）。ジャンル → そのジャンルの一覧 → 2択、の3段。
-             ★並びは設計メモ_A10 3章の図のとおり（「＋ 自分で書く」の下）。
+        <!-- 選択肢から選ぶ（2026-09-20）。ジャンル → そのジャンルの一覧 → 2択、の3段。
              ★「どんなものを探しますか」「ジャンルにもどる」はAIが書いた操作の言葉（永田さんの原文ではない） -->
-        <button type="button" class="hn-browse-btn">選択肢から試してみる</button>
         <div class="hn-browse" hidden>
             <p class="hn-browse-lead">どんなものを探しますか</p>
             <div class="hn-genres"></div>
@@ -1668,7 +1697,7 @@
         </div>
     </div>
 
-    <script src="app.js?v=20260916_hikae"></script>
+    <script src="app.js?v=20260924_skill"></script>
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', function() {

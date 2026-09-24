@@ -3393,16 +3393,25 @@ document.addEventListener('DOMContentLoaded', () => {
             } catch (err) { return []; }   // 読めないときは空として扱う（上書きはしない）
         }
 
+        // ★読み物の一覧（.hn-source）が、いま開いている画面の中に無ければ、健康法の画面の元（template）から読む。
+        //   2026-09-21 案いで、アイディアとリストが別々の画面になったため。★文の写しは持たない（正は1つ）
+        function sourceRoot(scope) {
+            if (scope.querySelector('.hn-source')) return scope;
+            const tpl = [...document.querySelectorAll('template')].find(t => t.content.querySelector('.hn-source'));
+            return tpl ? tpl.content : scope;
+        }
+
         function mount(root) {
             const scope = root || document;
+            const srcRoot = sourceRoot(scope);
             // 項目の文は、読み物の一覧（.hn-source）から読む。★app.js に写しを持たない
-            const source = [...scope.querySelectorAll('.hn-source li[data-hn]')].map(li => ({
+            const source = [...srcRoot.querySelectorAll('.hn-source li[data-hn]')].map(li => ({
                 text: li.textContent.trim(),
                 genres: li.dataset.hn.split(/\s+/)
             }));
             // ★ジャンルに属さない項目（data-hn-free）。いまは「他の健康法をゆっくり行う」だけ。
             //   ジャンルのボタンの下に別立てで出す（2026-09-21 永田さんのご指示）
-            const freeSource = [...scope.querySelectorAll('.hn-source li[data-hn-free]')].map(li => ({
+            const freeSource = [...srcRoot.querySelectorAll('.hn-source li[data-hn-free]')].map(li => ({
                 text: li.textContent.trim(),
                 genres: []
             }));
@@ -3492,19 +3501,30 @@ document.addEventListener('DOMContentLoaded', () => {
                     });
                 }
 
+                // ★入れる道は2つ（自分で書く／選択肢から選ぶ）。一度に開くのは1つだけ（2026-09-21）。
+                //   2つとも開くと、書く欄と選択肢が縦に積み重なり、どこを触ればいいか分からなくなる
                 function closeAdd() {
                     addBox.hidden = true;
                     addToggle.textContent = '＋ 自分で書く';
                     addToggle.setAttribute('aria-expanded', 'false');
+                    addToggle.classList.remove('is-open');
+                }
+                function closeBrowse() {
+                    browse.hidden = true;
+                    browseBtn.textContent = '選択肢から選ぶ';
+                    browseBtn.setAttribute('aria-expanded', 'false');
+                    browseBtn.classList.remove('is-open');
                 }
 
                 // ★書く欄は、押したときだけ開く。ふだんは空の入力欄が待ち構えていない（非・要求）
                 addToggle.addEventListener('click', () => {
                     const open = addBox.hidden;
                     if (!open) { closeAdd(); return; }
+                    closeBrowse();
                     addBox.hidden = false;
                     addToggle.textContent = 'とじる ▲';
                     addToggle.setAttribute('aria-expanded', 'true');
+                    addToggle.classList.add('is-open');
                     input.focus();
                 });
 
@@ -3592,7 +3612,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         const yes = document.createElement('button');
                         yes.type = 'button';
                         yes.className = 'hn-choice-yes';
-                        yes.textContent = 'わたしのヘルプ・ナウ！リストに入れる';
+                        // ★2026-09-21「わたしのヘルプ・ナウ！リストに入れる」から短くした（永田さん承認）。
+                        //   この画面の見出しが「わたしのヘルプ・ナウ！リスト」なので、どのリストかは分かる。
+                        //   「自分で書く」側のボタンと同じ言葉になる
+                        yes.textContent = 'リストに入れる';
                         const no = document.createElement('button');
                         no.type = 'button';
                         no.className = 'hn-choice-no';
@@ -3631,9 +3654,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 browseBtn.addEventListener('click', () => {
                     const open = browse.hidden;
-                    browse.hidden = !open;
-                    browseBtn.textContent = open ? 'とじる ▲' : '選択肢から試してみる';
-                    if (open) { showGenres(); renderGenres(); }
+                    if (!open) { closeBrowse(); return; }
+                    closeAdd();
+                    browse.hidden = false;
+                    browseBtn.textContent = 'とじる ▲';
+                    browseBtn.setAttribute('aria-expanded', 'true');
+                    browseBtn.classList.add('is-open');
+                    showGenres();
+                    renderGenres();
                 });
 
                 render();

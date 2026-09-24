@@ -2153,19 +2153,26 @@ input:checked + .toggle-slider::before {
 /* ===== わたしのヘルプ・ナウ！リスト（A10）の器。2026-09-20・★仮の実装 =====
    ★地の文・脚注は .skill-topic p（たたみ札の中の文）の見た目をそのまま使う。
      この画面のほかの文と同じ大きさ・同じ行間にするため、ここでは指定し直さない */
+/* ★入れたものは、薄い色の箱に入れる（2026-09-21 永田さん承認）。
+   それまでは地の文と同じ色・同じ大きさで続いていて、自分の持ち物に見えなかった
+   （永田さん「地の文と見分けがつきづらいからでしょうか？」）。
+   ★まだ何も入っていないときは、箱ごと出さない（空の箱が待ち構えない＝非・要求） */
 .hn-list {
     list-style: none;
-    margin: 10px 0 4px;
-    padding: 0;
+    margin: 14px 0 16px;
+    padding: 2px 14px;
+    background: #F6F4EE;
+    border: 1px solid #ECE7DC;
+    border-radius: 14px;
 }
+.hn-list:empty { display: none; }
 /* ★ボタンは文の「下」に置く（2026-09-20に実機幅375pxで見比べて決めた）。
    横に並べると、ボタンが約110px取るので「コップ１杯、お水を／飲んでみる」と
    短い文まで2行に折れ、上のアイディア一覧と見え方が揃わなかった */
 .hn-item {
-    padding: 8px 0 4px;
-    border-top: 1px solid #F1EEE8;
+    padding: 10px 0 4px;
 }
-.hn-item:last-child { border-bottom: 1px solid #F1EEE8; }
+.hn-item + .hn-item { border-top: 1px solid #E6E0D4; }
 .hn-item-text {
     display: block;
     font-size: 0.85rem;
@@ -2209,24 +2216,40 @@ input:checked + .toggle-slider::before {
     font-family: inherit;
     cursor: pointer;
 }
-/* ===== 選択肢から試してみる（ジャンル → 一覧 → 2択）。2026-09-20 =====
-   ★永田さんのご指定＝「ホーム画面の『選択肢から選ぶ』と同じ感じ」（2026-09-19）。
-     そこで入口は、ホーム画面と同じ「静かな下線つきの文字」（.palette-toggle-ribbon と同じ作り）、
-     ジャンルと項目は、ホーム画面の言葉チップと同じ「白いカプセル」にした。
-   ★大きな押しボタンにしていないのは、開くことを勧める見た目にしないため（非・要求） */
-.hn-browse-btn {
-    display: block;
-    background: transparent;
-    border: none;
-    padding: 4px 4px 4px 0;
-    margin-top: 2px;
-    font-size: 0.8rem;
+/* ===== 入れる道の2つのボタン（自分で書く／選択肢から選ぶ）。2026-09-21 永田さん承認 =====
+   ★同じ形・同じ大きさで横に並べる。片方だけ目立つと、そちらを勧めているように見えるため。
+   ★ボタンの重さは3段にそろえている（この画面の中で）：
+       開く（この2つ）         … 白地に緑の線
+       決める（リストに入れる） … 緑の塗り
+       やめる（今は入れない）   … 文字だけ
+   ★それまでの入口は「ホーム画面の『選択肢から選ぶ』と同じ静かな下線つきの文字」だった
+     （2026-09-19 永田さんのご指定）。2026-09-21 永田さんが、見分けにくさを理由に変えることを承認。
+     永田さん「Less is Moreでゆっくり進めるのはクライアント側で、クライアントのLess is Moreを
+     助ける仕組みやデザインを我々が作る」 */
+.hn-entries {
+    display: flex;
+    gap: 8px;
+    margin: 4px 0 10px;
+}
+.hn-entry {
+    flex: 1;
+    min-height: 44px;
+    padding: 10px 8px;
+    background: #FFF;
+    border: 1.5px solid #C9DCD0;
+    border-radius: 14px;
+    color: var(--btn-low-text);
+    font-size: 0.85rem;
+    font-weight: 500;
     font-family: inherit;
-    color: #A39B8F;
     cursor: pointer;
-    text-decoration: underline;
-    text-decoration-color: #D6D2CA;
-    text-underline-offset: 4px;
+    -webkit-tap-highlight-color: transparent;
+}
+/* 開いている方。★塗りつぶしにはしない（塗りは「リストに入れる」＝決めるボタンの印なので、
+   開いているだけの入口が同じ見た目だと、押したら入ってしまいそうに見える） */
+.hn-entry.is-open {
+    background: #F3F8F5;
+    border-color: #9FC0AD;
 }
 .hn-browse { margin: 6px 0 12px; }
 .skill-topic p.hn-browse-lead {
@@ -2330,5 +2353,16 @@ input:checked + .toggle-slider::before {
     margin-top: 2px;
 }
 
-/* 脚注。地の文より一段うしろに引く（読まなくてもよい、の位置） */
-.skill-topic p.hn-note { color: var(--text-light); }
+/* 脚注。地の文より一段うしろに引く（読まなくてもよい、の位置）
+   ★線で区切って、上のボタンから離す（2026-09-21）。すぐ下にあると、
+     「選択肢から選ぶ」の説明文に見えていた（本当はリスト全体への一言） */
+.skill-topic p.hn-note {
+    color: var(--text-light);
+    margin-top: 18px;
+    padding-top: 12px;
+    border-top: 1px solid #EFEBE4;
+}
+
+/* 案い（2026-09-21）で独立した画面にしたもの。たたみ札の見た目（文の大きさ・行間）はそのまま使い、
+   札の区切り線だけ消す */
+.skill-topic.skill-page { border-bottom: none; }
